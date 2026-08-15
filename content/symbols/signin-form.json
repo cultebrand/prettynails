@@ -1,0 +1,7 @@
+{
+  "id": "signin-form",
+  "name": "Sign-in form",
+  "binding": {
+    "type": "account"
+  }
+}

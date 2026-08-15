@@ -1,0 +1,278 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://admincms.dev/schema/v2/project.json",
+  "title": "adminCms project",
+  "description": "What this site expects its adminCms node to serve. The node keeps its own copy of everything under `forms`; saving on either side updates the other.",
+  "type": "object",
+  "required": [
+    "version",
+    "project",
+    "forms"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Points at this file, so an editor can offer completion and warnings."
+    },
+    "version": {
+      "const": 2,
+      "description": "Bumped when the shape changes in a way older readers cannot handle."
+    },
+    "project": {
+      "type": "object",
+      "required": [
+        "name",
+        "slug"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "slug": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+          "description": "Lowercase, dashes only."
+        }
+      }
+    },
+    "forms": {
+      "type": "array",
+      "description": "Each entry is one form the node serves. Order is the order the site renders them in.",
+      "items": {
+        "$ref": "#/$defs/form"
+      }
+    }
+  },
+  "$defs": {
+    "form": {
+      "type": "object",
+      "required": [
+        "slug",
+        "name",
+        "fields"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "slug": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+          "description": "Addresses the form in the API and in the page markup. Changing it breaks existing links."
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": [
+            "draft",
+            "published",
+            "paused"
+          ],
+          "default": "published",
+          "description": "draft is invisible to the public API; paused answers 410."
+        },
+        "successMessage": {
+          "type": "string",
+          "description": "Shown to the visitor after a submission succeeds."
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/field"
+          }
+        },
+        "site": {
+          "$ref": "#/$defs/site"
+        }
+      }
+    },
+    "field": {
+      "type": "object",
+      "required": [
+        "name",
+        "label",
+        "type"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "description": "How the value is stored in a submission."
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "enum": [
+            "text",
+            "email",
+            "tel",
+            "url",
+            "textarea",
+            "number",
+            "select",
+            "checkbox",
+            "date"
+          ]
+        },
+        "required": {
+          "type": "boolean",
+          "default": false
+        },
+        "placeholder": {
+          "type": "string"
+        },
+        "width": {
+          "enum": [
+            "full",
+            "half"
+          ],
+          "default": "full",
+          "description": "How wide the field sits on the site's form. The node stores this but does not act on it."
+        },
+        "options": {
+          "type": "array",
+          "description": "Only meaningful for a select.",
+          "items": {
+            "type": "object",
+            "required": [
+              "value",
+              "label"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "value": {
+                "type": "string",
+                "description": "What a submission stores."
+              },
+              "label": {
+                "type": "string",
+                "description": "What the visitor reads."
+              }
+            }
+          }
+        },
+        "showWhen": {
+          "type": "object",
+          "description": "The site shows this field only when a sibling matches. Omit to always show it.",
+          "required": [
+            "field",
+            "is"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "field": {
+              "type": "string"
+            },
+            "is": {
+              "enum": [
+                "equal",
+                "not_equal",
+                "filled",
+                "empty"
+              ]
+            },
+            "value": {
+              "type": "string"
+            }
+          }
+        },
+        "fill": {
+          "type": "object",
+          "description": "Where this field's answer comes from. The node substitutes the value on the way in and ignores whatever was posted under this name, so the stored answer is one it already knew rather than one the sender chose. Omit to ask.",
+          "required": [
+            "from"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "from": {
+              "enum": [
+                "user.email",
+                "user.name",
+                "user.id"
+              ],
+              "description": "The fact the node substitutes, read off the signed-in account."
+            },
+            "when": {
+              "enum": [
+                "signed-in",
+                "always"
+              ],
+              "default": "signed-in",
+              "description": "'signed-in' fills it for those who are and asks everyone else, which is how one form serves both. 'always' means the value is never the sender's to give, so the form is for signed-in people only and refuses anyone else."
+            },
+            "display": {
+              "enum": [
+                "hidden",
+                "locked"
+              ],
+              "default": "hidden",
+              "description": "What the sender sees once it is being filled: left out of the form, or shown with the value in place and not editable."
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "select"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "required": [
+              "options"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "is": {
+                "enum": [
+                  "equal",
+                  "not_equal"
+                ]
+              }
+            }
+          },
+          "then": true
+        }
+      ]
+    },
+    "site": {
+      "type": "object",
+      "description": "Presentation the node has no column for. It is carried through every sync untouched.",
+      "additionalProperties": false,
+      "properties": {
+        "submitLabel": {
+          "type": "string"
+        },
+        "spamProtection": {
+          "enum": [
+            "honeypot",
+            "turnstile",
+            "none"
+          ],
+          "default": "honeypot"
+        },
+        "retentionDays": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 0,
+          "description": "0 keeps submissions forever."
+        }
+      }
+    }
+  }
+}

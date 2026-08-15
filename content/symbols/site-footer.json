@@ -1,0 +1,7 @@
+{
+  "id": "site-footer",
+  "name": "Site footer",
+  "binding": {
+    "type": "none"
+  }
+}

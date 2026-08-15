@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Qalam &amp; Ahar — dashboard</title>
+
+    <!--
+      The same CMS as /static-admin, signed in to differently.
+
+      /static-admin talks to GitHub directly and asks for a personal access
+      token, which means everyone who edits the site needs a GitHub account with
+      write access to the repository. That is right for whoever owns the site
+      and wrong for everyone else: it hands out a credential that reaches every
+      branch, every file, and the repository settings.
+
+      This one signs in with the site's own accounts, and every read and write
+      goes through the node, which checks what that account is allowed to touch
+      before it forwards anything. Nobody here has a GitHub account, and nothing
+      in this page has ever seen a repository token.
+
+      It is still Sveltia, unmodified, using its own GitHub backend. Only the
+      address it is pointed at has changed.
+    -->
+    <link
+      rel="cms-config-url"
+      type="application/yaml"
+      href="/api/cms/config.yml"
+    />
+  </head>
+  <body>
+    <script>
+      /*
+        Opening this already signed in.
+
+        Sveltia's sign-in screen is the OAuth flow it knows, and behind that
+        button is this node rather than GitHub — but being asked to sign in to
+        something you are already signed in to is the wrong experience, and the
+        button says GitHub, which is neither what happens nor an account any of
+        these editors has.
+
+        So before the CMS loads, the node is asked whether it recognises this
+        browser. If it does, the account it hands back is written where Sveltia
+        keeps one, and the CMS opens with no screen at all. If it does not, this
+        goes to the site's own login and comes back — which is the answer to
+        "everything should pass through the Better Auth login", including this.
+
+        The stored shape is the node's to decide, not this page's: it comes back
+        whole from /api/cms/token, so there is one place that knows it.
+
+        Written to survive Sveltia changing where it keeps things. If that key
+        ever moves, seeding quietly stops working and the sign-in button comes
+        back — which still works, because it always did.
+      */
+      (async () => {
+        const CMS = 'https://unpkg.com/@sveltia/cms@0.187.0/dist/sveltia-cms.js';
+        const STORED = 'sveltia-cms.user';
+
+        try {
+          const response = await fetch('/api/cms/token', {
+            credentials: 'include',
+          });
+
+          if (response.status === 401) {
+            // No session at all. The CMS cannot do anything for them, and the
+            // login page is where they were always going to end up.
+            const back = location.pathname + location.search;
+            location.replace('/login?next=' + encodeURIComponent(back));
+            return;
+          }
+
+          const body = await response.json();
+          if (body && body.account) {
+            // Always overwritten rather than filled in only when empty: a token
+            // lasts eight hours and a tab can outlive one, and replacing a stale
+            // token on load is cheaper than discovering it mid-save.
+            localStorage.setItem(STORED, JSON.stringify(body.account));
+          }
+        } catch (error) {
+          /* Offline, or the node is unreachable. Fall through and let Sveltia
+             show its own sign-in — it is the same door, just a slower one. */
+        }
+
+        // In order, and only now: the CMS reads the stored account as it starts,
+        // and the preview renderers need the CMS before they can register.
+        for (const src of [
+          CMS,
+          '../assets/js/render.js',
+          '../static-admin/preview.js',
+        ]) {
+          await new Promise((done) => {
+            const tag = document.createElement('script');
+            tag.src = src;
+            tag.onload = done;
+            tag.onerror = done;
+            document.head.appendChild(tag);
+          });
+        }
+      })();
+    </script>
+  </body>
+</html>

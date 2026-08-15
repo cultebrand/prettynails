@@ -1,0 +1,204 @@
+{
+  "$schema": "./admin-cms.schema.json",
+  "version": 2,
+  "project": {
+    "name": "Qalam & Ahar",
+    "slug": "qalam-ahar"
+  },
+  "forms": [
+    {
+      "slug": "opening-notice",
+      "name": "Opening notice",
+      "status": "published",
+      "successMessage": "You are on the list — watch your inbox.",
+      "fields": [
+        {
+          "name": "email",
+          "label": "Email address",
+          "type": "email",
+          "required": true,
+          "placeholder": "you@example.com"
+        },
+        {
+          "name": "name",
+          "label": "Your name",
+          "type": "text",
+          "width": "half"
+        },
+        {
+          "name": "phone",
+          "label": "Phone",
+          "type": "tel",
+          "width": "half"
+        }
+      ],
+      "site": {
+        "submitLabel": "Put my name down",
+        "spamProtection": "honeypot",
+        "retentionDays": 0
+      }
+    },
+    {
+      "slug": "wholesale",
+      "name": "Wholesale enquiry (edited on github.com)",
+      "status": "published",
+      "successMessage": "Thanks — we will come back to you with sizes and lead times.",
+      "fields": [
+        {
+          "name": "email",
+          "label": "Email",
+          "type": "email",
+          "required": true
+        },
+        {
+          "name": "volume",
+          "label": "Expected volume",
+          "type": "select",
+          "options": [
+            {
+              "value": "small",
+              "label": "Under 50"
+            },
+            {
+              "value": "large",
+              "label": "50 or more"
+            },
+            {
+              "value": "pallet",
+              "label": "A pallet or more"
+            }
+          ]
+        },
+        {
+          "name": "detail",
+          "label": "Tell us more",
+          "type": "textarea",
+          "showWhen": {
+            "field": "volume",
+            "is": "equal",
+            "value": "large"
+          }
+        },
+        {
+          "name": "company",
+          "label": "Company",
+          "type": "text",
+          "width": "half"
+        }
+      ],
+      "site": {
+        "submitLabel": "Send enquiry",
+        "spamProtection": "honeypot",
+        "retentionDays": 0
+      }
+    },
+    {
+      "slug": "early-access",
+      "name": "Early access",
+      "status": "published",
+      "fields": [
+        {
+          "name": "email",
+          "label": "Email",
+          "type": "email",
+          "required": true
+        }
+      ],
+      "successMessage": "You are on the list."
+    },
+    {
+      "slug": "delivery",
+      "name": "Where to send your pens",
+      "status": "published",
+      "fields": [
+        {
+          "name": "full_name",
+          "label": "Full name",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "address",
+          "label": "Address",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "name": "hand",
+          "label": "Which hand you write with",
+          "type": "select",
+          "options": [
+            {
+              "value": "right",
+              "label": "Right"
+            },
+            {
+              "value": "left",
+              "label": "Left"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "contact",
+      "name": "Write to the bench",
+      "status": "published",
+      "fields": [
+        {
+          "name": "email",
+          "label": "Your email",
+          "type": "email",
+          "required": true,
+          "fill": {
+            "from": "user.email",
+            "when": "signed-in",
+            "display": "hidden"
+          }
+        },
+        {
+          "name": "subject",
+          "label": "Subject",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "message",
+          "label": "Message",
+          "type": "textarea",
+          "required": true
+        }
+      ],
+      "successMessage": "Thank you — it is with the bench."
+    },
+    {
+      "slug": "your-details",
+      "name": "Your details",
+      "status": "published",
+      "fields": [
+        {
+          "name": "first_name",
+          "label": "First name",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "last_name",
+          "label": "Last name",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "email",
+          "label": "Email",
+          "type": "email",
+          "fill": {
+            "from": "user.email",
+            "when": "signed-in",
+            "display": "locked"
+          }
+        }
+      ]
+    }
+  ]
+}

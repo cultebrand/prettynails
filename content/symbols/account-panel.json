@@ -1,0 +1,7 @@
+{
+  "id": "account-panel",
+  "name": "Account panel",
+  "binding": {
+    "type": "account"
+  }
+}

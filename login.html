@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="canonical" href="login" />
+    <title>Sign in — Qalam & Ahar</title>
+    <meta name="description" content="Sign in to your account." />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&amp;family=IBM+Plex+Mono:wght@400;500&amp;family=Instrument+Sans:wght@400..700&amp;display=swap"
+    />
+    <!-- ?v= is a cache buster: GitHub Pages serves these with max-age=14400. -->
+    <link rel="stylesheet" href="assets/css/styles.css?v=16" />
+    <!-- Styles authored in the visual builder land here; styles.css stays hand-written. -->
+    <link rel="stylesheet" href="assets/css/page.css?v=16" />
+
+    <!--
+      Who this page is for, taken from its entry in the Pages collection and
+      stamped here on export. It has to be in the markup rather than fetched,
+      because the decision below happens before the page is painted.
+    -->
+    <meta name="page-access" content="signed-out" />
+    <meta name="page-redirect" content="account" />
+
+    <script>
+      /*
+        Two jobs, both before the body exists.
+
+        It reads the hint the browser kept from last time and puts it on <html>,
+        so CSS can draw the right header and the right half of a page without
+        waiting for the server. And if this page is not for whoever that is, it
+        leaves for the page that is — replacing the entry rather than adding to
+        it, so Back does not bounce between the two.
+
+        The hint is a display preference, not a credential: it decides what is
+        drawn, never what is allowed. Every request is still authorised by the
+        session cookie, and main.js asks the server and corrects all of this
+        once the answer arrives.
+      */
+      (function () {
+        var signedIn = false;
+        try {
+          signedIn = Boolean(localStorage.getItem("qa.account"));
+        } catch (error) {
+          /* private mode, or storage refused — treated as signed out */
+        }
+        if (signedIn) document.documentElement.dataset.account = "in";
+
+        var meta = function (name) {
+          var node = document.querySelector('meta[name="' + name + '"]');
+          return node ? node.getAttribute("content") : "";
+        };
+        var needs = meta("page-access");
+        var wrong =
+          (needs === "signed-in" && !signedIn) ||
+          (needs === "signed-out" && signedIn);
+        var to = meta("page-redirect");
+        /* A caller may name where to land; only a path on this site is taken. */
+        var next = "";
+        try {
+          next = new URLSearchParams(location.search).get("next") || "";
+        } catch (error) {}
+        if (!/^\/[^/\\]/.test(next)) next = "";
+        if (wrong && to) location.replace(next || to);
+      })();
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip">Skip to content</a>
+    <aside aria-label="Announcement" data-when="site.announcement" class="banner">
+      <p data-text="site.announcement"></p>
+    </aside>
+
+    <!-- The masthead is a symbol: one drawing, placed on every page. Which
+         call to action it shows is decided by CSS from the attribute the head
+         script set, so it is right in the first frame. -->
+    <header data-symbol="site-header" class="masthead">
+      <a href="./" class="brand">
+        <span lang="ar" dir="rtl" class="brand__ar">قلم و آهار</span>
+        <span class="brand__latin">Qalam &amp; Ahar</span>
+      </a>
+      <nav aria-label="Sections" data-list="pages.pages" class="masthead__nav">
+        <a href="./">Home</a>
+      </nav>
+      <a href="signup" class="btn btn--solid masthead__cta" data-account-when="out">
+        Sign up
+      </a>
+      <a href="account" class="btn btn--ghost masthead__cta" data-account-when="in">
+        Your account
+      </a>
+    </header>
+
+    <main id="main">
+      <section data-symbol="signin-form" class="account account--single">
+        <header class="section-head">
+          <p class="eyebrow">Your account</p>
+          <h1 class="section-head__title">Sign in</h1>
+          <p class="section-head__blurb">
+            We email you a six-digit code. No password to remember, and none to lose.
+            New here? <a href="signup">Create an account</a>.
+          </p>
+        </header>
+        <div class="account__card">
+          <form data-account="sign-in" novalidate onsubmit="return false">
+            <div data-account-step="email">
+              <div class="account__field">
+                <label for="sign-in-email">Email</label>
+                <input class="notify__input" id="sign-in-email" name="email" type="email" required autocomplete="email" placeholder="you@example.com" />
+              </div>
+              <button type="submit" class="btn btn--solid">Email me a code</button>
+            </div>
+
+            <div data-account-step="code" hidden>
+              <div class="account__field">
+                <label for="sign-in-otp">Six-digit code</label>
+                <input class="notify__input account__code" id="sign-in-otp" name="otp" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000" />
+              </div>
+              <button type="submit" class="btn btn--solid">Sign in</button>
+              <button type="button" class="btn btn--ghost" data-account-restart>Use a different address</button>
+            </div>
+            <p class="account__status" data-account-note hidden></p>
+          </form>
+
+          <!-- The other door. Offered only where the browser has WebAuthn;
+               main.js hides it where it does not. -->
+          <div class="account__aside">
+            <p class="account__or"><span>or</span></p>
+            <button type="button" class="btn btn--ghost" data-passkey-use>
+              Use a passkey
+            </button>
+            <p class="account__status" data-passkey-note hidden></p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer data-symbol="site-footer" class="colophon">
+      <p lang="ar" dir="rtl" class="colophon__ar">قلم و آهار</p>
+      <p class="colophon__note">
+        Cut and cooked in a two-bench workshop. Nothing is kept in stock.
+      </p>
+      <ul data-list="site.contact.links" class="colophon__links">
+        <li>
+          <a href="https://instagram.com/" rel="noopener" target="_blank">Instagram</a>
+        </li>
+        <li><a href="mailto:bench@qalam-ahar.example">Email the bench</a></li>
+      </ul>
+    </footer>
+
+    <script src="assets/js/render.js?v=16"></script>
+    <script src="assets/js/main.js?v=16"></script>
+  </body>
+</html>

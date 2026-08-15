@@ -1,0 +1,9 @@
+{
+  "slug": "account",
+  "title": "Your account — Qalam & Ahar",
+  "description": "Your account with the workshop.",
+  "access": "signed-in",
+  "redirect_to": "login",
+  "nav_label": "",
+  "nav_order": 90
+}

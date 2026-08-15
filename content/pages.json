@@ -1,0 +1,49 @@
+{
+  "pages": [
+    {
+      "slug": "index",
+      "title": "Qalam & Ahar — a calligraphy supply workshop",
+      "description": "Reed pens cut to order, soot ink, and burnished ahar paper. The shop opens with Lot One.",
+      "access": "public",
+      "redirect_to": "",
+      "nav_label": "",
+      "nav_order": 0
+    },
+    {
+      "slug": "contact",
+      "title": "Write to the bench — Qalam & Ahar",
+      "description": "Ask the workshop a question.",
+      "access": "public",
+      "redirect_to": "",
+      "nav_label": "Contact",
+      "nav_order": 50
+    },
+    {
+      "slug": "account",
+      "title": "Your account — Qalam & Ahar",
+      "description": "Your account with the workshop.",
+      "access": "signed-in",
+      "redirect_to": "login",
+      "nav_label": "",
+      "nav_order": 90
+    },
+    {
+      "slug": "login",
+      "title": "Sign in — Qalam & Ahar",
+      "description": "Sign in to your account.",
+      "access": "signed-out",
+      "redirect_to": "account",
+      "nav_label": "",
+      "nav_order": 91
+    },
+    {
+      "slug": "signup",
+      "title": "Create an account — Qalam & Ahar",
+      "description": "Create an account with the workshop.",
+      "access": "signed-out",
+      "redirect_to": "account",
+      "nav_label": "",
+      "nav_order": 92
+    }
+  ]
+}

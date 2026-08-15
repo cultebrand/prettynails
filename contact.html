@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="canonical" href="contact" />
+    <title>Write to the bench — Qalam & Ahar</title>
+    <meta name="description" content="Ask the workshop a question." />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&amp;family=IBM+Plex+Mono:wght@400;500&amp;family=Instrument+Sans:wght@400..700&amp;display=swap"
+    />
+    <link rel="stylesheet" href="assets/css/styles.css?v=16" />
+    <link rel="stylesheet" href="assets/css/page.css?v=16" />
+
+    <!-- Open to anyone. The form underneath is not: it asks a stranger for an
+         address and asks a member for nothing, and the node decides which. -->
+    <meta name="page-access" content="public" />
+    <meta name="page-redirect" content="" />
+
+    <script>
+      /* The same head script every page carries: put last time's answer on
+         <html> so the masthead draws the right call to action in the first
+         frame, and leave for the right page if this is not the one. */
+      (function () {
+        var signedIn = false;
+        try {
+          signedIn = Boolean(localStorage.getItem("qa.account"));
+        } catch (error) {
+          /* private mode, or storage refused — treated as signed out */
+        }
+        if (signedIn) document.documentElement.dataset.account = "in";
+
+        var meta = function (name) {
+          var node = document.querySelector('meta[name="' + name + '"]');
+          return node ? node.getAttribute("content") : "";
+        };
+        var needs = meta("page-access");
+        var wrong =
+          (needs === "signed-in" && !signedIn) ||
+          (needs === "signed-out" && signedIn);
+        var to = meta("page-redirect");
+        /* A caller may name where to land; only a path on this site is taken. */
+        var next = "";
+        try {
+          next = new URLSearchParams(location.search).get("next") || "";
+        } catch (error) {}
+        if (!/^\/[^/\\]/.test(next)) next = "";
+        if (wrong && to) location.replace(next || to);
+      })();
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip">Skip to content</a>
+    <aside aria-label="Announcement" data-when="site.announcement" class="banner">
+      <p data-text="site.announcement"></p>
+    </aside>
+
+    <header data-symbol="site-header" class="masthead">
+      <a href="./" class="brand">
+        <span lang="ar" dir="rtl" class="brand__ar">قلم و آهار</span>
+        <span class="brand__latin">Qalam &amp; Ahar</span>
+      </a>
+      <nav aria-label="Sections" data-list="pages.pages" class="masthead__nav">
+        <a href="./">Home</a>
+      </nav>
+      <a href="signup" class="btn btn--solid masthead__cta" data-account-when="out">
+        Sign up
+      </a>
+      <a href="account" class="btn btn--ghost masthead__cta" data-account-when="in">
+        Your account
+      </a>
+    </header>
+
+    <main id="main">
+      <section data-symbol="contact-panel" class="account account--single">
+        <header class="section-head">
+          <p class="eyebrow">Write to the bench</p>
+          <h1 class="section-head__title">Ask us anything</h1>
+          <p class="section-head__blurb">
+            One of us reads every message. Expect a reply within a few days —
+            slower in the weeks a lot is being cut.
+          </p>
+        </header>
+
+        <!--
+          The questions are not in this markup on purpose.
+
+          `data-form-fields` means the node draws them, from the form of that
+          slug in the panel. A stranger is asked for their address; someone
+          signed in is not, because the node already has theirs and would
+          overwrite whatever was typed anyway.
+
+          Which means a designer adds a question in the panel and it appears
+          here, and nothing on this page has a rule of its own to fall out of
+          step with.
+        -->
+        <form
+          data-symbol="contact-form"
+          class="notify notify--stacked"
+          novalidate=""
+          data-form="contact"
+          data-success="Thank you — it is with the bench."
+          method="post"
+          action=""
+        >
+          <div data-form-fields>
+            <!-- Drawn before the node answers, and replaced once it does. Keeps
+                 the page from opening as an empty rectangle. -->
+            <p class="notify__note">Loading the form…</p>
+          </div>
+          <button type="submit" class="btn btn--solid">Send it</button>
+          <p role="status" aria-live="polite" class="notify__status"></p>
+        </form>
+      </section>
+    </main>
+
+    <footer data-symbol="site-footer" class="colophon">
+      <p lang="ar" dir="rtl" class="colophon__ar">قلم و آهار</p>
+      <p class="colophon__note">
+        Cut and cooked in a two-bench workshop. Nothing is kept in stock.
+      </p>
+      <ul data-list="site.contact.links" class="colophon__links">
+        <li>
+          <a href="https://instagram.com/" rel="noopener" target="_blank">Instagram</a>
+        </li>
+        <li><a href="mailto:bench@qalam-ahar.example">Email the bench</a></li>
+      </ul>
+    </footer>
+
+    <script src="assets/js/render.js?v=16"></script>
+    <script src="assets/js/main.js?v=16"></script>
+  </body>
+</html>

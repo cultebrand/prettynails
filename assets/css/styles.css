@@ -1,0 +1,1002 @@
+/* ===========================================================================
+   Qalam & Ahar — pre-launch landing page
+   Palette is an Ottoman lacquered pen case (qalamdan): a black ground with red
+   in it, gold leaf, verdigris, and the ivory of burnished ahar paper.
+   =========================================================================== */
+
+:root {
+  --ground: #191016;
+  --ground-raised: #221620;
+  --ahar: #efe4ce;
+  --ahar-dim: #b9a88e;
+  --brass: #c9a24b;
+  --verdigris: #7fa894;
+  --lac-red: #8c2b34;
+
+  --face-display: "Amiri", Georgia, serif;
+  --face-body: "Instrument Sans", system-ui, -apple-system, sans-serif;
+  --face-util: "IBM Plex Mono", ui-monospace, monospace;
+
+  --gutter: clamp(1.25rem, 5vw, 4.5rem);
+  --measure: 68ch;
+  --rule: 1px solid color-mix(in srgb, var(--ahar) 16%, transparent);
+
+  --step--1: 0.8125rem;
+  --step-0: clamp(1rem, 0.96rem + 0.2vw, 1.125rem);
+  --step-1: clamp(1.25rem, 1.1rem + 0.7vw, 1.6rem);
+  --step-2: clamp(1.75rem, 1.4rem + 1.7vw, 2.75rem);
+  --step-3: clamp(2.25rem, 1.5rem + 3.4vw, 4.25rem);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ahar);
+  font-family: var(--face-body);
+  font-size: var(--step-0);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--verdigris);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.skip {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 10;
+  padding: 0.75rem 1rem;
+  background: var(--ahar);
+  color: var(--ground);
+}
+
+.skip:focus {
+  left: 0;
+}
+
+/* --- shared bits ---------------------------------------------------------- */
+
+.eyebrow {
+  margin: 0;
+  font-family: var(--face-util);
+  font-size: var(--step--1);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--brass);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.7rem 1.15rem;
+  font: inherit;
+  font-weight: 600;
+  line-height: 1.1;
+  text-decoration: none;
+  white-space: nowrap;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+
+.btn--solid {
+  border: 1px solid var(--brass);
+  background: var(--brass);
+  color: var(--ground);
+}
+
+.btn--solid:hover {
+  background: color-mix(in srgb, var(--brass) 82%, var(--ahar));
+  border-color: color-mix(in srgb, var(--brass) 82%, var(--ahar));
+}
+
+.btn--ghost {
+  border: 1px solid color-mix(in srgb, var(--ahar) 32%, transparent);
+  background: transparent;
+  color: var(--ahar);
+}
+
+.btn--ghost:hover {
+  border-color: var(--brass);
+  color: var(--brass);
+}
+
+.section-head {
+  max-width: var(--measure);
+  margin-bottom: clamp(2rem, 5vw, 3.5rem);
+}
+
+.section-head__title {
+  margin: 0.6rem 0 0;
+  font-size: var(--step-2);
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.section-head__blurb {
+  margin: 1rem 0 0;
+  max-width: 46ch;
+  color: var(--ahar-dim);
+}
+
+/* --- announcement + masthead --------------------------------------------- */
+
+.banner {
+  padding: 0.55rem var(--gutter);
+  background: var(--lac-red);
+  text-align: center;
+}
+
+.banner p {
+  margin: 0;
+  font-family: var(--face-util);
+  font-size: var(--step--1);
+  letter-spacing: 0.04em;
+}
+
+.masthead {
+  display: flex;
+  align-items: center;
+  gap: clamp(1rem, 4vw, 3rem);
+  padding: 1.1rem var(--gutter);
+  border-bottom: var(--rule);
+}
+
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  text-decoration: none;
+}
+
+.brand__ar {
+  font-family: var(--face-display);
+  font-size: 1.4rem;
+  color: var(--brass);
+  line-height: 1;
+}
+
+.brand__latin {
+  font-size: var(--step--1);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.masthead__nav {
+  display: none;
+  gap: 1.6rem;
+  margin-inline-start: auto;
+  font-size: var(--step--1);
+  letter-spacing: 0.04em;
+}
+
+.masthead__nav a {
+  text-decoration: none;
+  color: var(--ahar-dim);
+  padding-block: 0.25rem;
+  border-bottom: 1px solid transparent;
+}
+
+.masthead__nav a:hover {
+  color: var(--ahar);
+  border-bottom-color: var(--brass);
+}
+
+.masthead__cta {
+  margin-inline-start: auto;
+  font-size: var(--step--1);
+}
+
+@media (min-width: 62rem) {
+  .masthead__nav {
+    display: flex;
+  }
+
+  .masthead__cta {
+    margin-inline-start: 0;
+  }
+}
+
+@media (max-width: 34rem) {
+  .masthead__cta {
+    display: none;
+  }
+}
+
+/* --- hero ----------------------------------------------------------------- */
+
+.hero {
+  display: grid;
+  gap: clamp(1.5rem, 5vw, 4rem);
+  padding: clamp(2.5rem, 7vw, 5.5rem) var(--gutter) clamp(3.5rem, 8vw, 6rem);
+  border-bottom: var(--rule);
+}
+
+.hero__lede {
+  min-width: 0;
+}
+
+/* The signature: the word is revealed right-to-left, the way it is written,
+   with a brass nib riding the leading edge of the stroke. */
+.wordmark {
+  position: relative;
+  display: block;
+  order: -1; /* above the headline until there is room beside it */
+  line-height: 0.78; /* Amiri carries a lot of leading; trim it back to the ink */
+}
+
+@media (min-width: 62rem) {
+  .hero {
+    /* `auto` keeps the word tight against the right gutter instead of leaving a
+       hole between the copy and the glyph. */
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+  }
+
+  .wordmark {
+    order: 0;
+  }
+}
+
+.wordmark__ar {
+  display: block;
+  font-family: var(--face-display);
+  font-size: clamp(17rem, 30vw, 27rem);
+  color: var(--brass);
+  clip-path: inset(0 0 0 0);
+  animation: stroke-in 1500ms cubic-bezier(0.65, 0.02, 0.3, 1) both;
+}
+
+.wordmark__nib {
+  position: absolute;
+  top: -16%;
+  right: 0;
+  width: 4px;
+  height: 132%;
+  background: var(--ahar);
+  transform: rotate(-18deg);
+  transform-origin: center;
+  animation: nib-travel 1500ms cubic-bezier(0.65, 0.02, 0.3, 1) both;
+}
+
+@keyframes stroke-in {
+  from {
+    clip-path: inset(0 0 0 100%);
+  }
+
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes nib-travel {
+  from {
+    right: 0;
+    opacity: 1;
+  }
+
+  85% {
+    opacity: 1;
+  }
+
+  to {
+    right: 100%;
+    opacity: 0;
+  }
+}
+
+.hero__headline {
+  max-width: 20ch;
+  margin: 0;
+  font-size: var(--step-3);
+  font-weight: 600;
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+.hero__sub {
+  max-width: 48ch;
+  margin: 1.35rem 0 0;
+  font-size: var(--step-1);
+  line-height: 1.5;
+  color: var(--ahar-dim);
+}
+
+/* --- notify form ---------------------------------------------------------- */
+
+.notify {
+  margin-top: clamp(2rem, 5vw, 3rem);
+  max-width: 34rem;
+}
+
+.notify__label {
+  display: block;
+  margin-bottom: 0.6rem;
+  font-family: var(--face-util);
+  font-size: var(--step--1);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--brass);
+}
+
+.notify__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.notify__input {
+  flex: 1 1 15rem;
+  min-width: 0;
+  padding: 0.7rem 0.85rem;
+  font: inherit;
+  color: var(--ahar);
+  background: var(--ground-raised);
+  border: 1px solid color-mix(in srgb, var(--ahar) 24%, transparent);
+  border-radius: 2px;
+}
+
+.notify__input::placeholder {
+  color: color-mix(in srgb, var(--ahar-dim) 70%, transparent);
+}
+
+.notify__input:focus-visible {
+  border-color: var(--verdigris);
+}
+
+/* A form whose questions arrive from the node, so their number is not known
+   here. Stacked rather than laid out in a row: a row is a design for one field
+   and a guess for any other count. */
+.notify--stacked {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+  max-width: 34rem;
+}
+
+.notify--stacked [data-form-fields] {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+}
+
+.notify--stacked .notify__input {
+  width: 100%;
+}
+
+.notify--stacked textarea.notify__input {
+  min-height: 8rem;
+  resize: vertical;
+}
+
+/* A value the bench already holds, shown so it can be read rather than typed.
+   Drawn flat and unlit: it is a statement of fact, not somewhere to put a
+   cursor, and it should not look like one that has been switched off. */
+.notify__input--locked {
+  color: var(--ahar-dim);
+  background: color-mix(in srgb, var(--ahar) 5%, transparent);
+  border-style: dashed;
+  cursor: default;
+  opacity: 1;
+}
+
+.notify__note {
+  margin: 0.75rem 0 0;
+  font-size: var(--step--1);
+  color: var(--ahar-dim);
+}
+
+.notify__status {
+  margin: 0.65rem 0 0;
+  min-height: 1.4em;
+  font-family: var(--face-util);
+  font-size: var(--step--1);
+  color: var(--verdigris);
+}
+
+.notify__status[data-state="error"] {
+  color: color-mix(in srgb, var(--lac-red) 55%, var(--ahar));
+}
+
+/* --- Lot One -------------------------------------------------------------- */
+
+.lots {
+  padding: clamp(3.5rem, 8vw, 6.5rem) var(--gutter);
+  border-bottom: var(--rule);
+}
+
+.lot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: color-mix(in srgb, var(--ahar) 16%, transparent);
+  border: var(--rule);
+}
+
+.lot {
+  display: flex;
+  flex-direction: column;
+  padding: 1.4rem;
+  background: var(--ground);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+/* Cards render visible by default so the page is complete without JavaScript.
+   The scroll-reveal hide only applies once the head script has tagged <html> with .js. */
+html.js .lot:not(.is-revealed) {
+  opacity: 0;
+  transform: translateY(0.75rem);
+}
+
+.lot__figure {
+  aspect-ratio: 4 / 5;
+  margin: 0 0 1.1rem;
+  overflow: hidden;
+  background: var(--ground-raised);
+}
+
+.lot__figure img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* No photograph yet? Show the grain of the paper instead of a grey box. */
+.lot__figure--empty {
+  background-image: repeating-linear-gradient(
+    -18deg,
+    color-mix(in srgb, var(--brass) 14%, transparent) 0 1px,
+    transparent 1px 9px
+  );
+}
+
+.lot__meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-family: var(--face-util);
+  font-size: var(--step--1);
+  color: var(--brass);
+}
+
+.lot__status {
+  color: var(--verdigris);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.lot__title {
+  margin: 0.5rem 0 0;
+  font-size: var(--step-1);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.lot__blurb {
+  margin: 0.5rem 0 1.25rem;
+  font-size: 0.9375rem;
+  color: var(--ahar-dim);
+}
+
+.lot__price {
+  margin-top: auto;
+  padding-top: 0.9rem;
+  border-top: var(--rule);
+  font-family: var(--face-util);
+  font-size: var(--step--1);
+}
+
+/* --- the cut (paper, not lacquer) ---------------------------------------- */
+
+.craft {
+  padding: clamp(3.5rem, 8vw, 6.5rem) var(--gutter);
+  background: var(--ahar);
+  color: var(--ground);
+}
+
+.craft .eyebrow {
+  color: var(--lac-red);
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: clamp(1.5rem, 4vw, 3rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+}
+
+.step {
+  counter-increment: step;
+  padding-top: 1rem;
+  border-top: 2px solid var(--lac-red);
+}
+
+.step::before {
+  content: counter(step, decimal-leading-zero);
+  display: block;
+  margin-bottom: 0.6rem;
+  font-family: var(--face-util);
+  font-size: var(--step--1);
+  color: var(--lac-red);
+}
+
+.step__title {
+  margin: 0 0 0.4rem;
+  font-family: var(--face-display);
+  font-size: var(--step-1);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.step__body {
+  margin: 0;
+  color: color-mix(in srgb, var(--ground) 78%, var(--ahar));
+}
+
+/* --- questions ------------------------------------------------------------ */
+
+.questions {
+  padding: clamp(3.5rem, 8vw, 6.5rem) var(--gutter);
+  border-bottom: var(--rule);
+}
+
+.faq {
+  max-width: var(--measure);
+  border-top: var(--rule);
+}
+
+.faq details {
+  border-bottom: var(--rule);
+}
+
+.faq summary {
+  padding: 1.1rem 0;
+  font-size: var(--step-1);
+  font-weight: 600;
+  line-height: 1.3;
+  cursor: pointer;
+  list-style: none;
+}
+
+.faq summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq summary::after {
+  content: "+";
+  float: right;
+  margin-left: 1rem;
+  font-family: var(--face-util);
+  font-weight: 400;
+  color: var(--brass);
+}
+
+.faq details[open] summary::after {
+  content: "\2212";
+}
+
+.faq p {
+  margin: 0 0 1.25rem;
+  max-width: 58ch;
+  color: var(--ahar-dim);
+}
+
+/* --- closer + colophon ---------------------------------------------------- */
+
+.closer {
+  padding: clamp(3.5rem, 8vw, 6.5rem) var(--gutter);
+}
+
+.closer__title {
+  max-width: 16ch;
+  margin: 0;
+  font-size: var(--step-2);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.colophon {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 1rem clamp(1.5rem, 5vw, 4rem);
+  padding: 2rem var(--gutter) 3rem;
+  border-top: var(--rule);
+}
+
+.colophon__ar {
+  margin: 0;
+  font-family: var(--face-display);
+  font-size: 1.6rem;
+  color: var(--brass);
+}
+
+.colophon__note {
+  margin: 0;
+  max-width: 34ch;
+  font-size: var(--step--1);
+  color: var(--ahar-dim);
+}
+
+.colophon__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  margin: 0;
+  margin-inline-start: auto;
+  padding: 0;
+  list-style: none;
+  font-family: var(--face-util);
+  font-size: var(--step--1);
+}
+
+.colophon__links a {
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--brass) 60%, transparent);
+}
+
+.colophon__links a:hover {
+  color: var(--brass);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .wordmark__ar,
+  .wordmark__nib {
+    animation: none;
+  }
+
+  .wordmark__nib {
+    display: none;
+  }
+
+  .lot {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* --- account ---------------------------------------------------------------
+   Hand-written here rather than in page.css, which the builder rewrites on
+   every save.
+
+   The page has exactly two doors — someone new and someone returning — and the
+   workshop already has a word for one thing split into two. "One press splits
+   the nib down the centre. It has to stop exactly where the shoulder ends."
+   So the two cards are divided by a hairline that fades out at both ends
+   rather than a full-height rule. That is the only ornament on the page.
+
+   Field labels take the mono face the eyebrows use, which on this site reads
+   as workshop labelling — a lot number on a bottle — rather than as form
+   chrome. */
+
+.account {
+  max-width: 54rem;
+  margin: 0 auto;
+  padding-block: clamp(3rem, 8vw, 6rem) clamp(4rem, 10vw, 8rem);
+  padding-inline: var(--gutter);
+}
+
+.account .section-head {
+  margin-bottom: clamp(2rem, 5vw, 3.25rem);
+}
+
+.account__pair {
+  position: relative;
+  display: grid;
+  gap: clamp(2rem, 5vw, 3.5rem);
+}
+
+/* Which half of the page is drawn comes from an attribute on <html>, set
+   before first paint, rather than from script reaching in once the session
+   check has come back. That ordering is the difference between a page that
+   arrives correct and one that corrects itself in front of you.
+
+   Signed out is the default, so a browser with no JavaScript — which cannot
+   sign in anyway — gets a page that never moves. */
+/* Only ever hides. Setting `display` on the visible one would override
+   whatever it is — a block heading, a grid of two cards, an inline-flex button
+   in the masthead — and these rules have to work for all three. */
+:root:not([data-account="in"]) [data-account-when="in"] {
+  display: none;
+}
+
+:root[data-account="in"] [data-account-when="out"] {
+  display: none;
+}
+
+/* The slit. Vertical between two columns, and simply turned when they stack —
+   the same cut, read the same way. */
+.account__pair::before {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: calc(50% - 0.5px);
+  height: 1px;
+  content: "";
+  background: linear-gradient(
+    to right,
+    transparent,
+    color-mix(in srgb, var(--ahar) 22%, transparent) 18%,
+    color-mix(in srgb, var(--ahar) 22%, transparent) 82%,
+    transparent
+  );
+}
+
+@media (min-width: 48rem) {
+  .account__pair {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .account__pair::before {
+    inset-block: 1.75rem;
+    inset-inline: auto;
+    inset-inline-start: 50%;
+    width: 1px;
+    height: auto;
+    background: linear-gradient(
+      to bottom,
+      transparent,
+      color-mix(in srgb, var(--ahar) 22%, transparent) 18%,
+      color-mix(in srgb, var(--ahar) 22%, transparent) 82%,
+      transparent
+    );
+  }
+}
+
+.account__title {
+  margin: 0 0 1.5rem;
+  font-family: var(--face-util);
+  font-size: var(--step--1);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--brass);
+}
+
+.account__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1.15rem;
+}
+
+.account__field label {
+  font-family: var(--face-util);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ahar-dim);
+}
+
+/* `.notify__input` carries `flex: 1 1 15rem` so it can share a line in the
+   notify row; stacked in a column that rule makes it grow to fill the height. */
+.account__field .notify__input {
+  flex: 0 0 auto;
+  width: 100%;
+}
+
+.account__card {
+  padding: clamp(1.5rem, 4vw, 2rem);
+  background: var(--ground-raised);
+  border: var(--rule);
+  border-radius: 2px;
+}
+
+/* Inside the pair the cards are the panel, not boxes on it — the slit already
+   separates them, and a border either side of it would say the same thing
+   twice. */
+.account__pair .account__card {
+  padding: 0;
+  background: none;
+  border: 0;
+}
+
+.account__card .btn {
+  margin-top: 0.5rem;
+}
+
+.account__status {
+  margin: 0.9rem 0 0;
+  font-family: var(--face-util);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--ahar-dim);
+}
+
+.account__status[hidden] {
+  display: none;
+}
+
+.account__status[data-error] {
+  color: color-mix(in srgb, var(--lac-red) 55%, var(--ahar));
+}
+
+.account__note {
+  max-width: 34ch;
+  margin: 0.5rem 0 1.25rem;
+  font-size: var(--step--1);
+  color: var(--ahar-dim);
+}
+
+/* Signed in, the page is one quiet statement rather than a door. The brass
+   edge is the only place the accent lands. */
+.account__card--signed-in {
+  border-inline-start: 2px solid var(--brass);
+}
+
+/* One card rather than two, so it does not float in a half-empty grid. */
+.account--single {
+  max-width: 32rem;
+}
+
+.account--single .account__card {
+  padding: clamp(1.5rem, 4vw, 2rem);
+  background: var(--ground-raised);
+  border: var(--rule);
+}
+
+.account .section-head__blurb a {
+  color: var(--brass);
+}
+
+.account__who {
+  margin: 0;
+  font-size: var(--step-1);
+}
+
+/* The code is read off a phone and typed in one go, so it is set large and
+   spaced — the same mono face the labels use. */
+.account__code {
+  font-family: var(--face-util);
+  font-size: 1.5rem;
+  letter-spacing: 0.4em;
+  text-align: center;
+}
+
+.account__card [data-account-step] .btn + .btn {
+  margin-inline-start: 0.5rem;
+}
+
+/* The second door on the sign-in page, kept quieter than the first: a code
+   always works, a passkey only works on a device that has one. */
+.account__aside {
+  padding-top: 1.25rem;
+  margin-top: 1.5rem;
+  border-top: var(--rule);
+}
+
+.account__or {
+  margin: 0 0 1rem;
+  font-family: var(--face-util);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ahar-dim);
+  text-align: center;
+}
+
+.account__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+/* One row per registered device. Quiet, because the list is a record rather
+   than a control panel — the only thing to do with it is take one away. */
+.passkeys {
+  margin-block: 1.25rem;
+}
+
+.passkey {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  padding-block: 0.75rem;
+  border-top: var(--rule);
+}
+
+.passkey:last-child {
+  border-bottom: var(--rule);
+}
+
+.passkey__text {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.passkey__name {
+  margin: 0;
+  font-size: var(--step-0);
+}
+
+.passkey__when {
+  margin: 0;
+  font-family: var(--face-util);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  color: var(--ahar-dim);
+}
+
+.passkey__remove {
+  padding-block: 0.35rem;
+  font-size: var(--step--1);
+}
+
+.passkey__remove[disabled] {
+  opacity: 0.5;
+}
+
+/* The account's own details, kept visually apart from the sign-in furniture
+   around it — this is the one part of the page the person is here to change. */
+.account__profiles {
+  padding-top: 1.25rem;
+  margin-top: 1.5rem;
+  border-top: var(--rule);
+}
+
+.account__profile + .account__profile {
+  padding-top: 1.5rem;
+  margin-top: 1.5rem;
+  border-top: var(--rule);
+}
+
+.account__profile select,
+.account__profile textarea {
+  width: 100%;
+}

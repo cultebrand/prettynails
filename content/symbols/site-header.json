@@ -1,0 +1,7 @@
+{
+  "id": "site-header",
+  "name": "Site header",
+  "binding": {
+    "type": "none"
+  }
+}

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Preview</title>
+
+  <!--
+    Live preview for the adminCms panel.
+
+    The same idea as the Sveltia preview beside it: rather than approximate the
+    page with a field-by-field summary, load the real page and pour draft
+    content through the site's own renderer. A preview that uses a second
+    renderer is a preview of the second renderer.
+
+    It shows the part of the page the entry is responsible for, not the whole
+    page. Editing one FAQ answer and being handed the entire site means hunting
+    for the change; the panel can ask for the full page when that is what is
+    wanted.
+
+    Scope is read from the markup rather than configured, because the markup
+    already says who owns what: a section carries data-symbol="<id>", and a
+    symbol names the content file it reads. Nothing here needs to be kept in
+    step with the config by hand.
+
+    This is a plain page rather than a CMS plugin, so the panel can host it in
+    an iframe and post drafts to it. It reads nothing and writes nothing — it
+    only paints what it is given.
+  -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:wght@400..700&display=swap">
+  <link rel="stylesheet" href="../assets/css/styles.css">
+  <link rel="stylesheet" href="../assets/css/page.css">
+  <style>
+    /* The panel sizes the frame; the page must not add its own scroll chrome. */
+    html, body { margin: 0; }
+    .preview-status {
+      position: fixed; inset-block-start: 0; inset-inline: 0;
+      padding: 0.5rem 0.75rem; font: 500 12px/1.4 system-ui, sans-serif;
+      background: #111; color: #fff; z-index: 9999;
+    }
+    .preview-status[hidden] { display: none; }
+    /* A scoped fragment is lifted out of the page, so it has no section
+       rhythm around it to breathe against. */
+    .preview-scoped > * { margin-block: 0; }
+    .preview-scoped { padding-block: 1rem; }
+
+  </style>
+</head>
+<body>
+  <p class="preview-status" id="status">Loading the page…</p>
+  <div id="surface"></div>
+
+  <script src="../assets/js/render.js"></script>
+  <script>
+  (function () {
+    "use strict";
+
+    var SITE_BASE = new URL("..", location.href);
+    var surface = document.getElementById("surface");
+    var status = document.getElementById("status");
+
+    // Last-committed content, so fields the operator is not editing still show
+    // their real values instead of blanks.
+    var committed = {};
+    var ready = false;
+    var pending = null;
+    var bodyHtml = "";
+    // Bodies of pages other than the homepage, fetched on demand.
+    var pageBodies = {};
+
+    function say(message) {
+      if (!message) { status.hidden = true; return; }
+      status.hidden = false;
+      status.textContent = message;
+    }
+
+    function fetchJson(name) {
+      return fetch(new URL("content/" + name, SITE_BASE).href, { cache: "no-cache" })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .catch(function () { return null; });
+    }
+
+    function stripBody(html) {
+      var doc = new DOMParser().parseFromString(html, "text/html");
+      doc.body.querySelectorAll("script").forEach(function (n) { n.remove(); });
+      return doc.body.innerHTML;
+    }
+
+    /* A draft replaces one file's content; everything else stays committed. */
+    function merge(draft) {
+      var content = JSON.parse(JSON.stringify(committed));
+      if (!draft || !draft.collection) return content;
+
+      if (draft.collection === "settings" || draft.collection === "content") {
+        // `files` collections map an entry onto a content file of that name.
+        content[draft.id] = Object.assign({}, content[draft.id], draft.data);
+      } else if (draft.collection === "symbols") {
+        content.symbolEntries = content.symbolEntries || {};
+        content.symbolEntries[draft.id] = draft.data;
+      } else if (draft.collection === "pages") {
+        content.pages = content.pages || {};
+        content.pages[draft.id] = draft.data;
+      }
+      return content;
+    }
+
+    function cssQuote(value) {
+      return String(value).replace(/["\\]/g, "\\$&");
+    }
+
+    function symbolSelector(names) {
+      return names.map(function (name) {
+        return '[data-symbol="' + cssQuote(name) + '"]';
+      }).join(",");
+    }
+
+    /* The block a binding belongs to, so a scope is a piece of page rather
+       than a stray paragraph. */
+    function blocksFor(nodes) {
+      var blocks = [];
+      Array.prototype.forEach.call(nodes, function (node) {
+        var block = node.closest("section, header, footer, aside, nav, article") || node;
+        if (blocks.indexOf(block) === -1) blocks.push(block);
+      });
+      // Drop anything already inside another match, so a section and its own
+      // heading are not both rendered.
+      return blocks.filter(function (block) {
+        return !blocks.some(function (other) {
+          return other !== block && other.contains(block);
+        });
+      });
+    }
+
+
+    function pageFile(slug) {
+      return !slug || slug === "index" ? "index.html" : slug + ".html";
+    }
+
+    /* A page entry previews its own document, not the homepage. */
+    function bodyFor(draft) {
+      if (!draft || draft.collection !== "pages") return Promise.resolve(bodyHtml);
+      var file = pageFile(draft.data && draft.data.slug ? draft.data.slug : draft.id);
+      if (file === "index.html") return Promise.resolve(bodyHtml);
+      if (pageBodies[file] != null) return Promise.resolve(pageBodies[file]);
+      return fetch(new URL(file, SITE_BASE).href, { cache: "no-cache" })
+        .then(function (r) { return r.ok ? r.text() : ""; })
+        .then(function (html) {
+          // A page that has been declared but never exported yet has no file;
+          // the homepage stands in so the frame is not blank.
+          pageBodies[file] = html ? stripBody(html) : bodyHtml;
+          return pageBodies[file];
+        })
+        .catch(function () { return bodyHtml; });
+    }
+
+    /**
+     * Which part of the page this entry is responsible for.
+     *
+     * Returns null when the entry owns no particular part, in which case the
+     * whole page is the honest answer.
+     */
+    function scopeFor(root, draft, content) {
+      if (!draft || !draft.collection) return null;
+      var collection = draft.collection;
+      var id = draft.id;
+
+      // A page entry owns the whole document rather than a piece of one. Its
+      // fields are the file name, the head metadata and one line of the menu —
+      // scoping to the menu alone showed an empty strip.
+      if (collection === "pages") return null;
+
+      // A symbol is drawn on the page under its own id.
+      if (collection === "symbols" && id) {
+        var drawn = root.querySelectorAll(symbolSelector([id]));
+        if (drawn.length) return Array.prototype.slice.call(drawn);
+      }
+
+      // A content file is drawn by whichever symbols read it: a symbol names
+      // its file in `source`, e.g. "catalog.items".
+      if (collection === "content" && id) {
+        var readers = [];
+        var entries = content.symbolEntries || {};
+        Object.keys(entries).forEach(function (key) {
+          var source = entries[key] && entries[key].source;
+          if (source && String(source).split(".")[0] === id) readers.push(key);
+        });
+        if (readers.length) {
+          var sections = root.querySelectorAll(symbolSelector(readers));
+          if (sections.length) return Array.prototype.slice.call(sections);
+        }
+      }
+
+      // Anything else is found through what it binds: site settings light up
+      // the banner and the colophon, pages light up the nav.
+      var prefix = collection === "settings" ? (id || "site") : collection;
+      var bound = root.querySelectorAll(
+        '[data-text^="' + cssQuote(prefix) + '."],' +
+        '[data-when^="' + cssQuote(prefix) + '."],' +
+        '[data-list^="' + cssQuote(prefix) + '."]'
+      );
+      if (bound.length) return blocksFor(bound);
+
+      return null;
+    }
+
+    function paint(draft) {
+      if (!ready) { pending = draft; return; }
+      if (!window.PureRender) { say("Renderer missing."); return; }
+      bodyFor(draft).then(function (html) {
+        render(draft, html);
+      });
+    }
+
+    function render(draft, html) {
+      var content = merge(draft);
+
+      // Bind the whole page first: a symbol's list looks up its own host with
+      // closest("[data-symbol]"), so binding a detached fragment on its own
+      // would leave those lists unrendered.
+      var page = document.createElement("div");
+      page.innerHTML = html;
+
+      try {
+        window.PureRender.bindAll(page, content, {
+          asset: function (path) {
+            return path ? new URL(path, SITE_BASE).href : path;
+          },
+        });
+      } catch (error) {
+        say("Could not render: " + error.message);
+        return;
+      }
+
+      var scope = draft && draft.mode === "page" ? null : scopeFor(page, draft, content);
+
+      surface.innerHTML = "";
+      if (scope && scope.length) {
+        surface.className = "preview-scoped";
+        scope.forEach(function (node) { surface.appendChild(node); });
+      } else {
+        surface.className = "";
+        while (page.firstChild) surface.appendChild(page.firstChild);
+      }
+      say(null);
+    }
+
+    Promise.all([
+      fetch(new URL("index.html", SITE_BASE).href, { cache: "no-cache" })
+        .then(function (r) { return r.ok ? r.text() : ""; })
+        .catch(function () { return ""; }),
+      fetchJson("site.json"),
+      fetchJson("pages.json"),
+      fetchJson("symbols.json"),
+    ]).then(function (parts) {
+      bodyHtml = stripBody(parts[0]);
+      committed.site = parts[1] || {};
+      committed.pages = parts[2] || {};
+      committed.symbolEntries = {};
+      (((parts[3] || {}).symbols) || []).forEach(function (entry) {
+        if (entry && entry.id) committed.symbolEntries[entry.id] = entry;
+      });
+
+      // Content files the symbols point at, so lists render with real items.
+      var roots = {};
+      Object.keys(committed.symbolEntries).forEach(function (id) {
+        var source = committed.symbolEntries[id].source;
+        if (source) roots[String(source).split(".")[0]] = true;
+      });
+
+      var names = Object.keys(roots).filter(function (n) {
+        return n !== "site" && n !== "pages";
+      });
+
+      return Promise.all(names.map(function (n) { return fetchJson(n + ".json"); }))
+        .then(function (files) {
+          names.forEach(function (name, i) { committed[name] = files[i] || {}; });
+        });
+    }).then(function () {
+      ready = true;
+      paint(pending);
+      // Tell the panel we are listening, in case it posted before we loaded.
+      if (window.parent !== window) {
+        window.parent.postMessage({ type: "admincms:preview-ready" }, "*");
+      }
+    }).catch(function (error) {
+      say("Could not load the page: " + error.message);
+    });
+
+    window.addEventListener("message", function (event) {
+      var data = event.data;
+      if (!data || data.type !== "admincms:preview") return;
+      paint(data);
+    });
+  })();
+  </script>
+</body>
+</html>

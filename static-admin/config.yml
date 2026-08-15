@@ -1,0 +1,424 @@
+# Sveltia CMS configuration
+# Docs: https://sveltiacms.app/en/docs
+#
+# CHANGE THIS FIRST: `repo` must be the GitHub repository this site is
+# committed to, in owner/name form. Everything else works as-is.
+#
+# The split between this CMS and the visual builder (/static-admin/builder.html):
+# the CMS edits DATA — lists and settings that render the same way every
+# time (catalog items, steps, questions, links, the announcement). The words
+# and layout of the page itself are edited visually in the builder, which
+# owns index.html. Headings, the hero, and the page <head> are not here on
+# purpose.
+
+backend:
+  name: github
+  repo: MahmoodKhalil57/pure-frontend
+  branch: master
+  # Token only: GitHub Pages has no server, so there is nowhere to run an OAuth
+  # client. Sign in with a personal access token instead. Add 'oauth' here if you
+  # later deploy the sveltia-cms-auth worker.
+  auth_methods: [token]
+  commit_messages:
+    update: 'content: update {{collection}} "{{slug}}"'
+    uploadMedia: "media: upload {{path}}"
+    deleteMedia: "media: delete {{path}}"
+
+# The site is served from the repository root (GitHub Pages, deploy from
+# branch), so repo paths and public URLs are the same thing.
+media_folder: media/uploads
+public_folder: /media/uploads
+
+site_url: https://mahmoodkhalil57.github.io/pure-frontend/
+display_url: https://mahmoodkhalil57.github.io/pure-frontend/
+
+collections:
+  - name: content
+    label: Content
+    icon: description
+    files:
+      - name: craft
+        label: How a pen is cut
+        file: content/craft.json
+        format: json
+        description: >-
+          The three cuts. Rendered through the “How it is made” symbol's
+          drawn template (Symbols → How it is made).
+        fields:
+          - label: Steps
+            name: steps
+            widget: list
+            label_singular: Step
+            summary: "{{fields.title}}"
+            hint: Numbered on the page in this order.
+            fields:
+              - { label: Title, name: title, widget: string }
+              - { label: Body, name: body, widget: text }
+
+      - name: questions
+        label: Questions
+        file: content/questions.json
+        format: json
+        description: >-
+          The questions and answers. Rendered through the “Questions” symbol's
+          drawn template (Symbols → Questions).
+        fields:
+          - label: Questions
+            name: items
+            widget: list
+            label_singular: Question
+            summary: "{{fields.title}}"
+            fields:
+              - { label: Question, name: title, widget: string }
+              - { label: Answer, name: body, widget: text }
+
+      - name: catalog
+        label: Catalog
+        file: content/catalog.json
+        format: json
+        description: >-
+          The items shown in the Lot One grid, rendered through the “Lot One
+          grid” symbol's drawn template.
+        fields:
+          - label: Items
+            name: items
+            widget: list
+            label_singular: Item
+            summary: "{{fields.lot}} — {{fields.title}}"
+            fields:
+              - { label: Lot number, name: lot, widget: string, hint: "Shown as “Lot 01”." }
+              - { label: Title, name: title, widget: string }
+              - { label: Description, name: blurb, widget: text, required: false }
+              - label: Price
+                name: price
+                widget: string
+                required: false
+                hint: Free text, so you can write “From 34” or “26 for 25 sheets”.
+              - label: Status
+                name: status
+                widget: select
+                required: false
+                # The explicit empty option is load-bearing, not cosmetic: on an
+                # optional select with no empty-value option, Sveltia (<= 0.187)
+                # prepends one reactively and enters an infinite loop as soon as
+                # the field has a value, hanging the whole entry editor.
+                options:
+                  - { label: Not set, value: "" }
+                  - { label: Opens first, value: Opens first }
+                  - { label: Pre-order, value: Pre-order }
+                  - { label: 30 made, value: 30 made }
+                  - { label: 12 made, value: 12 made }
+                  - { label: Sold out, value: Sold out }
+              - { label: Photograph, name: image, widget: image, required: false }
+              - label: Photograph description
+                name: image_alt
+                widget: string
+                required: false
+                hint: Read aloud by screen readers. Describe the object, not the photo.
+
+  # Pages and Symbols are where things are CREATED and BOUND: Sveltia owns
+  # what a page or symbol IS (slug, title, backend binding); the visual
+  # builder owns what it LOOKS like. Each entry is one file; the builder
+  # bakes aggregated manifests (content/pages.json, content/symbols.json)
+  # on save for the static runtime to read.
+  # Drawn in the visual builder, not typed into a form: the entry here says
+  # what a page IS, the builder says how it looks.
+  - name: pages
+    builder: true
+    label: Pages
+    label_singular: Page
+    icon: web
+    folder: content/pages
+    create: true
+    format: json
+    extension: json
+    slug: "{{fields.slug}}"
+    identifier_field: slug
+    summary: "{{fields.slug}} — {{fields.title}}"
+    description: >-
+      One entry per page. The builder composes each one visually and exports
+      it to <slug>.html on save; it cannot create or delete pages — that
+      happens here.
+    fields:
+      - label: Slug
+        name: slug
+        widget: string
+        pattern: ["^[a-z0-9-]+$", "Lowercase letters, digits and dashes only"]
+        hint: The file name — "about" becomes about.html. "index" is the homepage.
+      - { label: Title, name: title, widget: string, hint: The browser-tab and search-result title. }
+      - label: Description
+        name: description
+        widget: text
+        required: false
+        hint: What search engines and link previews show.
+      - label: Who it is for
+        name: access
+        widget: select
+        required: false
+        default: public
+        hint: >-
+          Anyone, or only visitors who are signed in or signed out. Someone who
+          does not match is sent to the page named below.
+        options:
+          - { label: Anyone, value: public }
+          - { label: Only when signed in, value: signed-in }
+          - { label: Only when signed out, value: signed-out }
+      - label: Send them to
+        name: redirect_to
+        widget: string
+        required: false
+        hint: Slug of the page to send them to instead, e.g. login.
+      - label: Menu label
+        name: nav_label
+        widget: string
+        required: false
+        hint: >-
+          Shown in the site menu. Leave empty to keep the page out of the menu
+          (while any page has one, the menu renders from the Pages list).
+      - label: Menu position
+        name: nav_order
+        widget: number
+        required: false
+        value_type: int
+        hint: Lower numbers come first in the menu.
+
+  - name: symbols
+    builder: true
+    label: Symbols
+    label_singular: Symbol
+    icon: extension
+    folder: content/symbols
+    create: true
+    format: json
+    extension: json
+    slug: "{{fields.id}}"
+    identifier_field: id
+    summary: "{{fields.name}} ({{fields.id}})"
+    description: >-
+      One entry per reusable element — declared and bound here, drawn in the
+      builder. A symbol edited in the builder updates everywhere it is placed.
+    fields:
+      - label: Id
+        name: id
+        widget: string
+        pattern: ["^[a-z0-9-]+$", "Lowercase letters, digits and dashes only"]
+        hint: Stable handle the builder uses to match the drawing to this entry.
+      - { label: Name, name: name, widget: string }
+      - label: Binding
+        name: binding
+        widget: object
+        hint: What backend capability this symbol carries, if any.
+        fields:
+          # `required: true` with a default dodges the same Sveltia
+          # optional-select hang the catalog Status field hit.
+          - label: Type
+            name: type
+            widget: select
+            required: true
+            default: none
+            options:
+              - { label: None — purely visual, value: none }
+              - { label: Form — submits to the backend, value: form }
+              # Sign-up and sign-in against this site's node. The node decides
+              # what a new account may do; the site only draws the forms.
+              - { label: Account — sign up and sign in, value: account }
+          - label: Form
+            name: form
+            widget: string
+            required: false
+            hint: >-
+              Only used when type is Form: the form's slug in admin-cms.json,
+              e.g. opening-notice.
+          - label: Message after submitting
+            name: success_note
+            widget: string
+            required: false
+            hint: Shown inside this form when a submission succeeds.
+          - label: Fallback endpoint
+            name: endpoint
+            widget: string
+            required: false
+            hint: >-
+              A POST URL from Formspree, Basin, or similar — used only when no
+              admin-cms backend is configured in Settings.
+      - label: Content source
+        name: source
+        widget: string
+        required: false
+        hint: >-
+          Renders another collection's items through this symbol's template —
+          e.g. catalog.items for the Lot One grid. Leave empty to use the
+          Content items below.
+      - label: Content items
+        name: items
+        widget: list
+        required: false
+        label_singular: Item
+        summary: "{{fields.title}}"
+        hint: >-
+          This symbol's own content. In the builder, give a container inside
+          the symbol data-list="symbol:items" and draw ONE item in it as the
+          template, with data-text="item.title" / data-text="item.body" on the
+          text slots — these items then render through that template, on every
+          placement.
+        fields:
+          - { label: Title, name: title, widget: string }
+          - { label: Body, name: body, widget: text, required: false }
+
+  - name: settings
+    label: Settings
+    icon: settings
+    files:
+      - name: site
+        label: Site
+        file: content/site.json
+        format: json
+        description: The announcement bar, contact details, and where sign-ups go.
+        fields:
+          - label: Announcement bar
+            name: announcement
+            widget: string
+            required: false
+            hint: Shown across the top of the page. Leave empty to hide the bar.
+          - label: Backend
+            name: backend
+            widget: object
+            hint: >-
+              The saastarter4-emdash instance that receives sign-ups. Neither
+              value is a secret — this repository is public.
+            fields:
+              - label: Backend URL
+                name: url
+                widget: string
+                required: false
+                hint: >-
+                  e.g. https://saastarter4-emdash.workers.dev — leave empty and the
+                  form falls back to the visitor's mail app.
+              - label: Form
+                name: form
+                widget: string
+                required: false
+                hint: The form's slug in the backend admin, e.g. opening-notice.
+          - label: Contact
+            name: contact
+            widget: object
+            fields:
+              - label: Email
+                name: email
+                widget: string
+                hint: Where the sign-up form sends people when no form endpoint is set.
+              - label: Footer links
+                name: links
+                widget: list
+                label_singular: Link
+                summary: "{{fields.label}}"
+                fields:
+                  - { label: Label, name: label, widget: string }
+                  - { label: URL, name: url, widget: string }
+
+  # ---------------------------------------------------------------------------
+  # The project file itself, edited visually.
+  #
+  # `admin-cms.json` declares the forms this site expects its node to serve. It
+  # was hand-edited JSON, which is a poor fit for the person who actually needs
+  # to change it — so it is modelled here as a singleton: one file, one entry,
+  # no "add new" button.
+  #
+  # Declaring it here rather than building a bespoke screen means both editors
+  # get it. Sveltia renders it because this is its config; the adminCms panel
+  # renders it because that panel mirrors this same config.
+  # ---------------------------------------------------------------------------
+  - name: "project"
+    label: "Dynamic Configuration"
+    # The other half of the node's forms table. Saving here applies the
+    # declaration to the node; saving a form there writes back to this file.
+    sync: "forms"
+    # The site's sign-up form is markup baked into index.html; no page reads
+    # this file at render time. Previewing the site here would suggest editing
+    # it changes that page, so the panel previews the forms themselves.
+    preview: "forms"
+    files:
+      - name: "admin-cms"
+        label: "Dynamic Configuration"
+        file: "admin-cms.json"
+        fields:
+          # Carried through untouched so saving does not strip them.
+          - { name: "$schema", label: "Schema", widget: "hidden", required: false }
+          - { name: "version", label: "Config version", widget: "hidden", required: false }
+
+          - name: "project"
+            label: "Project"
+            widget: "object"
+            fields:
+              - { name: "name", label: "Name", widget: "string" }
+              - { name: "slug", label: "Slug", widget: "string", mono: true, hint: "Lowercase, dashes only." }
+
+          - name: "forms"
+            label: "Forms"
+            widget: "list"
+            hint: "Each form here is one form your node serves. Saving applies it to the node."
+            fields:
+              - { name: "slug", label: "Slug", widget: "string", mono: true, hint: "Addresses the form in the API. Changing it breaks existing links." }
+              - { name: "name", label: "Name", widget: "string" }
+              - name: "status"
+                label: "Status"
+                widget: "select"
+                required: false
+                options: ["published", "draft", "paused"]
+                hint: "Draft is invisible to the public API; paused answers 410."
+              - { name: "successMessage", label: "Message after submitting", widget: "string", required: false }
+
+              - name: "fields"
+                label: "Fields"
+                widget: "list"
+                fields:
+                  - { name: "name", label: "Key", widget: "string", mono: true, hint: "How the value is stored in a submission." }
+                  - { name: "label", label: "Label", widget: "string" }
+                  - name: "type"
+                    label: "Type"
+                    widget: "select"
+                    options: ["text", "email", "tel", "url", "textarea", "number", "select", "checkbox", "date"]
+                  - { name: "required", label: "Required", widget: "boolean", required: false }
+                  - { name: "placeholder", label: "Placeholder", widget: "string", required: false }
+                  - name: "width"
+                    label: "Width"
+                    widget: "select"
+                    required: false
+                    options: ["full", "half"]
+                  - name: "options"
+                    label: "Choices"
+                    widget: "list"
+                    required: false
+                    # Meaningless on anything but a select, so it is drawn only
+                    # for one rather than captioned "ignore me" on every field.
+                    condition: { field: "type", value: "select" }
+                    fields:
+                      - { name: "value", label: "Value", widget: "string", mono: true }
+                      - { name: "label", label: "Label", widget: "string" }
+                  - name: "showWhen"
+                    label: "Show only when"
+                    widget: "object"
+                    required: false
+                    hint: "Leave blank to always show this field."
+                    fields:
+                      - { name: "field", label: "Depends on field", widget: "string", mono: true, required: false }
+                      - name: "is"
+                        label: "Condition"
+                        widget: "select"
+                        required: false
+                        options: ["equal", "not_equal", "filled", "empty"]
+                      - { name: "value", label: "Value", widget: "string", required: false }
+
+              - name: "site"
+                label: "On the site"
+                widget: "object"
+                required: false
+                hint: "Presentation the node has no column for. Carried through untouched."
+                fields:
+                  - { name: "submitLabel", label: "Submit button label", widget: "string", required: false }
+                  - name: "spamProtection"
+                    label: "Spam protection"
+                    widget: "select"
+                    required: false
+                    options: ["honeypot", "turnstile", "none"]
+                  - { name: "retentionDays", label: "Delete submissions after (days)", widget: "number", required: false, hint: "0 keeps them forever." }

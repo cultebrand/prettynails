@@ -1,0 +1,9 @@
+{
+  "slug": "login",
+  "title": "Sign in — Qalam & Ahar",
+  "description": "Sign in to your account.",
+  "access": "signed-out",
+  "redirect_to": "account",
+  "nav_label": "",
+  "nav_order": 91
+}

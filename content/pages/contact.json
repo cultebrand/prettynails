@@ -1,0 +1,9 @@
+{
+  "slug": "contact",
+  "title": "Write to the bench — Qalam & Ahar",
+  "description": "Ask the workshop a question.",
+  "access": "public",
+  "redirect_to": "",
+  "nav_label": "Contact",
+  "nav_order": 50
+}

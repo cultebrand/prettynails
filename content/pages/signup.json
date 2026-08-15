@@ -1,0 +1,9 @@
+{
+  "slug": "signup",
+  "title": "Create an account — Qalam & Ahar",
+  "description": "Create an account with the workshop.",
+  "access": "signed-out",
+  "redirect_to": "account",
+  "nav_label": "",
+  "nav_order": 92
+}
