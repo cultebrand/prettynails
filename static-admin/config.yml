@@ -13,7 +13,7 @@
 
 backend:
   name: github
-  repo: MahmoodKhalil57/pure-frontend
+  repo: cultebrand/prettynails
   branch: master
   # Token only: GitHub Pages has no server, so there is nowhere to run an OAuth
   # client. Sign in with a personal access token instead. Add 'oauth' here if you
@@ -29,8 +29,8 @@ backend:
 media_folder: media/uploads
 public_folder: /media/uploads
 
-site_url: https://mahmoodkhalil57.github.io/pure-frontend/
-display_url: https://mahmoodkhalil57.github.io/pure-frontend/
+site_url: https://cultebrand.github.io/prettynails/
+display_url: https://cultebrand.github.io/prettynails/
 
 collections:
   - name: content
