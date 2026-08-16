@@ -2,15 +2,15 @@
   "$schema": "./admin-cms.schema.json",
   "version": 2,
   "project": {
-    "name": "Qalam & Ahar",
-    "slug": "qalam-ahar"
+    "name": "Persinails Studio",
+    "slug": "persinails"
   },
   "forms": [
     {
-      "slug": "opening-notice",
-      "name": "Opening notice",
+      "slug": "waitlist",
+      "name": "Waitlist",
       "status": "published",
-      "successMessage": "You are on the list — watch your inbox.",
+      "successMessage": "You are on the list. We will write once, when the sets are ready.",
       "fields": [
         {
           "name": "email",
@@ -26,23 +26,33 @@
           "width": "half"
         },
         {
-          "name": "phone",
-          "label": "Phone",
-          "type": "tel",
-          "width": "half"
+          "name": "set",
+          "label": "The set you are waiting for",
+          "type": "select",
+          "width": "half",
+          "options": [
+            { "value": "", "label": "No preference" },
+            { "value": "lily-blanc", "label": "Lily Blanc" },
+            { "value": "orchid-veil", "label": "Orchid Veil" },
+            { "value": "matcha-latte", "label": "Matcha Latte" },
+            { "value": "cherry-gloss", "label": "Cherry Gloss" },
+            { "value": "etoile", "label": "Étoile" },
+            { "value": "bunny-cream", "label": "Bunny Cream" },
+            { "value": "amour", "label": "Amour" }
+          ]
         }
       ],
       "site": {
-        "submitLabel": "Put my name down",
+        "submitLabel": "Join",
         "spamProtection": "honeypot",
         "retentionDays": 0
       }
     },
     {
-      "slug": "wholesale",
-      "name": "Wholesale enquiry (edited on github.com)",
+      "slug": "custom-set",
+      "name": "Custom set enquiry",
       "status": "published",
-      "successMessage": "Thanks — we will come back to you with sizes and lead times.",
+      "successMessage": "Thanks — we will come back to you with a sketch and a lead time.",
       "fields": [
         {
           "name": "email",
@@ -51,22 +61,14 @@
           "required": true
         },
         {
-          "name": "volume",
-          "label": "Expected volume",
+          "name": "occasion",
+          "label": "What it is for",
           "type": "select",
           "options": [
-            {
-              "value": "small",
-              "label": "Under 50"
-            },
-            {
-              "value": "large",
-              "label": "50 or more"
-            },
-            {
-              "value": "pallet",
-              "label": "A pallet or more"
-            }
+            { "value": "wedding", "label": "A wedding" },
+            { "value": "shoot", "label": "A shoot" },
+            { "value": "gift", "label": "A gift" },
+            { "value": "other", "label": "Something else" }
           ]
         },
         {
@@ -74,15 +76,15 @@
           "label": "Tell us more",
           "type": "textarea",
           "showWhen": {
-            "field": "volume",
+            "field": "occasion",
             "is": "equal",
-            "value": "large"
+            "value": "other"
           }
         },
         {
-          "name": "company",
-          "label": "Company",
-          "type": "text",
+          "name": "date",
+          "label": "When you need them",
+          "type": "date",
           "width": "half"
         }
       ],
@@ -93,8 +95,8 @@
       }
     },
     {
-      "slug": "early-access",
-      "name": "Early access",
+      "slug": "sizing",
+      "name": "Sizing kit",
       "status": "published",
       "fields": [
         {
@@ -104,11 +106,11 @@
           "required": true
         }
       ],
-      "successMessage": "You are on the list."
+      "successMessage": "The sizing guide is on its way."
     },
     {
       "slug": "delivery",
-      "name": "Where to send your pens",
+      "name": "Where to send your set",
       "status": "published",
       "fields": [
         {
@@ -124,25 +126,20 @@
           "required": true
         },
         {
-          "name": "hand",
-          "label": "Which hand you write with",
+          "name": "shape",
+          "label": "Preferred shape",
           "type": "select",
           "options": [
-            {
-              "value": "right",
-              "label": "Right"
-            },
-            {
-              "value": "left",
-              "label": "Left"
-            }
+            { "value": "almond-medium", "label": "Almond · Medium" },
+            { "value": "almond-long", "label": "Almond · Long" },
+            { "value": "almond-short", "label": "Almond · Short" }
           ]
         }
       ]
     },
     {
       "slug": "contact",
-      "name": "Write to the bench",
+      "name": "Write to the studio",
       "status": "published",
       "fields": [
         {
@@ -169,7 +166,7 @@
           "required": true
         }
       ],
-      "successMessage": "Thank you — it is with the bench."
+      "successMessage": "Thank you — it is with the studio."
     },
     {
       "slug": "your-details",

@@ -1,7 +1,7 @@
 {
   "slug": "signup",
-  "title": "Create an account — Qalam & Ahar",
-  "description": "Create an account with the workshop.",
+  "title": "Create an account — Persinails Studio",
+  "description": "Create an account with the studio.",
   "access": "signed-out",
   "redirect_to": "account",
   "nav_label": "",

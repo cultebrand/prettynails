@@ -1,0 +1,22 @@
+{
+  "items": [
+    {
+      "slug": "amour",
+      "title": "Amour",
+      "finish": "Jelly crimson · sculpted",
+      "blurb": "Ten nails on one theme — hearts poured in jelly red, a soda bottle and a love letter built up in relief, and a gingham bow sculpted by hand.",
+      "deep": "#4A060E",
+      "image": "/media/uploads/nails/studio-amour.webp",
+      "image_alt": "A flat-lay of ten handmade press-on nails in red and white, with sculpted hearts, a bow, a soda bottle and love-letter details."
+    },
+    {
+      "slug": "fleur",
+      "title": "Fleur",
+      "finish": "Sculpted florals · sage and blush",
+      "blurb": "Lilies, blossom and leaf worked in three dimensions over sage and blush, each flower laid on petal by petal before the top coat goes on.",
+      "deep": "#4E5A45",
+      "image": "/media/uploads/nails/studio-fleur.webp",
+      "image_alt": "A flat-lay of ten handmade press-on nails in sage green and blush pink with sculpted three-dimensional flowers and leaves."
+    }
+  ]
+}

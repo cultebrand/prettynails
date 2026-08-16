@@ -1,5 +1,5 @@
 /* ===========================================================================
-   Qalam & Ahar — live CMS preview
+   Persinails Studio — live CMS preview
    Replaces Sveltia's abstract field-by-field preview with the real page.
 
    How: Sveltia's Decap-compatible `CMS.registerPreviewTemplate()` renders a
@@ -24,7 +24,7 @@
 
   var SITE_BASE = new URL("..", location.href);
   var FONTS_URL =
-    "https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:wght@400..700&display=swap";
+    "https://fonts.googleapis.com/css2?family=Italiana&family=Jost:wght@300..600&display=swap";
 
   if (!window.CMS || !window.PureRender) {
     console.warn("[preview] CMS or PureRender missing — live preview disabled.");
@@ -236,7 +236,10 @@
   }
 
   /** The symbol whose Content source reaches into a given content file —
-      how the craft entry knows to preview as the "How it is made" symbol. */
+      how the craft entry knows to preview as the "How a set goes on" symbol.
+      Two symbols may share a source (try-on and sets both read catalog.items);
+      the first one wins, and either draws the whole page, so it does not
+      matter which. */
   function consumerOf(fileKey) {
     var ids = Object.keys(committed.symbolEntries);
     for (var i = 0; i < ids.length; i += 1) {
@@ -263,9 +266,9 @@
 
   /** Where to scroll on first paint, so the edited data is on screen. */
   var FOCUS = {
-    catalog: "#lots",
-    craft: "#craft",
-    questions: "#questions",
+    catalog: "#sets",
+    craft: "#how",
+    studio: "#studio",
     site: ".banner",
     pages: ".masthead",
   };
@@ -378,29 +381,32 @@
      Every Sveltia field editor is wrapped in a light-DOM section carrying
      data-key-path (e.g. "items.2.title"). Focusing any field bubbles a
      focusin event out of the shadow DOM, so clicking into a field steers the
-     preview to the exact element that field feeds — the third catalog card,
-     the second question — and flashes it. */
+     preview to the exact element that field feeds — the third set's card,
+     the second studio piece — and flashes it. */
 
   /** Map a field key path to the element it feeds. Order matters: most
       specific first. `m` is the regex match; index groups are item indexes. */
   var TARGET_RULES = {
     catalog: [
-      [/^items\.(\d+)/, byIndex(".lot-grid .lot", "#lots")],
-      [/^items/, bySelector("#lots")],
+      // A set's colours and its photograph on the hand are worn by the hero,
+      // not by the card, so those two steer somewhere else.
+      [/^items\.\d+\.(wash|shade|deep|hand)/, bySelector("#top")],
+      [/^items\.(\d+)/, byIndex(".set-grid .set", "#sets")],
+      [/^items/, bySelector("#sets")],
     ],
     craft: [
-      [/^steps\.(\d+)/, byIndex(".steps .step", "#craft")],
-      [/^steps/, bySelector("#craft")],
+      [/^steps\.(\d+)/, byIndex(".steps .step", "#how")],
+      [/^steps/, bySelector("#how")],
     ],
-    questions: [
-      [/^items\.(\d+)/, byIndex(".faq details", "#questions")],
-      [/^items/, bySelector("#questions")],
+    studio: [
+      [/^items\.(\d+)/, byIndex(".pieces .piece", "#studio")],
+      [/^items/, bySelector("#studio")],
     ],
     site: [
       [/^announcement/, bySelector(".banner")],
       [/^contact\.links/, bySelector(".colophon__links")],
       [/^contact/, bySelector(".colophon")],
-      [/^backend/, bySelector("#notify")],
+      [/^backend/, bySelector("#waitlist")],
     ],
     // Folder collection: key paths are entry fields (slug, title, nav_label…).
     pages: [[/^/, bySelector(".masthead__nav")]],

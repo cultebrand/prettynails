@@ -1,19 +1,19 @@
 {
-  "announcement": "Lot One opens to the list first. Nothing is held back for later.",
+  "announcement": "",
   "backend": {
     "url": "https://p-prettynails.the-montiapple.workers.dev",
-    "form": "early-access"
+    "form": "waitlist"
   },
   "contact": {
-    "email": "bench@qalam-ahar.example",
+    "email": "studio@persinails.example",
     "links": [
       {
         "label": "Instagram",
-        "url": "https://instagram.com/"
+        "url": "https://instagram.com/persinails"
       },
       {
-        "label": "Email the bench",
-        "url": "mailto:bench@qalam-ahar.example"
+        "label": "Write to the studio",
+        "url": "contact"
       }
     ]
   }

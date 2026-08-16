@@ -1,6 +1,6 @@
 {
   "slug": "login",
-  "title": "Sign in — Qalam & Ahar",
+  "title": "Sign in — Persinails Studio",
   "description": "Sign in to your account.",
   "access": "signed-out",
   "redirect_to": "account",

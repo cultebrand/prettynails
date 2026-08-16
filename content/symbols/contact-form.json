@@ -1,0 +1,9 @@
+{
+  "id": "contact-form",
+  "name": "Contact form",
+  "binding": {
+    "type": "form",
+    "form": "contact",
+    "success_note": "Thank you — it is with the studio."
+  }
+}

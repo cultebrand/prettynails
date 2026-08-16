@@ -1,0 +1,9 @@
+{
+  "id": "waitlist-form",
+  "name": "Waitlist form",
+  "binding": {
+    "type": "form",
+    "form": "waitlist",
+    "success_note": "You are on the list. We will write once, when the sets are ready."
+  }
+}

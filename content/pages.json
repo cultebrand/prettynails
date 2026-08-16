@@ -2,8 +2,8 @@
   "pages": [
     {
       "slug": "index",
-      "title": "Qalam & Ahar — a calligraphy supply workshop",
-      "description": "Reed pens cut to order, soot ink, and burnished ahar paper. The shop opens with Lot One.",
+      "title": "Persinails Studio — handmade press-on nails",
+      "description": "Handmade press-on nail sets, one hand, seven finishes. Swipe to try each set on before the studio opens.",
       "access": "public",
       "redirect_to": "",
       "nav_label": "",
@@ -11,17 +11,17 @@
     },
     {
       "slug": "contact",
-      "title": "Write to the bench — Qalam & Ahar",
-      "description": "Ask the workshop a question.",
+      "title": "Write to the studio — Persinails Studio",
+      "description": "Ask the studio a question about a set, a size or a lead time.",
       "access": "public",
       "redirect_to": "",
-      "nav_label": "Contact",
+      "nav_label": "",
       "nav_order": 50
     },
     {
       "slug": "account",
-      "title": "Your account — Qalam & Ahar",
-      "description": "Your account with the workshop.",
+      "title": "Your account — Persinails Studio",
+      "description": "Your account with the studio.",
       "access": "signed-in",
       "redirect_to": "login",
       "nav_label": "",
@@ -29,7 +29,7 @@
     },
     {
       "slug": "login",
-      "title": "Sign in — Qalam & Ahar",
+      "title": "Sign in — Persinails Studio",
       "description": "Sign in to your account.",
       "access": "signed-out",
       "redirect_to": "account",
@@ -38,8 +38,8 @@
     },
     {
       "slug": "signup",
-      "title": "Create an account — Qalam & Ahar",
-      "description": "Create an account with the workshop.",
+      "title": "Create an account — Persinails Studio",
+      "description": "Create an account with the studio.",
       "access": "signed-out",
       "redirect_to": "account",
       "nav_label": "",

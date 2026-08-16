@@ -1,0 +1,8 @@
+{
+  "id": "try-on",
+  "name": "Try-on rail",
+  "binding": {
+    "type": "none"
+  },
+  "source": "catalog.items"
+}

@@ -1,5 +1,5 @@
 /* ===========================================================================
-   Qalam & Ahar — one dashboard
+   Persinails Studio — one dashboard
    Sveltia is the dashboard; the page builder lives inside it. This script
    injects a "Page" item at the top of Sveltia's collection sidebar which
    opens static-admin/builder.html as a full-viewport overlay — same sign-in (the

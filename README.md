@@ -10,19 +10,37 @@
 >   hostname once your custom domain is set up.
 
 
-A landing page for a shop that has not opened yet. Pure HTML and CSS — no build
-step, no dependencies to install, and the page reads complete with JavaScript
-turned off. JS only adds motion and live niceties. Two editors commit straight
-back to this repository, and a commit on `master` is a deploy:
+A landing page for **Persinails Studio** — handmade press-on nails, Copenhagen —
+whose shop has not opened yet. Pure HTML and CSS: no build step, no dependencies
+to install, and the page reads complete with JavaScript turned off. JS only adds
+motion and live niceties. Two editors commit straight back to this repository,
+and a commit on `master` is a deploy:
 
-- **[Sveltia CMS](https://sveltiacms.app/)** (`/static-admin/`) edits _data_: catalog
-  items, craft steps, questions, footer links, the announcement bar, settings.
+- **[Sveltia CMS](https://sveltiacms.app/)** (`/static-admin/`) edits _data_: the
+  seven sets, the studio pieces, the steps, footer links, the announcement bar,
+  settings.
 - **The visual builder** (`/static-admin/builder.html`,
   [GrapesJS](https://grapesjs.com/)) edits _the page itself_ — words, layout,
   cosmetics — and exports plain HTML and CSS.
 
-The seeded content is a calligraphy supply workshop (Qalam & Ahar). Every word and
-image is CMS-editable, so replace it with the real shop when you have one.
+Every word and image is CMS-editable, so replace it with the real shop when you
+have one.
+
+### The set is the unit
+
+One entry in **The seven** feeds three places at once: the hand in the hero, the
+rail you swipe under it, and the card lower down. It carries its own three
+colours — panel, glow and ink — and the hero cross-fades to them when someone
+tries that set on, so a new set arrives fully dressed without anyone opening a
+stylesheet. Those colours reach the page through `data-vars` on the item's
+markup (`--tint:wash;--set-deep:deep`), which `render.js` paints on as custom
+properties.
+
+The photographs come in two shapes and both matter. `image` is a square
+close-up, used on the card and in the rail. `hand` is the same hand wearing that
+set, shot from the same place as every other one — it is laid over
+`hand-bare.webp` in the hero and cross-faded, so anything that moves between
+shots shows up as a jump.
 
 ## Layout
 
@@ -39,8 +57,9 @@ content/symbols.json        baked manifest of the symbols (builder artifact)
 content/page.grapes.json    the builder's project file — every page's drawing
 content/blocks.grapes.json  designer-saved starter blocks
 content/site.json           announcement, contact, backend -> CMS "Settings"
-content/landing.json        steps, FAQ, form behaviour     -> CMS "Landing page"
-content/catalog.json        the Lot One grid               -> CMS "Catalog"
+content/craft.json          how a set goes on              -> CMS "How a set goes on"
+content/studio.json         the two studio flat-lays       -> CMS "From the studio"
+content/catalog.json        the seven sets                 -> CMS "The seven"
 media/uploads/              images uploaded through the CMS
 static-admin/index.html            loads Sveltia CMS from a CDN — the dashboard
 static-admin/config.yml            the content model
@@ -75,9 +94,12 @@ Concretely, Sveltia **creates and binds**, one entry per thing:
   backend **bindings**. A symbol bound to a form (`type: form`, plus the
   form's slug from `admin-cms.json`) gets its submit endpoint stamped at export
   and wired at runtime — backend functionality attaches here, as
-  configuration, never as code in the builder. The "Put my name down"
-  form is the live example: one symbol, placed twice, bound to the
-  `opening-notice` form.
+  configuration, never as code in the builder. The waitlist form is the live
+  example: one symbol bound to the `waitlist` form.
+
+  Two symbols may name the same **Content source**. `try-on` and `sets` both
+  read `catalog.items` and draw it differently — the rail under the hand and
+  the grid in "The seven" — which is why a set edited once changes in both.
 
 The builder bakes aggregated manifests (`content/pages.json`,
 `content/symbols.json`) on every save so the static runtime can read the
@@ -93,7 +115,7 @@ category. Editing a symbol updates every instance on every page.
   **Save block**, and it joins the block panel for reuse. The library lives in
   `content/blocks.grapes.json`, committed with the page.
 - **Sveltia** (`/static-admin/`) is for what must be standardized: anything that
-  exists N times with one shape (catalog items, steps, questions, links), and
+  exists N times with one shape (sets, studio pieces, steps, links), and
   anything that configures behaviour (form endpoint, announcement, contact).
   Repetition needs a schema, and a schema needs a form — that is Sveltia.
 - **The bridge** is a `data-list` container. The builder decides _where_
@@ -218,15 +240,15 @@ between the two is written down in that repo's `ARCHITECTURE.md`.
 The two values that connect them, `backend.url` and `backend.form`, are public by
 design. The form id identifies a form; it does not authorise anything.
 
-## The sign-up form
+## The waitlist form
 
 Three places it can go, in order:
 
 1. **The backend.** Set **Settings → Backend** in the CMS to your
    `saastarter4-emdash` URL and the form's slug. Submissions are stored there,
    with spam protection and notifications.
-2. **A third-party endpoint.** Set **Landing page → Sign-up form → Form endpoint**
-   to a Formspree/Basin URL.
+2. **A third-party endpoint.** Set **Symbols → Waitlist form → Fallback
+   endpoint** to a Formspree/Basin URL.
 3. **Nothing configured** — the form opens the visitor's mail app addressed to
    **Settings → Contact → Email**, so no address is silently dropped.
 
@@ -236,11 +258,16 @@ on every submission.
 
 ## When this becomes a real shop
 
-The catalog is one JSON file with a list inside it, because a static host cannot
-list a directory — the page would have no way to discover files in a
+The seven sets live in one JSON file with a list inside it, because a static host
+cannot list a directory — the page would have no way to discover files in a
 `content/products/` folder. That is fine for a handful of items. Past roughly
-thirty, switch the catalog to a folder collection and add a GitHub Action that
-writes an index file on each commit.
+thirty, switch it to a folder collection and add a GitHub Action that writes an
+index file on each commit.
+
+One thing to know before adding an eighth set: the hero counts them — `Set 01 of
+07` is drawn from the length of the list, so it follows on its own. What does not
+follow on its own is the photograph. A set with no **On the hand** image has
+nothing to lay over the bare hand, so the hero will show bare nails for it.
 
 ## Pinned version
 

@@ -1,5 +1,5 @@
 /* ===========================================================================
-   Qalam & Ahar — shared content renderers
+   Persinails Studio — shared content renderers
    One copy of the JSON -> HTML logic, used from two places:
      - assets/js/main.js   re-renders live in the visitor's browser
      - static-admin/builder.js    bakes the same markup into index.html at save time,
@@ -122,11 +122,37 @@
         else slot.remove();
       });
 
+      // Colour slots: data-vars="--tint:wash;--set-deep:deep" paints the item's
+      // own colours onto the element as custom properties, so a set carries its
+      // tint in the CMS rather than in a stylesheet nobody editing content can
+      // reach. Absent fields are skipped and the CSS fallback stands.
+      var painted = Array.prototype.slice.call(clone.querySelectorAll("[data-vars]"));
+      if (clone.hasAttribute && clone.hasAttribute("data-vars")) painted.unshift(clone);
+      painted.forEach(function (host) {
+        host
+          .getAttribute("data-vars")
+          .split(";")
+          .forEach(function (pair) {
+            var half = pair.split(":");
+            if (half.length !== 2) return;
+            var name = half[0].trim();
+            var value = item[half[1].trim()];
+            if (name && isFilled(value)) host.style.setProperty(name, value);
+          });
+      });
+
       // Image slots: data-img="item.image" appends an <img> when the item has
       // one (alt from data-img-alt's field, falling back to the title) and
       // removes the class named in data-img-empty; otherwise the drawn
       // empty-state stands.
-      clone.querySelectorAll("[data-img]").forEach(function (host) {
+      //
+      // The item's root element counts as a host. querySelectorAll only ever
+      // returns descendants, so a template whose outermost element IS the
+      // image slot — the hero's stacked hands are exactly that — would
+      // otherwise render every item pictureless.
+      var slots = Array.prototype.slice.call(clone.querySelectorAll("[data-img]"));
+      if (clone.hasAttribute && clone.hasAttribute("data-img")) slots.unshift(clone);
+      slots.forEach(function (host) {
         var value = item[host.getAttribute("data-img").slice(5)];
         if (!isFilled(value)) return;
         var img = doc.createElement("img");

@@ -1,9 +1,9 @@
 {
   "slug": "contact",
-  "title": "Write to the bench — Qalam & Ahar",
-  "description": "Ask the workshop a question.",
+  "title": "Write to the studio — Persinails Studio",
+  "description": "Ask the studio a question about a set, a size or a lead time.",
   "access": "public",
   "redirect_to": "",
-  "nav_label": "Contact",
+  "nav_label": "",
   "nav_order": 50
 }

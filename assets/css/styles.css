@@ -1,32 +1,74 @@
 /* ===========================================================================
-   Qalam & Ahar — pre-launch landing page
-   Palette is an Ottoman lacquered pen case (qalamdan): a black ground with red
-   in it, gold leaf, verdigris, and the ivory of burnished ahar paper.
+   Persinails Studio — hand-written styling
+   Handmade press-on nails, Copenhagen.
+
+   One ground colour, one ink, and a per-set accent trio that the hero swaps
+   as you try each set on:
+
+     --wash   the panel behind the set   (page ground when nothing is chosen)
+     --shade  the glow the set throws    (a radial wash, top right)
+     --deep   the set's own ink          (headline, labels, solid buttons)
+
+   Those three are re-declared on .hero by main.js and by the baked markup, so
+   the page is already wearing set 01 before a line of JavaScript runs.
+
+   The visual builder owns assets/css/page.css. This file is hand-written and
+   the builder never touches it.
    =========================================================================== */
 
 :root {
-  --ground: #191016;
-  --ground-raised: #221620;
-  --ahar: #efe4ce;
-  --ahar-dim: #b9a88e;
-  --brass: #c9a24b;
-  --verdigris: #7fa894;
-  --lac-red: #8c2b34;
+  /* --- ground and ink --- */
+  --wash: #f7f3ef;
+  --ink: #2c2320;
+  --rose: #7c4448; /* focus ring, ribbon hover */
 
-  --face-display: "Amiri", Georgia, serif;
-  --face-body: "Instrument Sans", system-ui, -apple-system, sans-serif;
-  --face-util: "IBM Plex Mono", ui-monospace, monospace;
+  /* --- the per-set trio, defaulting to Lily Blanc --- */
+  --shade: #e4dad2;
+  --deep: #6e5b4e;
 
-  --gutter: clamp(1.25rem, 5vw, 4.5rem);
-  --measure: 68ch;
-  --rule: 1px solid color-mix(in srgb, var(--ahar) 16%, transparent);
+  /* --- hairlines --- */
+  --line: color-mix(in srgb, var(--ink) 12%, transparent);
+  --line-soft: color-mix(in srgb, var(--ink) 8%, transparent);
 
-  --step--1: 0.8125rem;
-  --step-0: clamp(1rem, 0.96rem + 0.2vw, 1.125rem);
-  --step-1: clamp(1.25rem, 1.1rem + 0.7vw, 1.6rem);
-  --step-2: clamp(1.75rem, 1.4rem + 1.7vw, 2.75rem);
-  --step-3: clamp(2.25rem, 1.5rem + 3.4vw, 4.25rem);
+  /* --- type --- */
+  --face-display: "Italiana", "Times New Roman", Times, serif;
+  --face-body: "Jost", ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  --step--2: 0.6875rem; /* 11px — eyebrows, spec labels */
+  --step--1: 0.8125rem; /* 13px */
+  --step-0: 0.9375rem; /* 15px — body */
+  --step-1: 1.125rem; /* 18px — step titles */
+  --step-2: 1.5rem; /* 24px — set names */
+  --step-3: clamp(2rem, 6vw, 3.5rem); /* section headlines */
+  --step-4: clamp(2.75rem, 10vw, 5.25rem); /* the set's name in the hero */
+
+  /* --- measure and rhythm --- */
+  --gutter: clamp(1.25rem, 4vw, 3rem);
+  --measure: 87.5rem; /* 1400px — the widest the words ever get */
+  /* The gutter sits outside the measure, so the page fills a 1440 screen edge
+     to edge and only starts centring once it has more room than it needs. */
+  --frame: calc(var(--measure) + 2 * var(--gutter));
+  --section-top: clamp(5rem, 9vw, 8rem);
+
+  /* --- the nail ribbon --- */
+  --nail-h: 82px;
+  --ribbon-gap: clamp(1.75rem, 4vw, 3.25rem);
+  --ribbon-h: calc(var(--nail-h) + 61px);
 }
+
+@media (min-width: 40rem) {
+  :root {
+    --nail-h: 96px;
+  }
+}
+
+@media (min-width: 64rem) {
+  :root {
+    --nail-h: 116px;
+  }
+}
+
+/* --- resets --------------------------------------------------------------- */
 
 *,
 *::before,
@@ -36,16 +78,23 @@
 
 html {
   scroll-behavior: smooth;
+  /* The ribbon is not sticky, but the dock and the header both sit over the
+     top of a section — anchors land clear of them. */
+  scroll-padding-top: 1.5rem;
 }
 
 body {
+  /* The floating masthead is positioned against this. */
+  position: relative;
   margin: 0;
-  background: var(--ground);
-  color: var(--ahar);
+  background: var(--wash);
+  color: var(--ink);
   font-family: var(--face-body);
   font-size: var(--step-0);
-  line-height: 1.6;
+  font-weight: 400;
+  line-height: 1.62;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 img {
@@ -56,172 +105,400 @@ img {
 
 a {
   color: inherit;
+  text-decoration: none;
 }
 
 :focus-visible {
-  outline: 2px solid var(--verdigris);
+  outline: 2px solid var(--rose);
   outline-offset: 3px;
   border-radius: 2px;
 }
 
+/* Screen-reader-only text that is still read aloud and still focusable. */
 .visually-hidden {
   position: absolute;
   width: 1px;
   height: 1px;
+  margin: -1px;
+  padding: 0;
   overflow: hidden;
-  clip-path: inset(50%);
   white-space: nowrap;
+  clip-path: inset(50%);
+  border: 0;
 }
 
 .skip {
   position: absolute;
-  left: -9999px;
-  top: 0;
-  z-index: 10;
-  padding: 0.75rem 1rem;
-  background: var(--ahar);
-  color: var(--ground);
+  inset-block-start: 0;
+  inset-inline-start: -100%;
+  z-index: 100;
+  padding: 0.75rem 1.25rem;
+  background: var(--ink);
+  color: var(--wash);
+  font-size: var(--step--2);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
 }
 
 .skip:focus {
-  left: 0;
+  inset-inline-start: 0;
 }
 
-/* --- shared bits ---------------------------------------------------------- */
+/* --- shared primitives ---------------------------------------------------- */
 
+/* Small caps set wide. Every label on the site is one of these. */
 .eyebrow {
   margin: 0;
-  font-family: var(--face-util);
-  font-size: var(--step--1);
-  letter-spacing: 0.18em;
+  font-size: var(--step--2);
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--brass);
+  color: color-mix(in srgb, var(--deep) 62%, transparent);
 }
 
-.btn {
+/* Inside the hero a label belongs to the set on the hand and takes its ink.
+   Everywhere else the page speaks in its own voice. */
+.section-head .eyebrow,
+.waitlist .eyebrow {
+  color: color-mix(in srgb, var(--ink) 55%, transparent);
+}
+
+.btn,
+.btn--solid,
+.btn--ghost {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.7rem 1.15rem;
+  min-height: 44px;
+  padding-inline: 1.5rem;
+  border: 0;
+  border-radius: 999px;
   font: inherit;
-  font-weight: 600;
-  line-height: 1.1;
-  text-decoration: none;
+  font-size: 0.75rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
   white-space: nowrap;
-  border-radius: 2px;
   cursor: pointer;
-  transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+  transition:
+    background-color 0.42s ease,
+    color 0.42s ease,
+    border-color 0.42s ease,
+    transform 0.42s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
 .btn--solid {
-  border: 1px solid var(--brass);
-  background: var(--brass);
-  color: var(--ground);
+  background: var(--deep);
+  color: var(--wash);
 }
 
 .btn--solid:hover {
-  background: color-mix(in srgb, var(--brass) 82%, var(--ahar));
-  border-color: color-mix(in srgb, var(--brass) 82%, var(--ahar));
+  transform: translateY(-2px);
 }
 
 .btn--ghost {
-  border: 1px solid color-mix(in srgb, var(--ahar) 32%, transparent);
   background: transparent;
-  color: var(--ahar);
+  color: var(--deep);
+  border: 1px solid color-mix(in srgb, var(--deep) 28%, transparent);
 }
 
 .btn--ghost:hover {
-  border-color: var(--brass);
-  color: var(--brass);
+  border-color: color-mix(in srgb, var(--deep) 60%, transparent);
+  transform: translateY(-2px);
 }
 
+.btn:focus-visible,
+.btn--solid:focus-visible,
+.btn--ghost:focus-visible {
+  outline: 2px solid var(--deep);
+  outline-offset: 3px;
+}
+
+/* A section's opening: a small label, a large line, and sometimes a note. */
 .section-head {
-  max-width: var(--measure);
-  margin-bottom: clamp(2rem, 5vw, 3.5rem);
+  margin: 0 0 clamp(2.5rem, 5vw, 3.5rem);
 }
 
 .section-head__title {
-  margin: 0.6rem 0 0;
-  font-size: var(--step-2);
-  font-weight: 600;
-  line-height: 1.12;
-  letter-spacing: -0.02em;
-  text-wrap: balance;
+  margin: 0.75rem 0 0;
+  font-family: var(--face-display);
+  font-size: var(--step-3);
+  font-weight: 400;
+  line-height: 1.02;
 }
 
 .section-head__blurb {
-  margin: 1rem 0 0;
+  margin: 1.25rem 0 0;
   max-width: 46ch;
-  color: var(--ahar-dim);
+  color: color-mix(in srgb, var(--ink) 68%, transparent);
 }
 
-/* --- announcement + masthead --------------------------------------------- */
+/* A section head whose note sits on the far right of the same line. */
+.section-head--split {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem 2rem;
+}
+
+.section-head--split .section-head__title {
+  margin-top: 0;
+}
+
+/* The paper grain. Multiplied over the ground so it darkens rather than
+   fogs, and pinned behind everything it sits in. */
+.grain {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.5;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.32'/%3E%3C/svg%3E");
+}
+
+/* --- the announcement bar ------------------------------------------------- */
 
 .banner {
-  padding: 0.55rem var(--gutter);
-  background: var(--lac-red);
+  margin: 0;
+  padding: 0.6rem var(--gutter);
+  background: var(--ink);
+  color: var(--wash);
   text-align: center;
 }
 
 .banner p {
   margin: 0;
-  font-family: var(--face-util);
-  font-size: var(--step--1);
-  letter-spacing: 0.04em;
-}
-
-.masthead {
-  display: flex;
-  align-items: center;
-  gap: clamp(1rem, 4vw, 3rem);
-  padding: 1.1rem var(--gutter);
-  border-bottom: var(--rule);
-}
-
-.brand {
-  display: flex;
-  align-items: baseline;
-  gap: 0.6rem;
-  text-decoration: none;
-}
-
-.brand__ar {
-  font-family: var(--face-display);
-  font-size: 1.4rem;
-  color: var(--brass);
-  line-height: 1;
-}
-
-.brand__latin {
-  font-size: var(--step--1);
-  font-weight: 600;
-  letter-spacing: 0.08em;
+  font-size: var(--step--2);
+  letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
+/* --- the nail ribbon ------------------------------------------------------ */
+
+/* Two strips of single nails, drifting in opposite directions. The top one is
+   also the site menu: each nail is a link, named underneath. */
+.ribbon {
+  position: relative;
+  overflow: hidden;
+}
+
+.ribbon--top {
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.ribbon--bottom {
+  border-top: 1px solid var(--line);
+}
+
+.ribbon__track {
+  display: flex;
+  gap: var(--ribbon-gap);
+  padding: 22px 0 16px;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 7% 93%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 7% 93%, transparent);
+}
+
+.ribbon__row {
+  display: flex;
+  flex-shrink: 0;
+  justify-content: space-around;
+  gap: var(--ribbon-gap);
+  animation: ribbon-drift var(--duration, 86s) linear infinite;
+}
+
+@keyframes ribbon-drift {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(-100% - var(--ribbon-gap)));
+  }
+}
+
+.ribbon:hover .ribbon__row,
+.ribbon:focus-within .ribbon__row {
+  animation-play-state: paused;
+}
+
+.ribbon--bottom .ribbon__row {
+  animation-direction: reverse;
+}
+
+.ribbon__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  margin: 0;
+}
+
+.ribbon__nail {
+  height: var(--nail-h);
+  width: auto;
+  margin-bottom: 10px;
+  filter: drop-shadow(-4px 8px 11px color-mix(in srgb, #3c2820 20%, transparent));
+}
+
+.ribbon__name {
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: color-mix(in srgb, var(--ink) 44%, transparent);
+  transition: color 0.3s ease;
+}
+
+a.ribbon__item {
+  cursor: pointer;
+  padding-inline: 6px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+a.ribbon__item .ribbon__nail {
+  transition: transform 0.42s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+a.ribbon__item:hover .ribbon__nail,
+a.ribbon__item:focus-visible .ribbon__nail {
+  transform: translateY(-5px) scale(1.05);
+}
+
+a.ribbon__item:hover .ribbon__name,
+a.ribbon__item:focus-visible .ribbon__name {
+  color: var(--rose);
+}
+
+/* The named menu, for keyboards and screen readers. Each link is off-screen
+   until it is tabbed to, then it draws itself as a pill over the ribbon —
+   the nails behind it are decorative duplicates and carry tabindex="-1". */
+.ribbon__nav {
+  position: absolute;
+  inset-inline-start: 10px;
+  top: 10px;
+  z-index: 5;
+  display: flex;
+  gap: 6px;
+}
+
+.ribbon__nav a {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
+.ribbon__nav a:focus-visible {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: 7px 14px;
+  clip-path: none;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--wash);
+  font-size: var(--step--2);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  outline: 2px solid var(--rose);
+  outline-offset: 2px;
+}
+
+/* --- the masthead --------------------------------------------------------- */
+
+.masthead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  max-width: var(--frame);
+  margin-inline: auto;
+  padding: 1.75rem var(--gutter) 0;
+}
+
+/* On the landing page the masthead floats over the tinted hero rather than
+   pushing it down, so the set's colour runs to the very top of the panel.
+   Everywhere else it stays in the flow. */
+.masthead--float {
+  position: absolute;
+  inset-inline: 0;
+  top: var(--ribbon-h);
+  z-index: 20;
+  pointer-events: none;
+}
+
+.masthead--float > * {
+  pointer-events: auto;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4em;
+  font-family: var(--face-display);
+  font-size: 1.375rem;
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+
+@media (min-width: 40rem) {
+  .masthead .brand {
+    font-size: 1.625rem;
+  }
+}
+
+.colophon .brand {
+  font-size: 1.25rem;
+  letter-spacing: normal;
+}
+
+.brand__name {
+  color: var(--ink);
+}
+
+.brand__sub {
+  color: color-mix(in srgb, var(--ink) 42%, transparent);
+}
+
+/* Held back on the narrowest screens, where the wordmark alone is the header. */
+.masthead__note {
+  display: none;
+  margin: 0;
+  font-size: var(--step--2);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--ink) 52%, transparent);
+}
+
+@media (min-width: 40rem) {
+  .masthead__note {
+    display: block;
+  }
+}
+
+/* The page menu, when Pages give themselves a menu label. */
 .masthead__nav {
   display: none;
-  gap: 1.6rem;
-  margin-inline-start: auto;
-  font-size: var(--step--1);
-  letter-spacing: 0.04em;
+  gap: 1.5rem;
+  font-size: var(--step--2);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
 }
 
 .masthead__nav a {
-  text-decoration: none;
-  color: var(--ahar-dim);
-  padding-block: 0.25rem;
-  border-bottom: 1px solid transparent;
+  color: color-mix(in srgb, var(--ink) 62%, transparent);
+  transition: color 0.3s ease;
 }
 
 .masthead__nav a:hover {
-  color: var(--ahar);
-  border-bottom-color: var(--brass);
+  color: var(--ink);
 }
 
 .masthead__cta {
   margin-inline-start: auto;
-  font-size: var(--step--1);
 }
 
 @media (min-width: 62rem) {
@@ -240,432 +517,750 @@ a {
   }
 }
 
-/* --- hero ----------------------------------------------------------------- */
+/* --- the hero ------------------------------------------------------------- */
 
+/* The whole panel wears the chosen set: --wash behind it, --shade thrown from
+   the top right, --deep on the type. Changing sets re-declares the three and
+   everything follows in one slow cross-fade. */
 .hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: calc(100svh - var(--ribbon-h));
+  padding: clamp(6.5rem, 14vh, 9.5rem) 0 clamp(3rem, 6vw, 4.5rem);
+  background: var(--wash);
+  transition: background-color 1.1s ease-out;
+}
+
+.hero__glow {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    58% 46% at 72% 18%,
+    color-mix(in srgb, var(--shade) 46%, transparent),
+    transparent 70%
+  );
+  transition: background 1.1s ease-out;
+}
+
+.hero__inner {
   display: grid;
-  gap: clamp(1.5rem, 5vw, 4rem);
-  padding: clamp(2.5rem, 7vw, 5.5rem) var(--gutter) clamp(3.5rem, 8vw, 6rem);
-  border-bottom: var(--rule);
+  grid-template-areas:
+    "stage"
+    "tryon"
+    "lede";
+  gap: clamp(2rem, 5vw, 3rem);
+  align-items: center;
+  max-width: var(--frame);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+@media (min-width: 64rem) {
+  .hero__inner {
+    grid-template-areas:
+      "lede stage"
+      "tryon stage";
+    /* Five columns of twelve for the words, the rest for the hand. */
+    grid-template-columns: calc((100% - 11 * 1.5rem) / 12 * 5 + 4 * 1.5rem) minmax(0, 1fr);
+    align-items: end;
+    gap: 1rem 1.5rem;
+  }
+
+  .hero__tryon {
+    max-width: 32.5rem;
+  }
+}
+
+/* Only once there is room to spare does the hero step in past the sections
+   below it. */
+@media (min-width: 90rem) {
+  .hero__inner {
+    padding-inline: calc(var(--gutter) + 1.25rem);
+  }
 }
 
 .hero__lede {
-  min-width: 0;
+  grid-area: lede;
+  align-self: center;
 }
 
-/* The signature: the word is revealed right-to-left, the way it is written,
-   with a brass nib riding the leading edge of the stroke. */
-.wordmark {
-  position: relative;
-  display: block;
-  order: -1; /* above the headline until there is room beside it */
-  line-height: 0.78; /* Amiri carries a lot of leading; trim it back to the ink */
-}
-
-@media (min-width: 62rem) {
-  .hero {
-    /* `auto` keeps the word tight against the right gutter instead of leaving a
-       hole between the copy and the glyph. */
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-  }
-
-  .wordmark {
-    order: 0;
+@media (min-width: 64rem) {
+  .hero__lede {
+    align-self: end;
   }
 }
 
-.wordmark__ar {
-  display: block;
-  font-family: var(--face-display);
-  font-size: clamp(17rem, 30vw, 27rem);
-  color: var(--brass);
-  clip-path: inset(0 0 0 0);
-  animation: stroke-in 1500ms cubic-bezier(0.65, 0.02, 0.3, 1) both;
-}
-
-.wordmark__nib {
-  position: absolute;
-  top: -16%;
-  right: 0;
-  width: 4px;
-  height: 132%;
-  background: var(--ahar);
-  transform: rotate(-18deg);
-  transform-origin: center;
-  animation: nib-travel 1500ms cubic-bezier(0.65, 0.02, 0.3, 1) both;
-}
-
-@keyframes stroke-in {
+/* The name of the set arrives rather than swapping letter for letter: main.js
+   restarts this animation on every change. */
+@keyframes hero-rise {
   from {
-    clip-path: inset(0 0 0 100%);
-  }
-
-  to {
-    clip-path: inset(0 0 0 0);
-  }
-}
-
-@keyframes nib-travel {
-  from {
-    right: 0;
-    opacity: 1;
-  }
-
-  85% {
-    opacity: 1;
-  }
-
-  to {
-    right: 100%;
     opacity: 0;
+    filter: blur(5px);
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    filter: none;
+    transform: none;
   }
 }
 
-.hero__headline {
-  max-width: 20ch;
-  margin: 0;
-  font-size: var(--step-3);
-  font-weight: 600;
-  line-height: 1.04;
-  letter-spacing: -0.03em;
-  text-wrap: balance;
+.hero__title {
+  margin: 1rem 0 0;
+  font-family: var(--face-display);
+  font-size: var(--step-4);
+  font-weight: 400;
+  line-height: 0.92;
+  letter-spacing: -0.01em;
+  color: var(--deep);
+  animation: hero-rise 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
-.hero__sub {
-  max-width: 48ch;
-  margin: 1.35rem 0 0;
-  font-size: var(--step-1);
-  line-height: 1.5;
-  color: var(--ahar-dim);
+.hero__tagline {
+  margin: 1.25rem 0 0;
+  max-width: 24rem;
+  font-size: var(--step-0);
+  line-height: 1.625;
+  color: color-mix(in srgb, var(--deep) 78%, transparent);
+  animation: hero-rise 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) 0.11s both;
 }
 
-/* --- notify form ---------------------------------------------------------- */
-
-.notify {
-  margin-top: clamp(2rem, 5vw, 3rem);
-  max-width: 34rem;
+@media (min-width: 40rem) {
+  .hero__tagline {
+    font-size: 1rem;
+  }
 }
 
-.notify__label {
-  display: block;
-  margin-bottom: 0.6rem;
-  font-family: var(--face-util);
-  font-size: var(--step--1);
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--brass);
-}
-
-.notify__row {
+/* Finish / Shape / Price, side by side, in the same small caps as everything
+   else that labels rather than speaks. */
+.specs {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 1rem 2rem;
+  margin: 2rem 0 0;
+  font-size: var(--step--2);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--deep) 60%, transparent);
 }
 
-.notify__input {
-  flex: 1 1 15rem;
-  min-width: 0;
-  padding: 0.7rem 0.85rem;
-  font: inherit;
-  color: var(--ahar);
-  background: var(--ground-raised);
-  border: 1px solid color-mix(in srgb, var(--ahar) 24%, transparent);
-  border-radius: 2px;
+.specs dt {
+  opacity: 0.6;
 }
 
-.notify__input::placeholder {
-  color: color-mix(in srgb, var(--ahar-dim) 70%, transparent);
+.specs dd {
+  margin: 0.375rem 0 0;
+  color: var(--deep);
 }
 
-.notify__input:focus-visible {
-  border-color: var(--verdigris);
-}
-
-/* A form whose questions arrive from the node, so their number is not known
-   here. Stacked rather than laid out in a row: a row is a design for one field
-   and a guess for any other count. */
-.notify--stacked {
+.hero__actions {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 1rem;
-  max-width: 34rem;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 2.25rem;
 }
 
-.notify--stacked [data-form-fields] {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+/* --- the hand ------------------------------------------------------------- */
+
+.hero__stage {
+  grid-area: stage;
+  justify-self: center;
+  position: relative;
+  width: min(80vw, 25.84svh);
+  aspect-ratio: 1200 / 1579;
+}
+
+@media (min-width: 64rem) {
+  .hero__stage {
+    align-self: center;
+    width: min(46vw, 42.56svh);
+  }
+}
+
+.hero__hand,
+.hero__layer img {
+  position: absolute;
+  inset: 0;
   width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(-18px 26px 34px color-mix(in srgb, #3c2820 16%, transparent));
 }
 
-.notify--stacked .notify__input {
-  width: 100%;
-}
-
-.notify--stacked textarea.notify__input {
-  min-height: 8rem;
-  resize: vertical;
-}
-
-/* A value the bench already holds, shown so it can be read rather than typed.
-   Drawn flat and unlit: it is a statement of fact, not somewhere to put a
-   cursor, and it should not look like one that has been switched off. */
-.notify__input--locked {
-  color: var(--ahar-dim);
-  background: color-mix(in srgb, var(--ahar) 5%, transparent);
-  border-style: dashed;
-  cursor: default;
-  opacity: 1;
-}
-
-.notify__note {
-  margin: 0.75rem 0 0;
-  font-size: var(--step--1);
-  color: var(--ahar-dim);
-}
-
-.notify__status {
-  margin: 0.65rem 0 0;
-  min-height: 1.4em;
-  font-family: var(--face-util);
-  font-size: var(--step--1);
-  color: var(--verdigris);
-}
-
-.notify__status[data-state="error"] {
-  color: color-mix(in srgb, var(--lac-red) 55%, var(--ahar));
-}
-
-/* --- Lot One -------------------------------------------------------------- */
-
-.lots {
-  padding: clamp(3.5rem, 8vw, 6.5rem) var(--gutter);
-  border-bottom: var(--rule);
-}
-
-.lot-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-  gap: 1px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  background: color-mix(in srgb, var(--ahar) 16%, transparent);
-  border: var(--rule);
-}
-
-.lot {
-  display: flex;
-  flex-direction: column;
-  padding: 1.4rem;
-  background: var(--ground);
-  transition: opacity 0.5s ease, transform 0.5s ease;
-  transition-delay: var(--reveal-delay, 0ms);
-}
-
-/* Cards render visible by default so the page is complete without JavaScript.
-   The scroll-reveal hide only applies once the head script has tagged <html> with .js. */
-html.js .lot:not(.is-revealed) {
+/* Every set is drawn on top of the bare hand and faded in, so switching sets
+   reads as the same hand changing its mind rather than a new photograph. */
+.hero__layer {
+  position: absolute;
+  inset: 0;
   opacity: 0;
-  transform: translateY(0.75rem);
+  transform: scale(1.012);
+  will-change: opacity, transform;
+  transition:
+    opacity 0.78s cubic-bezier(0.22, 0.68, 0.24, 1),
+    transform 0.9s cubic-bezier(0.22, 0.68, 0.24, 1);
 }
 
-.lot__figure {
-  aspect-ratio: 4 / 5;
-  margin: 0 0 1.1rem;
+.hero__layer.is-on {
+  opacity: 1;
+  transform: none;
+}
+
+/* No JavaScript: the first set is the one on the hand, and it never changes. */
+html:not(.js) .hero__layers > .hero__layer:first-of-type {
+  opacity: 1;
+  transform: none;
+}
+
+/* --- try it on ------------------------------------------------------------ */
+
+.hero__tryon {
+  grid-area: tryon;
+  min-width: 0;
+}
+
+.tryon__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.tryon__count {
+  margin: 0;
+  font-family: var(--face-display);
+  font-size: 1.125rem;
+  color: color-mix(in srgb, var(--deep) 70%, transparent);
+}
+
+.tryon__count span + span {
+  color: color-mix(in srgb, var(--deep) 38%, transparent);
+}
+
+.tryon__rail {
+  /* Held here because each chip shadows --deep with its own swatch colour;
+     the captions all speak in the ink of the set currently on the hand. */
+  --rail-deep: var(--deep);
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  margin: 0;
+  list-style: none;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+
+.tryon__rail::-webkit-scrollbar {
+  display: none;
+}
+
+.chip {
+  flex: 0 0 auto;
+  scroll-snap-align: center;
+}
+
+.chip__button {
+  display: block;
+  width: clamp(76px, 13svh, 148px);
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: start;
+  color: inherit;
+  cursor: pointer;
+  opacity: 0.55;
+  transition:
+    opacity 0.5s ease-out,
+    transform 0.5s ease-out;
+}
+
+.chip__button:hover {
+  opacity: 0.85;
+}
+
+.chip[aria-current="true"] .chip__button,
+.chip__button[aria-pressed="true"] {
+  opacity: 1;
+  transform: translateY(-6px);
+}
+
+.chip__frame {
+  position: relative;
+  display: block;
   overflow: hidden;
-  background: var(--ground-raised);
+  aspect-ratio: 1 / 1;
+  border-radius: 14px;
+  background: #fbfaf9;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 8%, transparent);
+  transition: box-shadow 0.5s ease;
 }
 
-.lot__figure img {
+.chip[aria-current="true"] .chip__frame {
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--deep) 45%, transparent),
+    0 10px 24px -16px color-mix(in srgb, #3c2820 70%, transparent);
+}
+
+.chip__frame img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-/* No photograph yet? Show the grain of the paper instead of a grey box. */
-.lot__figure--empty {
-  background-image: repeating-linear-gradient(
-    -18deg,
-    color-mix(in srgb, var(--brass) 14%, transparent) 0 1px,
-    transparent 1px 9px
-  );
-}
-
-.lot__meta {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.75rem;
-  font-family: var(--face-util);
-  font-size: var(--step--1);
-  color: var(--brass);
-}
-
-.lot__status {
-  color: var(--verdigris);
-  letter-spacing: 0.06em;
+.chip__name {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 10px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: color-mix(in srgb, var(--rail-deep) 55%, transparent);
 }
 
-.lot__title {
+.chip[aria-current="true"] .chip__name {
+  color: var(--deep);
+}
+
+/* --- from the studio ------------------------------------------------------ */
+
+.studio,
+.how,
+.sets {
+  max-width: var(--frame);
+  margin-inline: auto;
+  padding: var(--section-top) var(--gutter) 0;
+  scroll-margin-top: 1.5rem;
+}
+
+.pieces {
+  display: grid;
+  gap: clamp(2.5rem, 5vw, 3.5rem) 2rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 48rem) {
+  .pieces {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.piece {
+  margin: 0;
+}
+
+.piece__figure {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+  aspect-ratio: 3 / 4;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--ink) 4%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 8%, transparent);
+}
+
+.piece__figure img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.piece__title {
+  margin: 1.25rem 0 0;
+  font-family: var(--face-display);
+  font-size: var(--step-2);
+  font-weight: 400;
+  line-height: 1.3;
+}
+
+.piece__finish {
   margin: 0.5rem 0 0;
-  font-size: var(--step-1);
-  font-weight: 600;
-  line-height: 1.2;
-  letter-spacing: -0.01em;
+  font-size: var(--step--2);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--piece-deep, var(--ink)) 75%, transparent);
 }
 
-.lot__blurb {
-  margin: 0.5rem 0 1.25rem;
-  font-size: 0.9375rem;
-  color: var(--ahar-dim);
+.piece__note {
+  margin: 0.75rem 0 0;
+  max-width: 24rem;
+  color: color-mix(in srgb, var(--ink) 65%, transparent);
 }
 
-.lot__price {
-  margin-top: auto;
-  padding-top: 0.9rem;
-  border-top: var(--rule);
-  font-family: var(--face-util);
-  font-size: var(--step--1);
-}
+/* --- how a set goes on ---------------------------------------------------- */
 
-/* --- the cut (paper, not lacquer) ---------------------------------------- */
-
-.craft {
-  padding: clamp(3.5rem, 8vw, 6.5rem) var(--gutter);
-  background: var(--ahar);
-  color: var(--ground);
-}
-
-.craft .eyebrow {
-  color: var(--lac-red);
+.how__title {
+  margin: 1.25rem 0 0;
+  max-width: 42rem;
+  font-family: var(--face-display);
+  font-size: var(--step-3);
+  font-weight: 400;
+  line-height: 1.02;
 }
 
 .steps {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
-  gap: clamp(1.5rem, 4vw, 3rem);
-  margin: 0;
+  gap: 2.5rem 2rem;
+  margin: clamp(3rem, 6vw, 4.5rem) 0 0;
   padding: 0;
   list-style: none;
   counter-reset: step;
 }
 
-.step {
-  counter-increment: step;
-  padding-top: 1rem;
-  border-top: 2px solid var(--lac-red);
+@media (min-width: 40rem) {
+  .steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
+@media (min-width: 64rem) {
+  .steps {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.step {
+  counter-increment: step;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--line);
+}
+
+/* The number is drawn rather than typed, so a step added in the CMS numbers
+   itself. Italiana's figures are the whole ornament here. */
 .step::before {
   content: counter(step, decimal-leading-zero);
   display: block;
-  margin-bottom: 0.6rem;
-  font-family: var(--face-util);
-  font-size: var(--step--1);
-  color: var(--lac-red);
+  font-family: var(--face-display);
+  font-size: 1.875rem;
+  line-height: 1;
+  color: color-mix(in srgb, var(--ink) 38%, transparent);
 }
 
 .step__title {
-  margin: 0 0 0.4rem;
-  font-family: var(--face-display);
+  margin: 0.75rem 0 0;
   font-size: var(--step-1);
-  font-weight: 700;
-  line-height: 1.2;
+  font-weight: 400;
+  line-height: 1.55;
 }
 
 .step__body {
+  margin: 0.5rem 0 0;
+  max-width: 20rem;
+  color: color-mix(in srgb, var(--ink) 68%, transparent);
+}
+
+/* --- the seven ------------------------------------------------------------ */
+
+.set-grid {
+  display: grid;
+  gap: 3.5rem 2rem;
   margin: 0;
-  color: color-mix(in srgb, var(--ground) 78%, var(--ahar));
-}
-
-/* --- questions ------------------------------------------------------------ */
-
-.questions {
-  padding: clamp(3.5rem, 8vw, 6.5rem) var(--gutter);
-  border-bottom: var(--rule);
-}
-
-.faq {
-  max-width: var(--measure);
-  border-top: var(--rule);
-}
-
-.faq details {
-  border-bottom: var(--rule);
-}
-
-.faq summary {
-  padding: 1.1rem 0;
-  font-size: var(--step-1);
-  font-weight: 600;
-  line-height: 1.3;
-  cursor: pointer;
+  padding: 0;
   list-style: none;
 }
 
-.faq summary::-webkit-details-marker {
-  display: none;
+@media (min-width: 40rem) {
+  .set-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
-.faq summary::after {
-  content: "+";
-  float: right;
-  margin-left: 1rem;
-  font-family: var(--face-util);
-  font-weight: 400;
-  color: var(--brass);
+@media (min-width: 64rem) {
+  .set-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
-.faq details[open] summary::after {
-  content: "\2212";
-}
-
-.faq p {
-  margin: 0 0 1.25rem;
-  max-width: 58ch;
-  color: var(--ahar-dim);
-}
-
-/* --- closer + colophon ---------------------------------------------------- */
-
-.closer {
-  padding: clamp(3.5rem, 8vw, 6.5rem) var(--gutter);
-}
-
-.closer__title {
-  max-width: 16ch;
+.set {
   margin: 0;
-  font-size: var(--step-2);
-  font-weight: 600;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
+  /* Each card carries its own tint; the fallback is the page ground, so a
+     set added in the CMS without one still looks deliberate. */
+  --tint: var(--wash);
+  --set-deep: var(--deep);
 }
 
-.colophon {
+/* Revealed on scroll, but only once JavaScript has said so. Without it the
+   cards are simply visible — which is also what a crawler and a printer see. */
+html.js .set:not(.is-revealed) {
+  opacity: 0;
+  transform: translateY(18px);
+}
+
+.set {
+  transition:
+    opacity 0.7s ease-out,
+    transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+.set__figure {
+  position: relative;
+  overflow: hidden;
+  margin: 0;
+  aspect-ratio: 1 / 1;
+  border-radius: 18px;
+  background: var(--tint);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 8%, transparent);
+}
+
+.set__figure img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* No photograph yet: the tint alone, brushed. */
+.set__figure--empty {
+  background-image: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--ink) 5%, transparent) 0 1px,
+    transparent 1px 9px
+  );
+}
+
+.set__head {
   display: flex;
-  flex-wrap: wrap;
   align-items: baseline;
-  gap: 1rem clamp(1.5rem, 5vw, 4rem);
-  padding: 2rem var(--gutter) 3rem;
-  border-top: var(--rule);
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1.25rem;
 }
 
-.colophon__ar {
+.set__name {
   margin: 0;
   font-family: var(--face-display);
-  font-size: 1.6rem;
-  color: var(--brass);
+  font-size: var(--step-2);
+  font-weight: 400;
+  line-height: 1.33;
+}
+
+.set__price {
+  margin: 0;
+  font-size: var(--step--2);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: color-mix(in srgb, var(--ink) 60%, transparent);
+}
+
+.set__finish {
+  margin: 0.5rem 0 0;
+  font-size: var(--step--2);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--set-deep) 75%, transparent);
+}
+
+.set__note {
+  margin: 0.9rem 0 0;
+  max-width: 24rem;
+  color: color-mix(in srgb, var(--ink) 72%, transparent);
+}
+
+.sets__closer {
+  display: flex;
+  justify-content: center;
+  margin: 0;
+  padding: clamp(3rem, 7vw, 5rem) 0 clamp(3.5rem, 8vw, 6rem);
+}
+
+.sets__closer .btn--solid {
+  background: var(--ink);
+}
+
+/* --- the waitlist --------------------------------------------------------- */
+
+.waitlist {
+  padding: 6rem var(--gutter);
+  border-top: 1px solid var(--line);
+  scroll-margin-top: 1.5rem;
+}
+
+@media (min-width: 40rem) {
+  .waitlist {
+    padding-block: 8rem;
+  }
+}
+
+.waitlist__inner {
+  display: grid;
+  gap: clamp(2rem, 5vw, 4rem);
+  align-items: start;
+  max-width: var(--measure);
+  margin-inline: auto;
+}
+
+@media (min-width: 64rem) {
+  .waitlist__inner {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.waitlist__title {
+  margin: 1.25rem 0 0;
+  font-family: var(--face-display);
+  font-size: var(--step-3);
+  font-weight: 400;
+  line-height: 1.02;
+}
+
+/* --- forms ---------------------------------------------------------------- */
+
+.notify {
+  margin: 0;
+}
+
+.notify__label {
+  margin: 0 0 0.75rem;
+  font-size: var(--step--2);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--ink) 55%, transparent);
+}
+
+.notify__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.notify__input {
+  flex: 1 1 15rem;
+  min-height: 44px;
+  padding-inline: 1.25rem;
+  border: 1px solid color-mix(in srgb, var(--ink) 25%, transparent);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--step-0);
+  transition: border-color 0.3s ease;
+}
+
+.notify__input::placeholder {
+  color: color-mix(in srgb, var(--ink) 40%, transparent);
+}
+
+.notify__input:focus-visible {
+  outline: none;
+  border-color: color-mix(in srgb, var(--ink) 70%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--rose) 18%, transparent);
+}
+
+/* The contact page and the account pages stack their fields instead. */
+.notify--stacked {
+  display: grid;
+  gap: 1rem;
+  max-width: 34rem;
+}
+
+.notify--stacked [data-form-fields] {
+  display: grid;
+  gap: 1rem;
+}
+
+.notify--stacked .notify__input {
+  flex: none;
+  width: 100%;
+  border-radius: 14px;
+  padding: 0.75rem 1.25rem;
+}
+
+.notify--stacked textarea.notify__input {
+  min-height: 8rem;
+  padding-block: 0.85rem;
+  resize: vertical;
+}
+
+.notify__input--locked {
+  background: color-mix(in srgb, var(--ink) 5%, transparent);
+  color: color-mix(in srgb, var(--ink) 60%, transparent);
+}
+
+.notify__note {
+  margin: 0.9rem 0 0;
+  font-size: var(--step--1);
+  color: color-mix(in srgb, var(--ink) 55%, transparent);
+}
+
+.notify__status {
+  margin: 0.75rem 0 0;
+  font-size: var(--step--1);
+  color: var(--deep);
+}
+
+.notify__status[data-state="error"] {
+  color: var(--rose);
+}
+
+.waitlist__note {
+  margin: 0 0 1.75rem;
+  max-width: 28rem;
+  color: color-mix(in srgb, var(--ink) 70%, transparent);
+}
+
+.waitlist .notify {
+  max-width: 28rem;
+}
+
+.waitlist .notify__input {
+  flex: 1 1 16rem;
+}
+
+.waitlist .btn--solid {
+  background: var(--ink);
+}
+
+/* On a phone the field takes the whole line and the button sits under it —
+   side by side there would leave neither of them a usable width. */
+@media (max-width: 39.99rem) {
+  .notify__row {
+    flex-direction: column;
+  }
+
+  .notify__row .notify__input,
+  .notify__row .btn,
+  .notify__row .btn--solid {
+    flex: none;
+    width: 100%;
+  }
+}
+
+/* --- the footer ----------------------------------------------------------- */
+
+.colophon {
+  padding: 2.5rem var(--gutter);
+  border-top: 1px solid var(--line);
+}
+
+/* The hairline runs the full width of the window; the words inside it stop at
+   the measure. */
+.colophon__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem 2rem;
+  max-width: var(--measure);
+  margin-inline: auto;
 }
 
 .colophon__note {
   margin: 0;
-  max-width: 34ch;
-  font-size: var(--step--1);
-  color: var(--ahar-dim);
+  font-size: var(--step--2);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--ink) 52%, transparent);
 }
 
 .colophon__links {
@@ -673,84 +1268,170 @@ html.js .lot:not(.is-revealed) {
   flex-wrap: wrap;
   gap: 1.25rem;
   margin: 0;
-  margin-inline-start: auto;
   padding: 0;
   list-style: none;
-  font-family: var(--face-util);
-  font-size: var(--step--1);
+  font-size: var(--step--2);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
 }
 
 .colophon__links a {
-  text-decoration: none;
-  border-bottom: 1px solid color-mix(in srgb, var(--brass) 60%, transparent);
+  color: color-mix(in srgb, var(--ink) 55%, transparent);
+  transition: color 0.3s ease;
 }
 
 .colophon__links a:hover {
-  color: var(--brass);
+  color: var(--rose);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
+/* --- the mobile dock ------------------------------------------------------ */
 
-  .wordmark__ar,
-  .wordmark__nib {
-    animation: none;
-  }
+/* A small floating bar that arrives once the hero is behind you, and only on
+   the screens where the ribbon's names are too small to aim at. */
+.dock {
+  position: fixed;
+  inset-inline: 0;
+  bottom: calc(14px + env(safe-area-inset-bottom));
+  z-index: 40;
+  display: flex;
+  justify-content: center;
+  padding-inline: 16px;
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(150%) scale(0.94);
+  transition:
+    opacity 0.34s ease,
+    transform 0.64s cubic-bezier(0.34, 1.46, 0.5, 1),
+    visibility 0s linear 0.64s;
+}
 
-  .wordmark__nib {
+.dock.is-shown {
+  visibility: visible;
+  opacity: 1;
+  transform: none;
+  transition-delay: 0s, 0s, 0s;
+}
+
+.dock__shell {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: 100%;
+  max-width: 340px;
+  padding: 5px;
+  border-radius: 27px;
+  background: color-mix(in srgb, #fffaf7 78%, transparent);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  backdrop-filter: blur(16px) saturate(1.4);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--ink) 9%, transparent),
+    inset 0 1px rgba(255, 255, 255, 0.8),
+    0 18px 34px -20px color-mix(in srgb, #3c2820 55%, transparent);
+  pointer-events: auto;
+}
+
+/* The plate is a nail: a rounded tip, a gloss down one side, and it slides
+   under whichever section you are reading. */
+.dock__plate {
+  position: absolute;
+  top: 5px;
+  bottom: 5px;
+  left: 5px;
+  width: calc(33.3333% - 3.3333px);
+  border-radius: 21px 21px 16px 16px;
+  background: linear-gradient(170deg, #fdf0ee 0%, #f6dedb 62%, #f0d2ce 100%);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--rose) 15%, transparent),
+    0 6px 14px -9px color-mix(in srgb, var(--rose) 75%, transparent);
+  transform: translateX(calc(var(--i, 0) * 100%));
+  transition: transform 0.62s cubic-bezier(0.34, 1.42, 0.5, 1);
+}
+
+.dock__gloss {
+  position: absolute;
+  top: 5px;
+  left: 10px;
+  width: 8px;
+  height: 62%;
+  border-radius: 999px;
+  background: linear-gradient(rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.15) 62%, transparent);
+  filter: blur(0.4px);
+  transform: rotate(13deg);
+}
+
+.dock__grain {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  opacity: 0.26;
+}
+
+.dock__link {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 54px;
+  border-radius: 20px;
+  color: color-mix(in srgb, var(--ink) 52%, transparent);
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    color 0.38s ease,
+    transform 0.32s cubic-bezier(0.34, 1.5, 0.5, 1);
+}
+
+.dock__link[aria-current] {
+  color: var(--rose);
+}
+
+.dock__link:active {
+  transform: scale(0.93);
+}
+
+.dock__link:focus-visible {
+  outline: 2px solid var(--rose);
+  outline-offset: -2px;
+}
+
+.dock__icon svg {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+
+.dock__label {
+  font-size: 9px;
+  line-height: 1;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+/* Room under the last section so the dock never covers the footer's links. */
+.dock-gap {
+  margin-bottom: calc(84px + env(safe-area-inset-bottom));
+}
+
+@media (min-width: 48rem) {
+  .dock {
     display: none;
   }
 
-  .lot {
-    opacity: 1;
-    transform: none;
-    transition: none;
+  .dock-gap {
+    margin-bottom: 0;
   }
 }
 
-/* --- account ---------------------------------------------------------------
-   Hand-written here rather than in page.css, which the builder rewrites on
-   every save.
+/* --- account, sign-in, sign-up -------------------------------------------- */
 
-   The page has exactly two doors — someone new and someone returning — and the
-   workshop already has a word for one thing split into two. "One press splits
-   the nib down the centre. It has to stop exactly where the shoulder ends."
-   So the two cards are divided by a hairline that fades out at both ends
-   rather than a full-height rule. That is the only ornament on the page.
-
-   Field labels take the mono face the eyebrows use, which on this site reads
-   as workshop labelling — a lot number on a bottle — rather than as form
-   chrome. */
-
-.account {
-  max-width: 54rem;
-  margin: 0 auto;
-  padding-block: clamp(3rem, 8vw, 6rem) clamp(4rem, 10vw, 8rem);
-  padding-inline: var(--gutter);
-}
-
-.account .section-head {
-  margin-bottom: clamp(2rem, 5vw, 3.25rem);
-}
-
-.account__pair {
-  position: relative;
-  display: grid;
-  gap: clamp(2rem, 5vw, 3.5rem);
-}
-
-/* Which half of the page is drawn comes from an attribute on <html>, set
-   before first paint, rather than from script reaching in once the session
-   check has come back. That ordering is the difference between a page that
-   arrives correct and one that corrects itself in front of you.
-
-   Signed out is the default, so a browser with no JavaScript — which cannot
-   sign in anyway — gets a page that never moves. */
-/* Only ever hides. Setting `display` on the visible one would override
-   whatever it is — a block heading, a grid of two cards, an inline-flex button
-   in the masthead — and these rules have to work for all three. */
+/* Which half of the chrome is drawn is decided before the page paints, from
+   the hint the browser kept. These two rules are the whole mechanism — main.js
+   only corrects the hint once the server answers. */
 :root:not([data-account="in"]) [data-account-when="in"] {
   display: none;
 }
@@ -759,102 +1440,76 @@ html.js .lot:not(.is-revealed) {
   display: none;
 }
 
-/* The slit. Vertical between two columns, and simply turned when they stack —
-   the same cut, read the same way. */
-.account__pair::before {
-  position: absolute;
-  inset-inline: 0;
-  inset-block-start: calc(50% - 0.5px);
-  height: 1px;
-  content: "";
-  background: linear-gradient(
-    to right,
-    transparent,
-    color-mix(in srgb, var(--ahar) 22%, transparent) 18%,
-    color-mix(in srgb, var(--ahar) 22%, transparent) 82%,
-    transparent
-  );
+.account {
+  max-width: var(--measure);
+  margin-inline: auto;
+  padding: clamp(4rem, 9vw, 7rem) var(--gutter) clamp(4rem, 8vw, 6rem);
 }
 
-@media (min-width: 48rem) {
-  .account__pair {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .account__pair::before {
-    inset-block: 1.75rem;
-    inset-inline: auto;
-    inset-inline-start: 50%;
-    width: 1px;
-    height: auto;
-    background: linear-gradient(
-      to bottom,
-      transparent,
-      color-mix(in srgb, var(--ahar) 22%, transparent) 18%,
-      color-mix(in srgb, var(--ahar) 22%, transparent) 82%,
-      transparent
-    );
-  }
+.account .section-head {
+  max-width: 44rem;
 }
 
-.account__title {
-  margin: 0 0 1.5rem;
-  font-family: var(--face-util);
-  font-size: var(--step--1);
-  font-weight: 500;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--brass);
-}
-
-.account__field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  margin-bottom: 1.15rem;
-}
-
-.account__field label {
-  font-family: var(--face-util);
-  font-size: 0.7rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ahar-dim);
-}
-
-/* `.notify__input` carries `flex: 1 1 15rem` so it can share a line in the
-   notify row; stacked in a column that rule makes it grow to fill the height. */
-.account__field .notify__input {
-  flex: 0 0 auto;
-  width: 100%;
+.account--single .account__card {
+  max-width: 34rem;
 }
 
 .account__card {
-  padding: clamp(1.5rem, 4vw, 2rem);
-  background: var(--ground-raised);
-  border: var(--rule);
-  border-radius: 2px;
+  padding: clamp(1.5rem, 3vw, 2.25rem);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: color-mix(in srgb, #ffffff 45%, transparent);
 }
 
-/* Inside the pair the cards are the panel, not boxes on it — the slit already
-   separates them, and a border either side of it would say the same thing
-   twice. */
-.account__pair .account__card {
-  padding: 0;
-  background: none;
-  border: 0;
+.account__card + .account__card {
+  margin-top: 1.5rem;
 }
 
-.account__card .btn {
-  margin-top: 0.5rem;
+.account__card .btn,
+.account__card .btn--solid,
+.account__card .btn--ghost {
+  margin-top: 1.25rem;
+}
+
+.account__card--signed-in {
+  border-color: color-mix(in srgb, var(--deep) 30%, transparent);
+}
+
+.account__title {
+  margin: 0 0 1rem;
+  font-family: var(--face-display);
+  font-size: var(--step-2);
+  font-weight: 400;
+}
+
+.account__field {
+  display: grid;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.account__field label {
+  font-size: var(--step--2);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--ink) 55%, transparent);
+}
+
+.account__field .notify__input {
+  flex: 0 0 auto;
+  width: 100%;
+  border-radius: 14px;
+  padding: 0.75rem 1.25rem;
+}
+
+.account__field--locked label {
+  opacity: 0.65;
 }
 
 .account__status {
-  margin: 0.9rem 0 0;
-  font-family: var(--face-util);
-  font-size: 0.75rem;
-  line-height: 1.5;
-  color: var(--ahar-dim);
+  margin: 1rem 0 0;
+  font-size: var(--step--1);
+  color: var(--deep);
 }
 
 .account__status[hidden] {
@@ -862,141 +1517,144 @@ html.js .lot:not(.is-revealed) {
 }
 
 .account__status[data-error] {
-  color: color-mix(in srgb, var(--lac-red) 55%, var(--ahar));
+  color: var(--rose);
 }
 
 .account__note {
-  max-width: 34ch;
-  margin: 0.5rem 0 1.25rem;
+  margin: 0.75rem 0 0;
   font-size: var(--step--1);
-  color: var(--ahar-dim);
-}
-
-/* Signed in, the page is one quiet statement rather than a door. The brass
-   edge is the only place the accent lands. */
-.account__card--signed-in {
-  border-inline-start: 2px solid var(--brass);
-}
-
-/* One card rather than two, so it does not float in a half-empty grid. */
-.account--single {
-  max-width: 32rem;
-}
-
-.account--single .account__card {
-  padding: clamp(1.5rem, 4vw, 2rem);
-  background: var(--ground-raised);
-  border: var(--rule);
+  color: color-mix(in srgb, var(--ink) 55%, transparent);
 }
 
 .account .section-head__blurb a {
-  color: var(--brass);
+  color: var(--deep);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .account__who {
-  margin: 0;
-  font-size: var(--step-1);
+  font-family: var(--face-display);
+  font-size: var(--step-2);
 }
 
-/* The code is read off a phone and typed in one go, so it is set large and
-   spaced — the same mono face the labels use. */
 .account__code {
-  font-family: var(--face-util);
-  font-size: 1.5rem;
-  letter-spacing: 0.4em;
-  text-align: center;
+  letter-spacing: 0.35em;
+  font-variant-numeric: tabular-nums;
 }
 
-.account__card [data-account-step] .btn + .btn {
-  margin-inline-start: 0.5rem;
+.account__card [data-account-step] .btn + .btn,
+.account__card [data-account-step] .btn--solid + .btn--ghost,
+.account__card [data-account-step] .btn--ghost + .btn--solid {
+  margin-inline-start: 0.75rem;
 }
 
-/* The second door on the sign-in page, kept quieter than the first: a code
-   always works, a passkey only works on a device that has one. */
 .account__aside {
-  padding-top: 1.25rem;
   margin-top: 1.5rem;
-  border-top: var(--rule);
 }
 
 .account__or {
-  margin: 0 0 1rem;
-  font-family: var(--face-util);
-  font-size: 0.7rem;
-  letter-spacing: 0.14em;
+  margin: 1.5rem 0;
+  font-size: var(--step--2);
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--ahar-dim);
-  text-align: center;
+  color: color-mix(in srgb, var(--ink) 45%, transparent);
 }
 
 .account__actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
 }
 
-/* One row per registered device. Quiet, because the list is a record rather
-   than a control panel — the only thing to do with it is take one away. */
 .passkeys {
-  margin-block: 1.25rem;
+  margin-top: 1rem;
 }
 
 .passkey {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
   align-items: center;
-  padding-block: 0.75rem;
-  border-top: var(--rule);
+  justify-content: space-between;
+  gap: 1rem;
+  padding-block: 0.85rem;
+  border-bottom: 1px solid var(--line);
 }
 
 .passkey:last-child {
-  border-bottom: var(--rule);
+  border-bottom: 0;
 }
 
 .passkey__text {
-  flex: 1 1 12rem;
   min-width: 0;
 }
 
 .passkey__name {
-  margin: 0;
-  font-size: var(--step-0);
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .passkey__when {
-  margin: 0;
-  font-family: var(--face-util);
-  font-size: 0.7rem;
-  letter-spacing: 0.06em;
-  color: var(--ahar-dim);
+  display: block;
+  font-size: var(--step--1);
+  color: color-mix(in srgb, var(--ink) 50%, transparent);
 }
 
 .passkey__remove {
-  padding-block: 0.35rem;
-  font-size: var(--step--1);
+  min-height: 36px;
+  padding-inline: 1rem;
+  font-size: 0.6875rem;
 }
 
 .passkey__remove[disabled] {
   opacity: 0.5;
+  cursor: not-allowed;
 }
 
-/* The account's own details, kept visually apart from the sign-in furniture
-   around it — this is the one part of the page the person is here to change. */
 .account__profiles {
-  padding-top: 1.25rem;
   margin-top: 1.5rem;
-  border-top: var(--rule);
 }
 
 .account__profile + .account__profile {
-  padding-top: 1.5rem;
   margin-top: 1.5rem;
-  border-top: var(--rule);
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--line);
 }
 
 .account__profile select,
 .account__profile textarea {
-  width: 100%;
+  font: inherit;
+}
+
+/* --- motion, when it is not wanted ---------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .ribbon__row,
+  .hero__title,
+  .hero__tagline {
+    animation: none;
+  }
+
+  .hero,
+  .hero__glow,
+  .hero__layer,
+  .btn,
+  .btn--solid,
+  .btn--ghost,
+  .dock,
+  .dock__plate,
+  .dock__link {
+    transition-duration: 1ms;
+  }
+
+  .set {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }

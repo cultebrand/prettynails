@@ -1,11 +1,11 @@
 /* ===========================================================================
-   Qalam & Ahar — runtime enhancement
+   Persinails Studio — runtime enhancement
    No build step, and nothing here is load-bearing for reading the page: the
    words and the catalog are baked into index.html (by hand or by the visual
    builder in /static-admin/builder.html). This script only
      1. refreshes the data-driven lists and the announcement bar from
         /content/*.json, so a CMS edit shows up without re-saving the page,
-     2. wires the sign-up form,
+     2. wires the waitlist form,
      3. adds the scroll-reveal motion.
    If a fetch fails — or JavaScript never runs — the baked-in page stands.
    Rendering logic lives in render.js (shared with the builder).
@@ -847,12 +847,209 @@
     });
   }
 
+  /* --- trying a set on ------------------------------------------------------
+     The hero is one photograph of a bare hand with every set laid over it. A
+     chip swaps which layer is showing and re-declares the panel's three
+     colours; nothing here is needed to read the page, and with JavaScript off
+     the hand simply keeps wearing set one. */
+
+  function applyHero(content) {
+    var panel = document.querySelector("[data-hero-panel]");
+    if (!panel) return;
+
+    var sets = get(content, "catalog.items");
+    var chips = Array.prototype.slice.call(panel.querySelectorAll(".chip"));
+    var layers = Array.prototype.slice.call(panel.querySelectorAll(".hero__layer"));
+    var rail = panel.querySelector(".tryon__rail");
+    if (!Array.isArray(sets) || !chips.length) return;
+
+    var slot = {};
+    panel.querySelectorAll("[data-hero]").forEach(function (node) {
+      slot[node.getAttribute("data-hero")] = node;
+    });
+
+    var total = String(sets.length).padStart(2, "0");
+    var current = -1;
+
+    function pad(n) {
+      return String(n).padStart(2, "0");
+    }
+
+    function wear(index, scrollIntoView) {
+      var set = sets[index];
+      if (!set || index === current) return;
+      current = index;
+
+      if (isFilled(set.wash)) panel.style.setProperty("--wash", set.wash);
+      if (isFilled(set.shade)) panel.style.setProperty("--shade", set.shade);
+      if (isFilled(set.deep)) panel.style.setProperty("--deep", set.deep);
+
+      // Re-keying the headline restarts its entrance, so the name arrives
+      // rather than swapping character for character.
+      if (slot.title) {
+        slot.title.textContent = set.title || "";
+        slot.title.style.animation = "none";
+        void slot.title.offsetWidth;
+        slot.title.style.animation = "";
+      }
+      if (slot.eyebrow) {
+        slot.eyebrow.textContent =
+          "Handmade press-on · Set " + pad(index + 1) + " of " + total;
+      }
+      if (slot.tagline) slot.tagline.textContent = set.tagline || "";
+      if (slot.finish) slot.finish.textContent = set.finish || "";
+      if (slot.shape) slot.shape.textContent = set.shape || "";
+      if (slot.price) slot.price.textContent = set.price || "";
+      if (slot.index) slot.index.textContent = pad(index + 1);
+      if (slot.total) slot.total.textContent = String(sets.length);
+
+      layers.forEach(function (layer, i) {
+        layer.classList.toggle("is-on", i === index);
+      });
+
+      chips.forEach(function (chip, i) {
+        var on = i === index;
+        chip.setAttribute("aria-current", on ? "true" : "false");
+        var button = chip.querySelector("button");
+        if (button) button.setAttribute("aria-pressed", on ? "true" : "false");
+      });
+
+      if (scrollIntoView && rail && chips[index]) {
+        var chip = chips[index];
+        rail.scrollTo({
+          left: chip.offsetLeft - (rail.clientWidth - chip.offsetWidth) / 2,
+          behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+            ? "auto"
+            : "smooth",
+        });
+      }
+    }
+
+    chips.forEach(function (chip, index) {
+      var button = chip.querySelector("button");
+      if (!button) return;
+      button.setAttribute("aria-pressed", index === 0 ? "true" : "false");
+      button.addEventListener("click", function () {
+        wear(index, true);
+      });
+    });
+
+    // Left and right walk the rail once a chip has focus.
+    if (rail) {
+      rail.addEventListener("keydown", function (event) {
+        var step = event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
+        if (!step) return;
+        event.preventDefault();
+        var next = (current + step + chips.length) % chips.length;
+        wear(next, true);
+        var button = chips[next].querySelector("button");
+        if (button) button.focus();
+      });
+    }
+
+    // A drag across the hand goes to the next set, which is how anyone holding
+    // a phone expects a stack of photographs to behave.
+    var stage = panel.querySelector(".hero__stage");
+    if (stage) {
+      var from = null;
+      stage.addEventListener("pointerdown", function (event) {
+        from = event.clientX;
+      });
+      stage.addEventListener("pointerup", function (event) {
+        if (from === null) return;
+        var moved = event.clientX - from;
+        from = null;
+        if (Math.abs(moved) < 44) return;
+        wear(
+          (current + (moved < 0 ? 1 : -1) + chips.length) % chips.length,
+          true
+        );
+      });
+    }
+
+    current = -1;
+    wear(0, false);
+  }
+
+  /* --- the mobile dock ------------------------------------------------------
+     Arrives once the hero is behind you, and marks whichever section is
+     closest to the top of the screen. */
+
+  function applyDock() {
+    var dock = document.querySelector(".dock");
+    if (!dock) return;
+
+    var links = Array.prototype.slice.call(dock.querySelectorAll(".dock__link"));
+    if (!links.length) return;
+
+    var pending = 0;
+
+    function update() {
+      pending = 0;
+      dock.classList.toggle("is-shown", window.scrollY > 140);
+
+      var line = window.innerHeight * 0.42;
+      var best = 0;
+      var nearest = -Infinity;
+
+      links.forEach(function (link, index) {
+        var id = link.getAttribute("data-dock-target");
+        if (!id) return;
+        var section = document.getElementById(id);
+        if (!section) return;
+        var top = section.getBoundingClientRect().top;
+        if (top <= line && top > nearest) {
+          nearest = top;
+          best = index;
+        }
+      });
+
+      dock.style.setProperty("--i", best);
+      links.forEach(function (link, index) {
+        if (index === best) link.setAttribute("aria-current", "location");
+        else link.removeAttribute("aria-current");
+      });
+    }
+
+    function schedule() {
+      if (!pending) pending = window.requestAnimationFrame(update);
+    }
+
+    update();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule, { passive: true });
+  }
+
+  /* --- the ribbon's height --------------------------------------------------
+     The masthead floats over the hero, which starts directly under the nail
+     ribbon. CSS guesses the ribbon's height from the nail size; once the
+     images have laid out, this replaces the guess with the measurement. */
+
+  function measureRibbon() {
+    var ribbon = document.querySelector(".ribbon--top");
+    if (!ribbon) return;
+
+    var set = function () {
+      var height = Math.round(ribbon.getBoundingClientRect().height);
+      if (height > 0) document.documentElement.style.setProperty("--ribbon-h", height + "px");
+    };
+
+    set();
+    window.addEventListener("resize", set, { passive: true });
+    if (document.readyState !== "complete") window.addEventListener("load", set);
+  }
+
   /* --- go ----------------------------------------------------------------- */
 
   // Content files are discovered from the bindings: site and pages always,
   // plus whatever roots the symbols' Content sources name (catalog.items ->
   // catalog.json, craft.steps -> craft.json, …). Adding a source-bound symbol
   // needs no change here.
+  // Chrome first: neither of these needs the content, and both decide where
+  // things sit on the screen — they should not wait on a network round trip.
+  measureRibbon();
+  applyDock();
+
   fetchJSON("symbols.json").then(function (manifest) {
     var symbolEntries = {};
     var roots = { site: true, pages: true };
@@ -876,12 +1073,13 @@
       window.PureRender.bindAll(document, content, { asset: asset });
       applyForms(content);
       applyAccounts(content);
+      applyHero(content);
 
-      var lots = document.querySelectorAll(".lot");
-      lots.forEach(function (node, index) {
-        node.style.setProperty("--reveal-delay", index * 70 + "ms");
+      var cards = document.querySelectorAll(".set");
+      cards.forEach(function (node, index) {
+        node.style.setProperty("--reveal-delay", (index % 3) * 70 + "ms");
       });
-      reveal(lots);
+      reveal(cards);
     });
   });
 })();

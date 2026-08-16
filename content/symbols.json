@@ -1,37 +1,61 @@
 {
   "symbols": [
     {
-      "id": "how-its-made",
-      "name": "How it is made",
-      "binding": {
-        "type": "none"
-      },
-      "source": "craft.steps"
-    },
-    {
-      "id": "lot-one",
-      "name": "Lot One grid",
+      "id": "try-on",
+      "name": "Try-on rail",
       "binding": {
         "type": "none"
       },
       "source": "catalog.items"
     },
     {
-      "id": "opening-notice-form",
-      "name": "Opening notice form",
-      "binding": {
-        "type": "form",
-        "form": "opening-notice",
-        "success_note": "You are on the list. Watch your inbox."
-      }
-    },
-    {
-      "id": "questions",
-      "name": "Questions",
+      "id": "studio",
+      "name": "From the studio",
       "binding": {
         "type": "none"
       },
-      "source": "questions.items"
+      "source": "studio.items"
+    },
+    {
+      "id": "how-its-made",
+      "name": "How a set goes on",
+      "binding": {
+        "type": "none"
+      },
+      "source": "craft.steps"
+    },
+    {
+      "id": "sets",
+      "name": "The seven — set grid",
+      "binding": {
+        "type": "none"
+      },
+      "source": "catalog.items"
+    },
+    {
+      "id": "waitlist-form",
+      "name": "Waitlist form",
+      "binding": {
+        "type": "form",
+        "form": "waitlist",
+        "success_note": "You are on the list. We will write once, when the sets are ready."
+      }
+    },
+    {
+      "id": "contact-panel",
+      "name": "Contact panel",
+      "binding": {
+        "type": "none"
+      }
+    },
+    {
+      "id": "contact-form",
+      "name": "Contact form",
+      "binding": {
+        "type": "form",
+        "form": "contact",
+        "success_note": "Thank you — it is with the studio."
+      }
     },
     {
       "id": "site-header",

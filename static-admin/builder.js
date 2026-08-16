@@ -1,5 +1,5 @@
 /* ===========================================================================
-   Qalam & Ahar — visual page builder
+   Persinails Studio — visual page builder
    GrapesJS (pinned from a CDN, like Sveltia) composing the real site.
    No build step anywhere; this file is the whole integration.
 
@@ -54,7 +54,7 @@
   var TOKEN_KEY = "pure-builder.github-token";
   var SVELTIA_USER_KEY = "sveltia-cms.user";
   var FONTS_URL =
-    "https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:wght@400..700&display=swap";
+    "https://fonts.googleapis.com/css2?family=Italiana&family=Jost:wght@300..600&display=swap";
   var PAGE_CSS_HEADER =
     "/* Written by the visual builder (static-admin/builder.html).\n" +
     "   Hand edits here are overwritten on the next builder save — put\n" +
@@ -72,7 +72,7 @@
 
   var state = {
     editor: null,
-    content: null, // { site, landing, catalog, pages }
+    content: null, // { site, catalog, craft, studio, pages }
     pages: [], // declared pages from content/pages.json
     symbols: [], // symbol registry from content/symbols.json
     newSymbolIds: [], // registry rows minted in this session ("Make reusable")

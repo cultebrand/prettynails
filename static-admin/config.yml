@@ -6,10 +6,14 @@
 #
 # The split between this CMS and the visual builder (/static-admin/builder.html):
 # the CMS edits DATA — lists and settings that render the same way every
-# time (catalog items, steps, questions, links, the announcement). The words
-# and layout of the page itself are edited visually in the builder, which
-# owns index.html. Headings, the hero, and the page <head> are not here on
-# purpose.
+# time (the seven sets, the studio pieces, the steps, links, the
+# announcement). The words and layout of the page itself are edited visually
+# in the builder, which owns index.html. Headings and the page <head> are not
+# here on purpose.
+#
+# A set's three colours ARE data: the hero wears them when you try that set
+# on, and the card in "The seven" is tinted with them. They live on the item
+# so a new set arrives fully dressed without anyone touching a stylesheet.
 
 backend:
   name: github
@@ -38,83 +42,142 @@ collections:
     icon: description
     files:
       - name: craft
-        label: How a pen is cut
+        label: How a set goes on
         file: content/craft.json
         format: json
         description: >-
-          The three cuts. Rendered through the “How it is made” symbol's
-          drawn template (Symbols → How it is made).
+          The steps under “How a set goes on”. Rendered through that symbol's
+          drawn template (Symbols → How a set goes on).
         fields:
           - label: Steps
             name: steps
             widget: list
             label_singular: Step
             summary: "{{fields.title}}"
-            hint: Numbered on the page in this order.
+            hint: Numbered on the page in this order — the numbers draw themselves.
             fields:
               - { label: Title, name: title, widget: string }
               - { label: Body, name: body, widget: text }
 
-      - name: questions
-        label: Questions
-        file: content/questions.json
+      - name: studio
+        label: From the studio
+        file: content/studio.json
         format: json
         description: >-
-          The questions and answers. Rendered through the “Questions” symbol's
-          drawn template (Symbols → Questions).
+          The pieces shown under “From the studio” — flat-lays rather than
+          sets on a hand. Rendered through the “From the studio” symbol.
         fields:
-          - label: Questions
+          - label: Pieces
             name: items
             widget: list
-            label_singular: Question
+            label_singular: Piece
             summary: "{{fields.title}}"
             fields:
-              - { label: Question, name: title, widget: string }
-              - { label: Answer, name: body, widget: text }
-
-      - name: catalog
-        label: Catalog
-        file: content/catalog.json
-        format: json
-        description: >-
-          The items shown in the Lot One grid, rendered through the “Lot One
-          grid” symbol's drawn template.
-        fields:
-          - label: Items
-            name: items
-            widget: list
-            label_singular: Item
-            summary: "{{fields.lot}} — {{fields.title}}"
-            fields:
-              - { label: Lot number, name: lot, widget: string, hint: "Shown as “Lot 01”." }
-              - { label: Title, name: title, widget: string }
-              - { label: Description, name: blurb, widget: text, required: false }
-              - label: Price
-                name: price
+              - { label: Slug, name: slug, widget: string, required: false }
+              - { label: Name, name: title, widget: string }
+              - label: Finish
+                name: finish
                 widget: string
                 required: false
-                hint: Free text, so you can write “From 34” or “26 for 25 sheets”.
-              - label: Status
-                name: status
-                widget: select
+                hint: The small line under the name, e.g. “Sculpted florals · sage and blush”.
+              - { label: Description, name: blurb, widget: text, required: false }
+              - label: Ink
+                name: deep
+                widget: color
                 required: false
-                # The explicit empty option is load-bearing, not cosmetic: on an
-                # optional select with no empty-value option, Sveltia (<= 0.187)
-                # prepends one reactively and enters an infinite loop as soon as
-                # the field has a value, hanging the whole entry editor.
-                options:
-                  - { label: Not set, value: "" }
-                  - { label: Opens first, value: Opens first }
-                  - { label: Pre-order, value: Pre-order }
-                  - { label: 30 made, value: 30 made }
-                  - { label: 12 made, value: 12 made }
-                  - { label: Sold out, value: Sold out }
+                hint: The colour the finish line is set in. A hex value.
               - { label: Photograph, name: image, widget: image, required: false }
               - label: Photograph description
                 name: image_alt
                 widget: string
                 required: false
-                hint: Read aloud by screen readers. Describe the object, not the photo.
+                hint: Read aloud by screen readers. Describe the nails, not the photo.
+
+      - name: catalog
+        label: The seven
+        file: content/catalog.json
+        format: json
+        description: >-
+          Every set the studio makes. One entry feeds three places at once: the
+          hand in the hero, the rail you swipe, and the card in “The seven”.
+        fields:
+          - label: Sets
+            name: items
+            widget: list
+            label_singular: Set
+            summary: "{{fields.title}} — {{fields.price}}"
+            hint: The order here is the order they are numbered and shown in.
+            fields:
+              - label: Slug
+                name: slug
+                widget: string
+                required: false
+                pattern: ["^[a-z0-9-]*$", "Lowercase letters, digits and dashes only"]
+                hint: A stable handle, e.g. lily-blanc. Not shown on the page.
+              - { label: Name, name: title, widget: string }
+              - label: Tagline
+                name: tagline
+                widget: string
+                required: false
+                hint: The line under the name in the hero, e.g. “Milk glaze, hand-drawn lily”.
+              - { label: Description, name: blurb, widget: text, required: false }
+              - label: Finish
+                name: finish
+                widget: string
+                required: false
+                hint: e.g. Glazed milk, Aurora pearl, Mirror chrome.
+              - label: Shape
+                name: shape
+                widget: string
+                required: false
+                hint: e.g. “Almond · Medium”.
+              - label: Price
+                name: price
+                widget: string
+                required: false
+                hint: Free text, so you can write “kr 420” or “from kr 420”.
+
+              # The three colours the set wears. The hero cross-fades to them
+              # when someone tries the set on, and the card in “The seven” is
+              # tinted with the first two.
+              - label: Panel colour
+                name: wash
+                widget: color
+                required: false
+                hint: The pale ground behind the hand, and the card's tint.
+              - label: Glow
+                name: shade
+                widget: color
+                required: false
+                hint: The colour thrown across the top right of the hero.
+              - label: Ink
+                name: deep
+                widget: color
+                required: false
+                hint: The set's name, its labels, and the solid button.
+
+              - label: Photograph
+                name: image
+                widget: image
+                required: false
+                hint: A square close-up. Used on the card and in the rail.
+              - label: Photograph description
+                name: image_alt
+                widget: string
+                required: false
+                hint: Read aloud by screen readers. Describe the nails, not the photo.
+              - label: On the hand
+                name: hand
+                widget: image
+                required: false
+                hint: >-
+                  The same hand wearing this set, shot from the same place as
+                  every other — it is laid over the bare hand in the hero, so
+                  anything that moves shows as a jump.
+              - label: On the hand — description
+                name: hand_alt
+                widget: string
+                required: false
 
   # Pages and Symbols are where things are CREATED and BOUND: Sveltia owns
   # what a page or symbol IS (slug, title, backend binding); the visual
@@ -228,7 +291,7 @@ collections:
             required: false
             hint: >-
               Only used when type is Form: the form's slug in admin-cms.json,
-              e.g. opening-notice.
+              e.g. waitlist.
           - label: Message after submitting
             name: success_note
             widget: string
@@ -247,7 +310,7 @@ collections:
         required: false
         hint: >-
           Renders another collection's items through this symbol's template —
-          e.g. catalog.items for the Lot One grid. Leave empty to use the
+          e.g. catalog.items for the grid in “The seven”. Leave empty to use the
           Content items below.
       - label: Content items
         name: items
@@ -298,7 +361,7 @@ collections:
                 name: form
                 widget: string
                 required: false
-                hint: The form's slug in the backend admin, e.g. opening-notice.
+                hint: The form's slug in the backend admin, e.g. waitlist.
           - label: Contact
             name: contact
             widget: object
