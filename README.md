@@ -10,7 +10,7 @@
 >   hostname once your custom domain is set up.
 
 
-A landing page for **Persinails Studio** — handmade press-on nails, Copenhagen —
+A pre-launch site for **MyNails** — handmade press-on nails, Copenhagen —
 whose shop has not opened yet. Pure HTML and CSS: no build step, no dependencies
 to install, and the page reads complete with JavaScript turned off. JS only adds
 motion and live niceties. Two editors commit straight back to this repository,
@@ -42,6 +42,39 @@ set, shot from the same place as every other one — it is laid over
 `hand-bare.webp` in the hero and cross-faded, so anything that moves between
 shots shows up as a jump.
 
+## The pages
+
+```
+/                  the landing page — try every set on one hand
+/shop              all seven sets
+/sets/<slug>       one page per set: the story, the specs, prev/next
+/about             how the sets are made and why the runs are small
+/guide             sizing, applying, wearing, removing, keeping
+/faq               the questions, and the FAQ structured data
+/contact           write to the studio
+/privacy /terms    GDPR notice and the consumer terms
+/404.html          served by GitHub Pages for anything else
+/login /signup /account
+```
+
+Everything above `/login` is public and in `sitemap.xml`; the account pages are
+excluded there and in `robots.txt`.
+
+### tools/pages.mjs
+
+The shop, the seven set pages, about, the guide, the FAQ, the legal pages and
+the 404 are **generated** — one template, so their `<head>`, masthead and footer
+cannot drift apart. It is not a build step: the output is committed and the site
+is served exactly as it sits on disk. Run it by hand after editing
+`content/catalog.json` or `content/faq.json`:
+
+```sh
+node tools/pages.mjs      # rewrites those pages and sitemap.xml
+```
+
+It never touches `index.html`, `contact.html`, `login.html`, `signup.html` or
+`account.html` — those have hand-written bodies and belong to the builder.
+
 ## Layout
 
 ```
@@ -56,6 +89,7 @@ content/pages.json          baked manifest of the pages (builder artifact)
 content/symbols.json        baked manifest of the symbols (builder artifact)
 content/page.grapes.json    the builder's project file — every page's drawing
 content/blocks.grapes.json  designer-saved starter blocks
+content/faq.json           the questions on /faq            -> CMS "FAQ"
 content/site.json           announcement, contact, backend -> CMS "Settings"
 content/craft.json          how a set goes on              -> CMS "How a set goes on"
 content/studio.json         the two studio flat-lays       -> CMS "From the studio"

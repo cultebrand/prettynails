@@ -1,0 +1,9 @@
+{
+  "slug": "faq",
+  "title": "Frequently asked questions — MyNails",
+  "description": "How long a set lasts, whether it will fit, whether press-ons damage your nails, reuse, shipping and custom work.",
+  "access": "public",
+  "redirect_to": "",
+  "nav_label": "FAQ",
+  "nav_order": 40
+}

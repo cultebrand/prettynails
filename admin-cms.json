@@ -2,8 +2,8 @@
   "$schema": "./admin-cms.schema.json",
   "version": 2,
   "project": {
-    "name": "Persinails Studio",
-    "slug": "persinails"
+    "name": "MyNails",
+    "slug": "mynails"
   },
   "forms": [
     {

@@ -5,15 +5,31 @@
     "form": "waitlist"
   },
   "contact": {
-    "email": "studio@persinails.example",
+    "email": "hello@put-on.com",
     "links": [
       {
-        "label": "Instagram",
-        "url": "https://instagram.com/persinails"
+        "label": "Shop",
+        "url": "/shop"
       },
       {
-        "label": "Write to the studio",
-        "url": "contact"
+        "label": "About",
+        "url": "/about"
+      },
+      {
+        "label": "Fit & care",
+        "url": "/guide"
+      },
+      {
+        "label": "FAQ",
+        "url": "/faq"
+      },
+      {
+        "label": "Contact",
+        "url": "/contact"
+      },
+      {
+        "label": "Instagram",
+        "url": ""
       }
     ]
   }

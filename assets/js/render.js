@@ -1,5 +1,5 @@
 /* ===========================================================================
-   Persinails Studio — shared content renderers
+   MyNails — shared content renderers
    One copy of the JSON -> HTML logic, used from two places:
      - assets/js/main.js   re-renders live in the visitor's browser
      - static-admin/builder.js    bakes the same markup into index.html at save time,
@@ -75,9 +75,19 @@
       var a = el(doc, "a", null, page.nav_label);
       // Extensionless: GitHub Pages serves account.html for /account, so the
       // file on disk keeps its extension and the address people see does not.
-      // Relative rather than root-relative, because the same site is served
-      // from a subpath on github.io before a custom domain is attached.
-      a.setAttribute("href", page.slug === "index" ? "./" : page.slug);
+      //
+      // Root-relative, because these pages no longer all sit at the same depth
+      // — a set's page is /sets/<slug>, and a bare "shop" drawn there would
+      // resolve to /sets/shop. The custom domain serves this site from the
+      // root, which is what makes a leading slash correct.
+      a.setAttribute("href", page.slug === "index" ? "/" : "/" + page.slug);
+      if (
+        doc.defaultView &&
+        doc.defaultView.location &&
+        doc.defaultView.location.pathname.replace(/\.html$/, "") === a.getAttribute("href")
+      ) {
+        a.setAttribute("aria-current", "page");
+      }
       container.appendChild(a);
     });
   }
@@ -120,6 +130,27 @@
         var value = item[slot.getAttribute("data-text").slice(5)];
         if (isFilled(value)) slot.textContent = value;
         else slot.remove();
+      });
+
+      // Link slots: data-href="/sets/{slug}" points an anchor at the item's
+      // own page. A pattern rather than a field, because the address is made
+      // of the item plus a path the item knows nothing about — and keeping the
+      // path in the drawing means the builder can change where a card goes
+      // without anyone editing this file. An item missing the field it names
+      // leaves the drawn href alone rather than linking to /sets/undefined.
+      var linked = Array.prototype.slice.call(clone.querySelectorAll("[data-href]"));
+      if (clone.hasAttribute && clone.hasAttribute("data-href")) linked.unshift(clone);
+      linked.forEach(function (host) {
+        var pattern = host.getAttribute("data-href");
+        var missing = false;
+        var href = pattern.replace(/\{([a-z0-9_]+)\}/gi, function (_, key) {
+          if (!isFilled(item[key])) {
+            missing = true;
+            return "";
+          }
+          return encodeURIComponent(item[key]);
+        });
+        if (!missing) host.setAttribute("href", href);
       });
 
       // Colour slots: data-vars="--tint:wash;--set-deep:deep" paints the item's

@@ -1,0 +1,9 @@
+{
+  "slug": "about",
+  "title": "About the studio — MyNails",
+  "description": "A one-person press-on nail studio in Copenhagen. How the sets are made, why they are made in small runs, and what that means for what you can buy.",
+  "access": "public",
+  "redirect_to": "",
+  "nav_label": "About",
+  "nav_order": 20
+}

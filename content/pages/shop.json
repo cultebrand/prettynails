@@ -1,0 +1,9 @@
+{
+  "slug": "shop",
+  "title": "Shop all seven sets — MyNails",
+  "description": "Seven handmade press-on nail sets, each in twelve sizes and reusable. Glazed milk, aurora pearl, satin marble, jelly gloss, mirror chrome and more.",
+  "access": "public",
+  "redirect_to": "",
+  "nav_label": "Shop",
+  "nav_order": 10
+}

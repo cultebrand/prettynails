@@ -1,6 +1,6 @@
 {
   "slug": "login",
-  "title": "Sign in — Persinails Studio",
+  "title": "Sign in — MyNails",
   "description": "Sign in to your account.",
   "access": "signed-out",
   "redirect_to": "account",

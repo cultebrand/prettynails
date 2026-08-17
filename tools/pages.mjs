@@ -1,0 +1,969 @@
+#!/usr/bin/env node
+/* ===========================================================================
+   MyNails — page scaffolder
+
+   NOT a build step. The site is served exactly as it sits on disk; nothing
+   here runs at deploy time and nothing here runs in a visitor's browser.
+
+   What it is: the one place the shared chrome (head, masthead, footer) is
+   written down, so the shop, the seven set pages, the guide, the FAQ and the
+   legal pages cannot drift apart from each other. Run it by hand after adding
+   a set to content/catalog.json or a question to content/faq.json:
+
+       node tools/pages.mjs
+
+   It rewrites only the pages it owns (listed in OWNED below) and never touches
+   index.html, contact.html, login.html, signup.html or account.html — those
+   have hand-written bodies and belong to the visual builder.
+   =========================================================================== */
+
+import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+const read = (p) => JSON.parse(readFileSync(join(ROOT, p), "utf8"));
+
+const site = read("content/site.json");
+const catalog = read("content/catalog.json");
+const faq = read("content/faq.json");
+const craft = read("content/craft.json");
+
+const BRAND = "MyNails";
+const ORIGIN = "https://put-on.com";
+const OG_IMAGE = "/media/uploads/og-mynails.png";
+const YEAR = 2026;
+
+/* --- escaping --------------------------------------------------------------
+   Every value below comes from content/*.json, which a non-technical editor
+   fills in through the CMS. It is therefore untrusted input to this file and
+   gets escaped on the way into markup — not because the editor is hostile, but
+   because an apostrophe in a product name should not be able to end an
+   attribute. */
+const esc = (s) =>
+  String(s ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+
+/** Prose from the CMS: blank lines become paragraphs. */
+const paras = (s) =>
+  String(s ?? "")
+    .split(/\n{2,}/)
+    .filter(Boolean)
+    .map((p) => `<p>${esc(p.trim())}</p>`)
+    .join("\n            ");
+
+/* --- long-form layout ------------------------------------------------------
+   A 62ch column of prose inside a 1400px frame leaves half the window empty.
+   The page's own sections go in that half instead, pinned while you read, so a
+   guide on a laptop behaves like a document rather than a scroll.
+
+   The list is built from the headings themselves, which is what keeps it from
+   drifting out of step with them: add an h2 to the copy below and it appears
+   in the rail on the next run, anchored, with no second list to update. Pages
+   with fewer than three headings do not get one — a rail listing two things is
+   furniture, not navigation. */
+const headingId = (s) =>
+  s
+    .replace(/<[^>]*>/g, "")
+    .toLowerCase()
+    .replace(/&amp;/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+
+function longform(body) {
+  const heads = [...body.matchAll(/<h2>([\s\S]*?)<\/h2>/g)].map((m) => m[1].trim());
+
+  if (heads.length < 3) {
+    return `        <div class="prose__body">\n${body}\n        </div>`;
+  }
+
+  let i = 0;
+  const anchored = body.replace(/<h2>/g, () => `<h2 id="${headingId(heads[i++])}">`);
+  const items = heads
+    .map(
+      (h) =>
+        `              <li><a href="#${headingId(h)}">${h.replace(/<[^>]*>/g, "")}</a></li>`,
+    )
+    .join("\n");
+
+  return `        <div class="prose__layout">
+          <div class="prose__body">
+${anchored}
+          </div>
+          <nav class="toc" aria-label="On this page">
+            <p class="toc__title">On this page</p>
+            <ol>
+${items}
+            </ol>
+          </nav>
+        </div>`;
+}
+
+/* --- the menu --------------------------------------------------------------
+   Root-absolute on purpose. These pages live at two depths (/shop and
+   /sets/amour) and the site is served from a domain root, so a relative href
+   would resolve differently depending on which page drew it. */
+const MENU = [
+  { href: "/shop", label: "Shop" },
+  { href: "/about", label: "About" },
+  { href: "/guide", label: "Fit &amp; care" },
+  { href: "/faq", label: "FAQ" },
+  { href: "/contact", label: "Contact" },
+];
+
+const ACCESS_SCRIPT = `      (function () {
+        var signedIn = false;
+        try {
+          signedIn = Boolean(localStorage.getItem("qa.account"));
+        } catch (error) {
+          /* private mode, or storage refused — treated as signed out */
+        }
+        if (signedIn) document.documentElement.dataset.account = "in";
+      })();`;
+
+function head({ title, description, path, jsonld = [], preload = [] }) {
+  const url = ORIGIN + path;
+  const preloads = preload
+    .map((p) => `    <link rel="preload" as="image" href="${esc(p)}" />\n`)
+    .join("");
+  const blocks = jsonld
+    .map(
+      (b) =>
+        `    <script type="application/ld+json">\n` +
+        JSON.stringify(b, null, 2)
+          .split("\n")
+          .map((l) => "      " + l)
+          .join("\n") +
+        `\n    </script>`,
+    )
+    .join("\n");
+
+  return `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="canonical" href="${esc(url)}" />
+
+    <!-- Generated by tools/pages.mjs. Edit the copy in content/*.json or in
+         the template there, then re-run it; hand edits here are overwritten. -->
+    <title>${esc(title)}</title>
+    <meta name="description" content="${esc(description)}" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="${BRAND}" />
+    <meta property="og:url" content="${esc(url)}" />
+    <meta property="og:title" content="${esc(title)}" />
+    <meta property="og:description" content="${esc(description)}" />
+    <meta property="og:image" content="${esc(ORIGIN + OG_IMAGE)}" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#f7f3ef" />
+
+    <link rel="icon" href="/media/uploads/apple-touch-icon-180x180.png" />
+    <link rel="apple-touch-icon" href="/media/uploads/apple-touch-icon-180x180.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Italiana&amp;family=Jost:wght@300..600&amp;display=swap"
+    />
+    <link rel="stylesheet" href="/assets/css/styles.css?v=18" />
+    <link rel="stylesheet" href="/assets/css/page.css?v=18" />
+${preloads}
+    <!-- Where content/ and media/ live. These pages are not all at the same
+         depth — a set's page is /sets/<slug> — so main.js is told the root
+         rather than guessing it from the current directory. -->
+    <meta name="site-root" content="/" />
+    <meta name="page-access" content="public" />
+    <meta name="page-redirect" content="" />
+${blocks}
+
+    <script>
+${ACCESS_SCRIPT}
+    </script>
+  </head>
+  <body>
+    <a href="#main" class="skip">Skip to content</a>
+    <aside aria-label="Announcement" data-when="site.announcement" class="banner" hidden>
+      <p data-text="site.announcement"></p>
+    </aside>
+`;
+}
+
+function masthead(current) {
+  const links = MENU.map(
+    (m) => `<a href="${m.href}"${m.href === current ? ' aria-current="page"' : ""}>${m.label}</a>`,
+  ).join("");
+  return `    <header data-symbol="site-header" class="masthead">
+      <a href="/" class="brand"><span class="brand__name">${BRAND}</span></a>
+      <nav aria-label="Pages" data-list="pages.pages" class="masthead__nav">${links}</nav>
+      <a href="/signup" class="btn btn--solid masthead__cta" data-account-when="out">Sign up</a>
+      <a href="/account" class="btn btn--ghost masthead__cta" data-account-when="in">Your account</a>
+    </header>
+
+    <main id="main">
+`;
+}
+
+function footer() {
+  const links = site.contact.links
+    .filter((l) => l.url && l.label)
+    .map((l) => {
+      const ext = /^https?:/.test(l.url);
+      return `          <li><a href="${esc(l.url)}"${ext ? ' rel="noopener" target="_blank"' : ""}>${esc(l.label)}</a></li>`;
+    })
+    .join("\n");
+
+  return `    </main>
+
+    <footer data-symbol="site-footer" class="colophon">
+      <div class="colophon__inner">
+        <a href="/" class="brand"><span class="brand__name">${BRAND}</span></a>
+        <ul data-list="site.contact.links" class="colophon__links">
+${links}
+        </ul>
+        <p class="colophon__note">Handmade in Copenhagen</p>
+      </div>
+      <div class="colophon__legal">
+        <p>&copy; ${YEAR} ${BRAND}. All rights reserved.</p>
+        <ul>
+          <li><a href="/privacy">Privacy</a></li>
+          <li><a href="/terms">Terms</a></li>
+        </ul>
+      </div>
+    </footer>
+
+    <script src="/assets/js/render.js?v=18"></script>
+    <script src="/assets/js/main.js?v=18"></script>
+  </body>
+</html>
+`;
+}
+
+const page = (meta, body) => head(meta) + masthead(meta.current) + body + footer();
+
+/* --- structured data ------------------------------------------------------ */
+
+const ORG = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: BRAND,
+  url: ORIGIN,
+  logo: ORIGIN + OG_IMAGE,
+  email: site.contact.email,
+  address: { "@type": "PostalAddress", addressLocality: "Copenhagen", addressCountry: "DK" },
+};
+
+const crumbs = (trail) => ({
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: trail.map((t, i) => ({
+    "@type": "ListItem",
+    position: i + 1,
+    name: t.name,
+    item: ORIGIN + t.href,
+  })),
+});
+
+/* --- shared blocks -------------------------------------------------------- */
+
+const setCard = (item) => `          <li class="set" style="--tint: ${esc(item.wash)}; --set-deep: ${esc(item.deep)}">
+            <a class="set__link" href="/sets/${esc(item.slug)}">
+              <figure class="set__figure">
+                <img src="${esc(item.image)}" alt="${esc(item.image_alt)}" loading="lazy" decoding="async" />
+              </figure>
+              <div class="set__head">
+                <h3 class="set__name">${esc(item.title)}</h3>
+                <p class="set__price">${esc(item.price)}</p>
+              </div>
+              <p class="set__finish">${esc(item.finish)}</p>
+              <p class="set__note">${esc(item.blurb)}</p>
+              <span class="set__more">View the set</span>
+            </a>
+          </li>`;
+
+const waitlistBlock = (heading, note) => `      <section id="waitlist" class="waitlist">
+        <div class="waitlist__inner">
+          <div>
+            <p class="eyebrow">The studio is not open yet</p>
+            <h2 class="waitlist__title">${esc(heading)}</h2>
+          </div>
+          <div>
+            <p class="waitlist__note">${esc(note)}</p>
+            <form
+              data-symbol="waitlist-form"
+              class="notify"
+              novalidate=""
+              data-form="waitlist"
+              data-success="You are on the list. We will write once, when the sets are ready."
+              method="post"
+              action="${esc(site.backend.url)}/api/f/waitlist"
+            >
+              <div class="notify__row">
+                <label class="visually-hidden" for="waitlist-email">Email address</label>
+                <input
+                  id="waitlist-email"
+                  class="notify__input"
+                  type="email"
+                  name="email"
+                  required=""
+                  autocomplete="email"
+                  placeholder="you@example.com"
+                />
+                <button type="submit" class="btn btn--solid">Join the waitlist</button>
+              </div>
+              <p role="status" aria-live="polite" class="notify__status"></p>
+            </form>
+          </div>
+        </div>
+      </section>
+`;
+
+/* --- the pages ------------------------------------------------------------ */
+
+const OWNED = {};
+
+/* Shop -------------------------------------------------------------------- */
+OWNED["shop.html"] = page(
+  {
+    title: `Shop all seven sets — ${BRAND}`,
+    description:
+      "Seven handmade press-on nail sets, each in twelve sizes and reusable. Glazed milk, aurora pearl, satin marble, jelly gloss, mirror chrome and more.",
+    path: "/shop",
+    current: "/shop",
+    jsonld: [
+      {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        name: "The seven sets",
+        itemListElement: catalog.items.map((item, i) => ({
+          "@type": "ListItem",
+          position: i + 1,
+          name: item.title,
+          url: `${ORIGIN}/sets/${item.slug}`,
+        })),
+      },
+      crumbs([
+        { name: "Home", href: "/" },
+        { name: "Shop", href: "/shop" },
+      ]),
+    ],
+  },
+  `      <section class="sets sets--page">
+        <header class="section-head">
+          <p class="eyebrow">Every set we make</p>
+          <h1 class="section-head__title">The seven</h1>
+          <p class="section-head__blurb">
+            Each set is ten nails on one idea, made in a small run and packed with twelve
+            sizes so it fits without a fitting. Nothing here is printed or bought in.
+          </p>
+        </header>
+        <ul class="set-grid">
+${catalog.items.map(setCard).join("\n")}
+        </ul>
+      </section>
+
+${waitlistBlock(
+  "Sets are made in small runs, and small runs go quickly.",
+  "Leave an address and we’ll write once — when the first seven sets are ready to order. Nothing else, ever.",
+)}`,
+);
+
+/* Set detail × 7 ----------------------------------------------------------- */
+catalog.items.forEach((item, index) => {
+  const prev = catalog.items[(index - 1 + catalog.items.length) % catalog.items.length];
+  const next = catalog.items[(index + 1) % catalog.items.length];
+
+  OWNED[`sets/${item.slug}.html`] = page(
+    {
+      title: `${item.title} — ${item.finish} press-on nails | ${BRAND}`,
+      description: item.blurb,
+      path: `/sets/${item.slug}`,
+      current: "/shop",
+      preload: [item.hand],
+      jsonld: [
+        {
+          "@context": "https://schema.org",
+          "@type": "Product",
+          name: item.title,
+          description: item.blurb,
+          image: [ORIGIN + item.image, ORIGIN + item.hand],
+          brand: { "@type": "Brand", name: BRAND },
+          material: item.finish,
+          offers: {
+            "@type": "Offer",
+            url: `${ORIGIN}/sets/${item.slug}`,
+            price: String(item.price).replace(/[^\d.]/g, ""),
+            priceCurrency: "DKK",
+            availability: "https://schema.org/PreOrder",
+          },
+        },
+        crumbs([
+          { name: "Home", href: "/" },
+          { name: "Shop", href: "/shop" },
+          { name: item.title, href: `/sets/${item.slug}` },
+        ]),
+      ],
+    },
+    `      <nav class="crumbs" aria-label="Breadcrumb">
+        <ol>
+          <li><a href="/">Home</a></li>
+          <li><a href="/shop">Shop</a></li>
+          <li aria-current="page">${esc(item.title)}</li>
+        </ol>
+      </nav>
+
+      <article class="detail" style="--wash: ${esc(item.wash)}; --shade: ${esc(item.shade)}; --deep: ${esc(item.deep)}">
+        <div class="detail__media">
+          <figure class="detail__hand">
+            <img
+              src="${esc(item.hand)}"
+              alt="${esc(item.hand_alt)}"
+              width="1200"
+              height="1579"
+              fetchpriority="high"
+              decoding="async"
+            />
+          </figure>
+          <figure class="detail__macro">
+            <img src="${esc(item.image)}" alt="${esc(item.image_alt)}" loading="lazy" decoding="async" />
+          </figure>
+        </div>
+
+        <div class="detail__lede">
+          <p class="eyebrow">Set ${String(index + 1).padStart(2, "0")} of ${String(catalog.items.length).padStart(2, "0")}</p>
+          <h1 class="detail__title">${esc(item.title)}</h1>
+          <p class="detail__tagline">${esc(item.tagline)}</p>
+
+          <dl class="specs">
+            <div><dt>Finish</dt><dd>${esc(item.finish)}</dd></div>
+            <div><dt>Shape</dt><dd>${esc(item.shape)}</dd></div>
+            <div><dt>Wear</dt><dd>${esc(item.wear)}</dd></div>
+            <div><dt>Price</dt><dd>${esc(item.price)}</dd></div>
+          </dl>
+
+          <div class="detail__body">
+            ${paras(item.story)}
+          </div>
+
+          <ul class="detail__includes">
+            <li>Ten hand-finished nails, plus two spares</li>
+            <li>Twelve sizes in the box — no fitting needed</li>
+            <li>Glue, adhesive tabs, a mini file and a cuticle stick</li>
+            <li>Reusable: soaked off gently, a set goes back on four or five times</li>
+          </ul>
+
+          <div class="detail__actions">
+            <a class="btn btn--solid" href="#waitlist">Join the waitlist</a>
+            <a class="btn btn--ghost" href="/guide">Read the fit guide</a>
+          </div>
+          <p class="detail__aside">
+            Not open for orders yet. The waitlist is one email, sent when this set is ready.
+          </p>
+        </div>
+      </article>
+
+      <nav class="pager" aria-label="Other sets">
+        <a class="pager__link pager__link--prev" href="/sets/${esc(prev.slug)}">
+          <span class="pager__dir">Previous</span>
+          <span class="pager__name">${esc(prev.title)}</span>
+        </a>
+        <a class="pager__all" href="/shop">All seven</a>
+        <a class="pager__link pager__link--next" href="/sets/${esc(next.slug)}">
+          <span class="pager__dir">Next</span>
+          <span class="pager__name">${esc(next.title)}</span>
+        </a>
+      </nav>
+
+${waitlistBlock(
+  `${item.title} is made in small runs, and small runs go quickly.`,
+  "Leave an address and we’ll write once — when this set is ready to order. Nothing else, ever.",
+)}`,
+  );
+});
+
+/* About -------------------------------------------------------------------- */
+OWNED["about.html"] = page(
+  {
+    title: `About the studio — ${BRAND}`,
+    description:
+      "A one-person press-on nail studio in Copenhagen. How the sets are made, why they are made in small runs, and what that means for what you can buy.",
+    path: "/about",
+    current: "/about",
+    jsonld: [
+      ORG,
+      crumbs([
+        { name: "Home", href: "/" },
+        { name: "About", href: "/about" },
+      ]),
+    ],
+  },
+  `      <section class="prose">
+        <header class="section-head">
+          <p class="eyebrow">About</p>
+          <h1 class="section-head__title">A small studio in Copenhagen</h1>
+        </header>
+
+${longform(`          <p class="prose__lede">
+            Every set on this site was made by hand, one nail at a time, at a desk in
+            Copenhagen. There is no factory behind this and no third party finishing the
+            work. That is the whole reason the runs are small.
+          </p>
+
+          <p>
+            The studio started because salon appointments are three hours long and the
+            result lasts three weeks. Press-ons undo that arithmetic: the three hours
+            happen once, here, and afterwards the same set goes on in ten minutes and
+            comes off without damage when you have had enough of it.
+          </p>
+
+          <h2>How a set is actually made</h2>
+          <p>
+            A set begins as ten bare tips in the sizes that box will hold. The base goes
+            on in thin coats and is cured between each one. Anything sculpted — a bow, a
+            flower, a heart — is built in passes rather than in one lump, because gel
+            that goes on thick slumps before it sets and loses its edges.
+          </p>
+          <p>
+            Detail work is painted with a liner brush under a lamp. The top coat goes on
+            last and is the only step that cannot be corrected: a dust speck under it
+            stays there for the life of the set, which is why a nail is more often
+            started again than fixed.
+          </p>
+          <p>
+            A simple set is about four hours. Amour, where every nail is a different
+            picture, is closer to fourteen.
+          </p>
+
+          <h2>Why the runs are small</h2>
+          <p>
+            Because one person is making them. A run is however many sets can be
+            finished properly between one opening and the next, and when they are gone
+            they are gone until the next run. We would rather sell out than send out
+            something rushed.
+          </p>
+
+          <h2>What this means for you</h2>
+          <p>
+            Two things. Sets sell quickly, so the waitlist is worth being on — it is one
+            email, sent when a run is ready. And no two sets are truly identical: the
+            marble in Matcha Latte drags differently every time, and the orchid in
+            Orchid Veil is painted freehand twice. If you need ten nails that match each
+            other exactly, this is not the right studio.
+          </p>
+
+          <h2>Materials</h2>
+          <p>
+            Soak-off gel, cured under UV. No MMA. The tips are recyclable ABS. Nothing
+            is tested on animals, and nothing in a box needs a salon to remove it.
+          </p>`)}
+
+        <aside class="prose__cta">
+          <p>Questions the FAQ does not answer, or a custom set in mind?</p>
+          <a class="btn btn--solid" href="/contact">Write to the studio</a>
+        </aside>
+      </section>
+`,
+);
+
+/* Fit & care --------------------------------------------------------------- */
+OWNED["guide.html"] = page(
+  {
+    title: `Fit &amp; care — how to apply, wear and remove | ${BRAND}`,
+    description:
+      "How to size a set, apply it so it lasts, look after it while you wear it, and take it off without damaging your own nails.",
+    path: "/guide",
+    current: "/guide",
+    jsonld: [
+      {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        name: "How to apply a press-on nail set",
+        totalTime: "PT10M",
+        step: craft.steps.map((s, i) => ({
+          "@type": "HowToStep",
+          position: i + 1,
+          name: s.title,
+          text: s.body,
+        })),
+      },
+      crumbs([
+        { name: "Home", href: "/" },
+        { name: "Fit & care", href: "/guide" },
+      ]),
+    ],
+  },
+  `      <section class="prose">
+        <header class="section-head">
+          <p class="eyebrow">Fit &amp; care</p>
+          <h1 class="section-head__title">Ten minutes on, three weeks worn</h1>
+          <p class="section-head__blurb">
+            Most sets that fail early fail for one of two reasons: the nail was the wrong
+            size, or the natural nail was not dry when the glue went on. Both take a
+            minute to get right.
+          </p>
+        </header>
+
+${longform(`          <h2>Sizing</h2>
+          <p>
+            Twelve sizes come in every box, which covers most hands without a sizing kit.
+            Lay all ten out and match each one dry before any glue is opened.
+          </p>
+          <p>
+            A nail fits when it meets both sidewalls without pressing into them and stops
+            just short of the cuticle. If a nail sits between two sizes, take the larger
+            and file the sides down — a nail that is too narrow lifts at the corners
+            within a day.
+          </p>
+
+          <h2>Preparing your own nails</h2>
+          <p>
+            Cut short, file flat, and push the cuticle back. Buff the surface just enough
+            to take the shine off, then wipe every nail with alcohol and let it dry
+            completely. Skip that wipe and the set will lift in two days regardless of
+            how good the glue is.
+          </p>
+
+          <h2>Applying</h2>
+          <p>
+            A bead of glue on your own nail and a thin line inside the press-on. Set the
+            press-on at the cuticle first, then roll it down flat towards the tip so no
+            air is trapped underneath. Hold ten seconds. Do one nail at a time and start
+            with your non-dominant hand.
+          </p>
+          <p>
+            Adhesive tabs instead of glue if you only want the set for an evening — they
+            hold for two or three days and come off in warm water.
+          </p>
+
+          <h2>Wearing</h2>
+          <p>
+            Showering and washing up are fine. Long soaks in hot water are what loosens
+            glue, so gloves for washing up will add days to a set. Treat them as nails,
+            not tools: opening a can with them is what snaps a tip.
+          </p>
+          <p>
+            If one nail lifts at the edge, re-glue it that day. A lifted nail that stays
+            lifted traps water underneath it.
+          </p>
+
+          <h2>Removing</h2>
+          <p>
+            Soak your fingertips in warm, soapy water with a few drops of oil for ten
+            minutes, then work a cuticle stick gently under the free edge and lift. If it
+            resists, soak it longer. Nothing here should hurt.
+          </p>
+          <p class="prose__warn">
+            Never pull a press-on that is still stuck. That is what takes a layer of your
+            own nail with it, and it is the only way these cause damage.
+          </p>
+
+          <h2>Keeping the set</h2>
+          <p>
+            Scrape the old glue off the underside with the cuticle stick, wipe with
+            alcohol and put the set back in its box. Stored that way a set will go back
+            on four or five times.
+          </p>`)}
+
+        <aside class="prose__cta">
+          <p>Still not sure which size or shape to take?</p>
+          <a class="btn btn--solid" href="/contact">Ask the studio</a>
+        </aside>
+      </section>
+`,
+);
+
+/* FAQ ---------------------------------------------------------------------- */
+OWNED["faq.html"] = page(
+  {
+    title: `Frequently asked questions — ${BRAND}`,
+    description:
+      "How long a set lasts, whether it will fit, whether press-ons damage your nails, reuse, shipping and custom work.",
+    path: "/faq",
+    current: "/faq",
+    jsonld: [
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: faq.items.map((f) => ({
+          "@type": "Question",
+          name: f.question,
+          acceptedAnswer: { "@type": "Answer", text: f.answer },
+        })),
+      },
+      crumbs([
+        { name: "Home", href: "/" },
+        { name: "FAQ", href: "/faq" },
+      ]),
+    ],
+  },
+  `      <section class="prose">
+        <header class="section-head">
+          <p class="eyebrow">FAQ</p>
+          <h1 class="section-head__title">Questions we get asked</h1>
+        </header>
+
+        <ul class="faq" data-symbol="faq" data-list="symbol:items">
+          <template data-item><li class="faq__item"><h2 class="faq__q" data-text="item.question"></h2><p class="faq__a" data-text="item.answer"></p></li></template>
+${faq.items
+  .map(
+    (f) =>
+      `          <li class="faq__item"><h2 class="faq__q" data-text="item.question">${esc(f.question)}</h2><p class="faq__a" data-text="item.answer">${esc(f.answer)}</p></li>`,
+  )
+  .join("\n")}
+        </ul>
+
+        <aside class="prose__cta">
+          <p>Something we have not covered?</p>
+          <a class="btn btn--solid" href="/contact">Write to the studio</a>
+        </aside>
+      </section>
+`,
+);
+
+/* Legal -------------------------------------------------------------------- */
+const legal = (slug, title, description, body) => {
+  OWNED[`${slug}.html`] = page(
+    {
+      title: `${title} — ${BRAND}`,
+      description,
+      path: `/${slug}`,
+      current: "",
+      jsonld: [
+        crumbs([
+          { name: "Home", href: "/" },
+          { name: title, href: `/${slug}` },
+        ]),
+      ],
+    },
+    `      <section class="prose prose--legal">
+        <header class="section-head">
+          <p class="eyebrow">Legal</p>
+          <h1 class="section-head__title">${title}</h1>
+          <p class="section-head__blurb">Last updated ${YEAR}-08-17.</p>
+        </header>
+${longform(body)}
+      </section>
+`,
+  );
+};
+
+legal(
+  "privacy",
+  "Privacy",
+  "What data this site collects, why, how long it is kept and how to have it deleted.",
+  `          <p class="prose__lede">
+            Short version: the only personal data this site collects is what you type
+            into a form, and the only thing we do with it is answer you.
+          </p>
+
+          <h2>What is collected</h2>
+          <p>
+            <strong>The waitlist form</strong> takes your email address, and optionally a
+            name and which set you are waiting for. <strong>The contact form</strong>
+            takes your email address, a subject and a message. <strong>An account</strong>,
+            if you make one, stores your email address and any details you add to it.
+          </p>
+          <p>
+            No analytics, no advertising pixels and no third-party trackers run on this
+            site. Nothing is sold or shared with anyone for marketing.
+          </p>
+
+          <h2>Why</h2>
+          <p>
+            The waitlist address is used for exactly one email, sent when a run of sets
+            is ready to order. Contact messages are used to reply to you. Account details
+            are used to send you what you order. That is the complete list.
+          </p>
+
+          <h2>Cookies</h2>
+          <p>
+            One cookie, and only if you sign in: the session cookie that keeps you signed
+            in. There is no cookie banner because there is nothing to consent to.
+          </p>
+
+          <h2>How long it is kept</h2>
+          <p>
+            Waitlist addresses are deleted once the run they were for has opened and the
+            email has gone out. Contact messages are kept while a conversation is open
+            and deleted within twelve months. Account data is kept until you close the
+            account.
+          </p>
+
+          <h2>Where it is stored</h2>
+          <p>
+            Form submissions and accounts are held on servers inside the EU. The site
+            itself is static and stores nothing about you.
+          </p>
+
+          <h2>Your rights</h2>
+          <p>
+            Under the GDPR you can ask for a copy of what is held about you, ask for it to
+            be corrected, or ask for it to be deleted. Write to
+            <a href="mailto:${esc(site.contact.email)}">${esc(site.contact.email)}</a> and
+            it will be done within thirty days. You can also complain to Datatilsynet,
+            the Danish data protection authority.
+          </p>
+
+          <h2>Changes</h2>
+          <p>
+            If this page changes in a way that affects you, the date at the top changes
+            with it.
+          </p>`,
+);
+
+legal(
+  "terms",
+  "Terms",
+  "The terms these sets are sold under: pricing, delivery, returns, the right of withdrawal and liability.",
+  `          <p class="prose__lede">
+            These terms cover orders placed on this site. They do not affect the statutory
+            rights you have as a consumer in the EU, which sit above anything written here.
+          </p>
+
+          <h2>Who you are buying from</h2>
+          <p>
+            ${BRAND}, a sole trader based in Copenhagen, Denmark. Reach us at
+            <a href="mailto:${esc(site.contact.email)}">${esc(site.contact.email)}</a>.
+          </p>
+
+          <h2>Orders</h2>
+          <p>
+            The shop is not open yet. When it is, an order is accepted once you receive a
+            confirmation email. If a set sells out between your order and that
+            confirmation, the order is cancelled and refunded in full.
+          </p>
+
+          <h2>Prices</h2>
+          <p>
+            Prices are in Danish kroner and include VAT. Delivery is charged separately
+            and shown before you pay.
+          </p>
+
+          <h2>Delivery</h2>
+          <p>
+            Sets are made to order in small runs and dispatched from Copenhagen. Expected
+            dispatch is stated on the set before you order. Delays are told to you by
+            email, not left to be discovered.
+          </p>
+
+          <h2>Right of withdrawal</h2>
+          <p>
+            You have fourteen days from receiving an order to withdraw from it, without
+            giving a reason. Tell us by email within those fourteen days and return the
+            set unused and in its box; the money, including standard delivery, is refunded
+            within fourteen days of the return arriving. Return postage is yours to pay.
+          </p>
+          <p>
+            Two exceptions, both of them the law rather than our preference. A set that has
+            been worn cannot be returned on hygiene grounds. A custom set made to your
+            design and measurements is exempt from the right of withdrawal, and this is
+            said again before any custom order is confirmed.
+          </p>
+
+          <h2>Faults</h2>
+          <p>
+            You have a two-year right of complaint under Danish law. A set that arrives
+            damaged or turns out to be faulty is replaced or refunded, and you do not pay
+            return postage. Photograph the box before removing anything and write to us in
+            the same week.
+          </p>
+
+          <h2>What these are and are not</h2>
+          <p>
+            These are reusable press-on nails, applied with glue or adhesive tabs. Wear
+            depends on how they are applied and how they are treated, so the two to three
+            weeks quoted is a typical result and not a guarantee. Applied or removed
+            against the instructions in the <a href="/guide">fit guide</a> they can damage
+            your natural nail, and that is not covered.
+          </p>
+          <p>
+            The materials are cured soak-off gel on ABS tips. If you have a known acrylate
+            allergy, do not use them.
+          </p>
+
+          <h2>Liability</h2>
+          <p>
+            Nothing here limits our liability for death, personal injury or anything else
+            that cannot be limited by law.
+          </p>
+
+          <h2>Law</h2>
+          <p>
+            Danish law applies. Disputes can be taken to Nævnenes Hus or through the EU
+            Online Dispute Resolution platform.
+          </p>`,
+);
+
+/* 404 ---------------------------------------------------------------------- */
+OWNED["404.html"] = page(
+  {
+    title: `Page not found — ${BRAND}`,
+    description: "That page does not exist.",
+    path: "/404",
+    current: "",
+  },
+  `      <section class="prose prose--center">
+        <header class="section-head">
+          <p class="eyebrow">Error 404</p>
+          <h1 class="section-head__title">This page isn’t here</h1>
+          <p class="section-head__blurb">
+            The address may be mistyped, or the page may have moved. Everything below
+            still works.
+          </p>
+        </header>
+        <div class="notfound__links">
+          <a class="btn btn--solid" href="/shop">Shop the seven</a>
+          <a class="btn btn--ghost" href="/">Back to the front</a>
+        </div>
+        <ul class="notfound__list">
+          <li><a href="/about">About the studio</a></li>
+          <li><a href="/guide">Fit &amp; care</a></li>
+          <li><a href="/faq">FAQ</a></li>
+          <li><a href="/contact">Contact</a></li>
+        </ul>
+      </section>
+`,
+);
+
+/* --- write ---------------------------------------------------------------- */
+
+let written = 0;
+for (const [rel, html] of Object.entries(OWNED)) {
+  const out = join(ROOT, rel);
+  mkdirSync(dirname(out), { recursive: true });
+  writeFileSync(out, html);
+  written += 1;
+  console.log("  wrote", rel);
+}
+
+/* sitemap.xml — every page this site actually serves, so adding a set updates
+   it without anyone remembering to. Sign-in-only pages are left out. */
+const urls = [
+  { loc: "/", priority: "1.0" },
+  { loc: "/shop", priority: "0.9" },
+  ...catalog.items.map((i) => ({ loc: `/sets/${i.slug}`, priority: "0.8" })),
+  { loc: "/about", priority: "0.6" },
+  { loc: "/guide", priority: "0.6" },
+  { loc: "/faq", priority: "0.6" },
+  { loc: "/contact", priority: "0.5" },
+  { loc: "/privacy", priority: "0.2" },
+  { loc: "/terms", priority: "0.2" },
+];
+
+writeFileSync(
+  join(ROOT, "sitemap.xml"),
+  `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls.map((u) => `  <url><loc>${ORIGIN}${u.loc}</loc><priority>${u.priority}</priority></url>`).join("\n")}
+</urlset>
+`,
+);
+console.log("  wrote sitemap.xml");
+console.log(`\n${written + 1} files written.`);

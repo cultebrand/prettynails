@@ -2,25 +2,79 @@
   "pages": [
     {
       "slug": "index",
-      "title": "Persinails Studio — handmade press-on nails",
-      "description": "Handmade press-on nail sets, one hand, seven finishes. Swipe to try each set on before the studio opens.",
+      "title": "MyNails — handmade press-on nails, made in Copenhagen",
+      "description": "Seven handmade press-on nail sets, each in twelve sizes and reusable. Try every set on the same hand before the studio opens.",
       "access": "public",
       "redirect_to": "",
       "nav_label": "",
       "nav_order": 0
     },
     {
+      "slug": "shop",
+      "title": "Shop all seven sets — MyNails",
+      "description": "Seven handmade press-on nail sets, each in twelve sizes and reusable. Glazed milk, aurora pearl, satin marble, jelly gloss, mirror chrome and more.",
+      "access": "public",
+      "redirect_to": "",
+      "nav_label": "Shop",
+      "nav_order": 10
+    },
+    {
+      "slug": "about",
+      "title": "About the studio — MyNails",
+      "description": "A one-person press-on nail studio in Copenhagen. How the sets are made, why they are made in small runs, and what that means for what you can buy.",
+      "access": "public",
+      "redirect_to": "",
+      "nav_label": "About",
+      "nav_order": 20
+    },
+    {
+      "slug": "guide",
+      "title": "Fit & care — how to apply, wear and remove | MyNails",
+      "description": "How to size a set, apply it so it lasts, look after it while you wear it, and take it off without damaging your own nails.",
+      "access": "public",
+      "redirect_to": "",
+      "nav_label": "Fit & care",
+      "nav_order": 30
+    },
+    {
+      "slug": "faq",
+      "title": "Frequently asked questions — MyNails",
+      "description": "How long a set lasts, whether it will fit, whether press-ons damage your nails, reuse, shipping and custom work.",
+      "access": "public",
+      "redirect_to": "",
+      "nav_label": "FAQ",
+      "nav_order": 40
+    },
+    {
       "slug": "contact",
-      "title": "Write to the studio — Persinails Studio",
+      "title": "Write to the studio — MyNails",
       "description": "Ask the studio a question about a set, a size or a lead time.",
       "access": "public",
       "redirect_to": "",
-      "nav_label": "",
+      "nav_label": "Contact",
       "nav_order": 50
     },
     {
+      "slug": "privacy",
+      "title": "Privacy — MyNails",
+      "description": "What data this site collects, why, how long it is kept and how to have it deleted.",
+      "access": "public",
+      "redirect_to": "",
+      "nav_label": "",
+      "nav_order": 80
+    },
+    {
+      "slug": "terms",
+      "title": "Terms — MyNails",
+      "description": "The terms these sets are sold under: pricing, delivery, returns, the right of withdrawal and liability.",
+      "access": "public",
+      "redirect_to": "",
+      "nav_label": "",
+      "nav_order": 81
+    },
+    {
       "slug": "account",
-      "title": "Your account — Persinails Studio",
+      "title": "Your account — MyNails",
       "description": "Your account with the studio.",
       "access": "signed-in",
       "redirect_to": "login",
@@ -29,7 +83,7 @@
     },
     {
       "slug": "login",
-      "title": "Sign in — Persinails Studio",
+      "title": "Sign in — MyNails",
       "description": "Sign in to your account.",
       "access": "signed-out",
       "redirect_to": "account",
@@ -38,7 +92,7 @@
     },
     {
       "slug": "signup",
-      "title": "Create an account — Persinails Studio",
+      "title": "Create an account — MyNails",
       "description": "Create an account with the studio.",
       "access": "signed-out",
       "redirect_to": "account",

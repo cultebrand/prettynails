@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+
+# The two editors and the account pages are not content. Keeping them out of
+# the index is tidiness, not security — they are protected by the backend
+# session, not by this file.
+Disallow: /static-admin/
+Disallow: /dynamic-admin/
+Disallow: /account
+Disallow: /login
+Disallow: /signup
+
+Sitemap: https://put-on.com/sitemap.xml

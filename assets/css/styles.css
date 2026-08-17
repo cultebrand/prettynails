@@ -1,5 +1,5 @@
 /* ===========================================================================
-   Persinails Studio — hand-written styling
+   MyNails — hand-written styling
    Handmade press-on nails, Copenhagen.
 
    One ground colour, one ink, and a per-set accent trio that the hero swaps
@@ -547,10 +547,15 @@ a.ribbon__item:focus-visible .ribbon__name {
 
 .hero__inner {
   display: grid;
+  /* The words come first on a narrow screen. The hand used to, and the effect
+     was that a phone opened on a photograph with no name, no price and nothing
+     to press — the h1 sat below the fold and the buttons below that. In this
+     order the set's name, its price and both buttons land above the fold on a
+     390x844 phone, and the hand still lands with them. */
   grid-template-areas:
+    "lede"
     "stage"
-    "tryon"
-    "lede";
+    "tryon";
   gap: clamp(2rem, 5vw, 3rem);
   align-items: center;
   max-width: var(--frame);
@@ -689,6 +694,12 @@ a.ribbon__item:focus-visible .ribbon__name {
   height: 100%;
   object-fit: contain;
   filter: drop-shadow(-18px 26px 34px color-mix(in srgb, #3c2820 16%, transparent));
+  /* The hand enters the frame from the top, so the photograph ends the wrist
+     on a straight cut. Fading the top of the frame lets the arm leave the
+     picture instead of being sliced off by it — the one thing on the page that
+     read as unfinished rather than deliberate. Every layer gets the same mask
+     so the cross-fade between sets stays seamless. */
+  mask-image: linear-gradient(to bottom, transparent 0, #000 8%);
 }
 
 /* Every set is drawn on top of the bare hand and faded in, so switching sets
@@ -867,6 +878,11 @@ html:not(.js) .hero__layers > .hero__layer:first-of-type {
   border-radius: 18px;
   background: color-mix(in srgb, var(--ink) 4%, transparent);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 8%, transparent);
+  /* The flat-lays are the smallest photographs on the site — the narrowest is
+     388px wide. Left uncapped, a two-column grid on a wide screen blew that up
+     past 650px and the softness was the first thing anyone saw. Capped, the
+     worst case is a 1.2x upscale. Raise this when better files are shot. */
+  max-width: 29rem;
 }
 
 .piece__figure img {
@@ -1001,6 +1017,46 @@ html.js .set:not(.is-revealed) {
     opacity 0.7s ease-out,
     transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
   transition-delay: var(--reveal-delay, 0ms);
+}
+
+/* On the shop the whole card is the link to that set's page. The anchor wraps
+   the card rather than sitting inside it, so the target is the picture and the
+   words together instead of a four-word phrase under them. */
+.set__link {
+  display: block;
+  color: inherit;
+}
+
+.set__link:focus-visible {
+  outline: 2px solid var(--deep);
+  outline-offset: 6px;
+  border-radius: 20px;
+}
+
+.set__link .set__figure img {
+  transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.set__link:hover .set__figure img {
+  transform: scale(1.03);
+}
+
+.set__more {
+  display: inline-block;
+  margin-top: 1rem;
+  font-size: var(--step--2);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--set-deep) 70%, transparent);
+  box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--set-deep) 30%, transparent);
+  transition:
+    color 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.set__link:hover .set__more {
+  color: var(--set-deep);
+  box-shadow: inset 0 -1px 0 var(--set-deep);
 }
 
 .set__figure {
@@ -1625,6 +1681,664 @@ html.js .set:not(.is-revealed) {
 .account__profile select,
 .account__profile textarea {
   font: inherit;
+}
+
+/* ===========================================================================
+   THE REST OF THE SITE
+
+   Everything above dresses the landing page. Everything below dresses the
+   pages it links to — the shop, the seven set pages, the guide, the FAQ, the
+   legal pages and the 404 — built out of the same tokens, so a colour changed
+   at the top of this file still changes all of them.
+   =========================================================================== */
+
+/* --- the page shell ------------------------------------------------------- *
+   A short page (a 404, a thin legal section) used to leave its footer stranded
+   halfway up the window with blank ground beneath it. The body becomes a
+   column and the main takes the slack, so the footer sits on the bottom edge
+   when there is not enough content to push it there. */
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
+}
+
+body > main {
+  flex: 1 0 auto;
+}
+
+/* A flex item with `margin-inline: auto` shrinks to fit its content and then
+   centres, where the same box in normal flow would have filled the line and
+   only then been capped by its max-width. The masthead is the one piece of
+   chrome written that way, and turning the body into a column above quietly
+   pulled it into a 668px huddle in the middle of a 1440px window. Restoring
+   the width it would have had leaves the auto margins doing what they were
+   written for — centring, once the window is wider than the measure. */
+body > .masthead {
+  width: 100%;
+}
+
+/* --- the menu on a small screen ------------------------------------------- *
+   The masthead menu used to be hidden below 62rem, which left every page that
+   is not the landing page with no way out but the wordmark — the landing page
+   has the floating dock, and the others had nothing. Rather than a hamburger
+   and the JavaScript to open it, the menu becomes a strip that scrolls
+   sideways: it is the same markup, it needs no script, and it cannot get stuck
+   open. */
+
+.masthead__nav {
+  display: flex;
+  flex: 1 1 100%;
+  order: 3;
+  gap: 1.25rem;
+  margin-top: 0.25rem;
+  padding-bottom: 0.25rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.masthead__nav::-webkit-scrollbar {
+  display: none;
+}
+
+.masthead__nav a {
+  padding-block: 0.5rem;
+  white-space: nowrap;
+}
+
+.masthead__nav a[aria-current="page"] {
+  color: var(--ink);
+  box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--ink) 45%, transparent);
+}
+
+@media (min-width: 62rem) {
+  .masthead__nav {
+    flex: 0 1 auto;
+    order: 0;
+    margin-top: 0;
+    padding-bottom: 0;
+    overflow-x: visible;
+  }
+}
+
+/* --- breadcrumbs ---------------------------------------------------------- */
+
+.crumbs {
+  max-width: var(--frame);
+  margin-inline: auto;
+  padding: 1.5rem var(--gutter) 0;
+  font-size: var(--step--2);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.crumbs ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: color-mix(in srgb, var(--ink) 45%, transparent);
+}
+
+.crumbs li + li::before {
+  content: "/";
+  margin-inline-end: 0.75rem;
+  opacity: 0.5;
+}
+
+.crumbs a {
+  color: color-mix(in srgb, var(--ink) 62%, transparent);
+  transition: color 0.3s ease;
+}
+
+.crumbs a:hover {
+  color: var(--ink);
+}
+
+/* --- a set's own page ----------------------------------------------------- *
+   The panel wears the set the same way the hero does: --wash behind it,
+   --shade thrown from the top right, --deep on the type. Those three come off
+   the item in the CMS and are stamped onto .detail at export. */
+
+.detail {
+  position: relative;
+  display: grid;
+  gap: clamp(2.5rem, 5vw, 4rem);
+  max-width: var(--frame);
+  margin-inline: auto;
+  padding: clamp(2rem, 4vw, 3.5rem) var(--gutter) 0;
+}
+
+@media (min-width: 64rem) {
+  .detail {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+    gap: clamp(3rem, 5vw, 5rem);
+  }
+}
+
+.detail__media {
+  display: grid;
+  gap: 1.25rem;
+  min-width: 0;
+}
+
+.detail__hand,
+.detail__macro {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+  border-radius: 22px;
+  background: var(--wash);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 8%, transparent);
+}
+
+.detail__hand {
+  aspect-ratio: 1200 / 1579;
+}
+
+.detail__hand img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  /* The photograph is a hand entering from the top of the frame, so the wrist
+     ends on a straight cut. Fading the top centimetre lets it leave the frame
+     instead of being guillotined by it. */
+  mask-image: linear-gradient(to bottom, transparent 0, #000 9%);
+}
+
+.detail__macro {
+  aspect-ratio: 4 / 3;
+}
+
+.detail__macro img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@media (min-width: 64rem) {
+  .detail__lede {
+    position: sticky;
+    top: 2rem;
+  }
+}
+
+.detail__title {
+  margin: 0.75rem 0 0;
+  font-family: var(--face-display);
+  font-size: var(--step-4);
+  font-weight: 400;
+  line-height: 0.94;
+  color: var(--deep);
+}
+
+.detail__tagline {
+  margin: 1rem 0 0;
+  font-size: var(--step-1);
+  color: color-mix(in srgb, var(--ink) 70%, transparent);
+}
+
+.detail__body {
+  margin-top: 2.25rem;
+  max-width: 44ch;
+}
+
+.detail__body p {
+  margin: 0 0 1.15rem;
+  color: color-mix(in srgb, var(--ink) 78%, transparent);
+}
+
+.detail__includes {
+  margin: 2rem 0 0;
+  padding: 1.75rem 0 0;
+  border-top: 1px solid var(--line);
+  list-style: none;
+}
+
+.detail__includes li {
+  position: relative;
+  padding-inline-start: 1.5rem;
+  margin-bottom: 0.85rem;
+  font-size: var(--step--1);
+  color: color-mix(in srgb, var(--ink) 72%, transparent);
+}
+
+.detail__includes li::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  top: 0.55em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--deep) 45%, transparent);
+}
+
+.detail__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 2.25rem;
+}
+
+.detail__aside {
+  margin: 1.25rem 0 0;
+  font-size: var(--step--1);
+  color: color-mix(in srgb, var(--ink) 52%, transparent);
+}
+
+/* --- previous / next ------------------------------------------------------ */
+
+.pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  max-width: var(--frame);
+  margin: clamp(4rem, 8vw, 6rem) auto 0;
+  padding: 2rem var(--gutter) 0;
+  border-top: 1px solid var(--line);
+}
+
+.pager__link {
+  display: grid;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.pager__link--next {
+  text-align: end;
+}
+
+.pager__dir {
+  font-size: var(--step--2);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--ink) 45%, transparent);
+}
+
+.pager__name {
+  font-family: var(--face-display);
+  font-size: var(--step-2);
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+.pager__all {
+  font-size: var(--step--2);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--ink) 55%, transparent);
+}
+
+.pager__all:hover,
+.pager__link:hover .pager__name {
+  color: var(--deep);
+}
+
+/* --- long-form pages ------------------------------------------------------ *
+   About, the fit guide, the FAQ and the legal pages. One column, held to a
+   readable measure rather than the full frame, because a 1400px line of prose
+   is unreadable however handsome the type is. */
+
+.prose {
+  max-width: var(--frame);
+  margin-inline: auto;
+  padding: clamp(3rem, 6vw, 5rem) var(--gutter) 0;
+}
+
+/* Wide enough for a display headline to break where it wants to rather than
+   where 34 characters forced it; the blurb keeps its own 46ch measure. */
+.prose .section-head {
+  max-width: 52ch;
+}
+
+.prose--center .section-head,
+.prose--center .section-head__blurb {
+  max-width: 46ch;
+  margin-inline: auto;
+  text-align: center;
+}
+
+/* Prose on the left, the page's own sections pinned on the right. Below the
+   breakpoint the rail moves above the text and lies flat — a sticky index is
+   only worth its height on a screen tall enough to spare it. */
+.prose__layout {
+  display: grid;
+  gap: clamp(2rem, 4vw, 3.5rem);
+}
+
+@media (min-width: 64rem) {
+  .prose__layout {
+    grid-template-columns: minmax(0, 62ch) minmax(0, 1fr);
+    align-items: start;
+    gap: clamp(3rem, 7vw, 7rem);
+  }
+}
+
+.prose__body {
+  max-width: 62ch;
+  font-size: var(--step-0);
+  line-height: 1.72;
+  color: color-mix(in srgb, var(--ink) 78%, transparent);
+}
+
+/* Headings are scroll targets now, so they must not land under the masthead. */
+.prose__body h2 {
+  scroll-margin-top: 5.5rem;
+}
+
+.toc {
+  order: -1;
+  align-self: start;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  font-size: var(--step--1);
+}
+
+@media (min-width: 64rem) {
+  .toc {
+    order: 0;
+    position: sticky;
+    top: 2.5rem;
+    padding: 0 0 0 1.5rem;
+    border: 0;
+    border-inline-start: 1px solid var(--line);
+    border-radius: 0;
+  }
+}
+
+.toc__title {
+  margin: 0 0 0.85rem;
+  font-size: var(--step--2);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--ink) 45%, transparent);
+}
+
+.toc ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: toc;
+}
+
+.toc li {
+  counter-increment: toc;
+}
+
+.toc a {
+  display: block;
+  padding: 0.4rem 0;
+  color: color-mix(in srgb, var(--ink) 62%, transparent);
+  transition: color 0.3s ease;
+}
+
+.toc a::before {
+  content: counter(toc, decimal-leading-zero);
+  margin-inline-end: 0.75rem;
+  font-family: var(--face-display);
+  color: color-mix(in srgb, var(--ink) 32%, transparent);
+}
+
+.toc a:hover {
+  color: var(--ink);
+}
+
+.prose__lede {
+  font-size: var(--step-1);
+  line-height: 1.6;
+  color: var(--ink);
+}
+
+.prose__body h2 {
+  margin: clamp(2.5rem, 5vw, 3.5rem) 0 0;
+  font-family: var(--face-display);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 400;
+  line-height: 1.15;
+  color: var(--ink);
+}
+
+.prose__body h2 + p {
+  margin-top: 0.85rem;
+}
+
+.prose__body p {
+  margin: 0 0 1.15rem;
+}
+
+.prose__body a {
+  color: var(--ink);
+  box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--ink) 35%, transparent);
+}
+
+.prose__body a:hover {
+  box-shadow: inset 0 -1px 0 var(--ink);
+}
+
+.prose__body strong {
+  font-weight: 500;
+  color: var(--ink);
+}
+
+/* The one instruction on the guide that costs you a nail if it is skipped. */
+.prose__warn {
+  margin-top: 1.5rem;
+  padding: 1.15rem 1.35rem;
+  border-inline-start: 2px solid color-mix(in srgb, var(--rose) 55%, transparent);
+  border-radius: 0 12px 12px 0;
+  background: color-mix(in srgb, var(--rose) 6%, transparent);
+  color: var(--ink);
+}
+
+.prose--legal .prose__body {
+  font-size: var(--step--1);
+}
+
+.prose__cta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.5rem;
+  max-width: 62ch;
+  margin-top: clamp(3rem, 6vw, 4.5rem);
+  padding-top: 2rem;
+  border-top: 1px solid var(--line);
+}
+
+.prose__cta p {
+  margin: 0;
+  color: color-mix(in srgb, var(--ink) 68%, transparent);
+}
+
+/* --- the FAQ -------------------------------------------------------------- */
+
+/* Ten questions in one 62ch column left the other half of a wide window empty.
+   Two columns use it and halve the scroll; the answers are short enough that
+   reading across is no harder than reading down. */
+.faq {
+  display: grid;
+  gap: 0 clamp(2.5rem, 5vw, 4.5rem);
+  max-width: 62ch;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 64rem) {
+  .faq {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-width: none;
+  }
+}
+
+.faq__item {
+  padding: 1.75rem 0;
+  border-top: 1px solid var(--line);
+}
+
+.faq__item:last-child {
+  border-bottom: 1px solid var(--line);
+}
+
+/* In two columns the last item of each column wants the closing hairline, not
+   only the last item overall. */
+@media (min-width: 64rem) {
+  .faq__item:nth-last-child(-n + 2) {
+    border-bottom: 1px solid var(--line);
+  }
+}
+
+.faq__q {
+  margin: 0;
+  font-family: var(--face-display);
+  font-size: clamp(1.35rem, 2.6vw, 1.75rem);
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.faq__a {
+  margin: 0.85rem 0 0;
+  line-height: 1.7;
+  color: color-mix(in srgb, var(--ink) 74%, transparent);
+}
+
+/* --- 404 ------------------------------------------------------------------ */
+
+.notfound__links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.notfound__list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem 2rem;
+  margin: 3rem 0 0;
+  padding: 2rem 0 0;
+  border-top: 1px solid var(--line);
+  list-style: none;
+  font-size: var(--step--2);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.notfound__list a {
+  color: color-mix(in srgb, var(--ink) 60%, transparent);
+}
+
+.notfound__list a:hover {
+  color: var(--ink);
+}
+
+/* --- the contact page ----------------------------------------------------- *
+   The form is one narrow column, which on a wide screen left the other half of
+   the window empty. What fills it is the answer to most of the messages the
+   form would otherwise receive. */
+
+.contact__grid {
+  display: grid;
+  gap: clamp(2.5rem, 5vw, 4rem);
+}
+
+@media (min-width: 56rem) {
+  .contact__grid {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    align-items: start;
+  }
+}
+
+.contact__aside {
+  padding: 1.75rem 1.75rem 1.5rem;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--ink) 2.5%, transparent);
+  font-size: var(--step--1);
+  line-height: 1.7;
+  color: color-mix(in srgb, var(--ink) 72%, transparent);
+}
+
+.contact__aside p {
+  margin: 0.6rem 0 1.5rem;
+}
+
+.contact__aside p:last-child {
+  margin-bottom: 0;
+}
+
+.contact__aside a {
+  color: var(--ink);
+  box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--ink) 35%, transparent);
+}
+
+.contact__aside a:hover {
+  box-shadow: inset 0 -1px 0 var(--ink);
+}
+
+.contact__aside-title {
+  margin: 0;
+  font-size: var(--step--2);
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--ink) 50%, transparent);
+}
+
+.contact__aside-title + p {
+  margin-top: 0.5rem;
+}
+
+.contact__aside-note {
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--line-soft);
+  color: color-mix(in srgb, var(--ink) 50%, transparent);
+}
+
+/* --- the legal line under the footer -------------------------------------- */
+
+.colophon__legal {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 2rem;
+  max-width: var(--measure);
+  margin: 2rem auto 0;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--line-soft);
+  font-size: var(--step--2);
+  color: color-mix(in srgb, var(--ink) 45%, transparent);
+}
+
+.colophon__legal p {
+  margin: 0;
+}
+
+.colophon__legal ul {
+  display: flex;
+  gap: 1.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.colophon__legal a {
+  color: inherit;
+}
+
+.colophon__legal a:hover {
+  color: var(--ink);
 }
 
 /* --- motion, when it is not wanted ---------------------------------------- */

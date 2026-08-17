@@ -1,6 +1,6 @@
 {
   "slug": "signup",
-  "title": "Create an account — Persinails Studio",
+  "title": "Create an account — MyNails",
   "description": "Create an account with the studio.",
   "access": "signed-out",
   "redirect_to": "account",

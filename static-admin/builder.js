@@ -1,5 +1,5 @@
 /* ===========================================================================
-   Persinails Studio — visual page builder
+   MyNails — visual page builder
    GrapesJS (pinned from a CDN, like Sveltia) composing the real site.
    No build step anywhere; this file is the whole integration.
 

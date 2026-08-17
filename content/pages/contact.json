@@ -1,9 +1,9 @@
 {
   "slug": "contact",
-  "title": "Write to the studio — Persinails Studio",
+  "title": "Write to the studio — MyNails",
   "description": "Ask the studio a question about a set, a size or a lead time.",
   "access": "public",
   "redirect_to": "",
-  "nav_label": "",
+  "nav_label": "Contact",
   "nav_order": 50
 }

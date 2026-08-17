@@ -33,6 +33,14 @@
       "source": "catalog.items"
     },
     {
+      "id": "faq",
+      "name": "FAQ list",
+      "binding": {
+        "type": "none"
+      },
+      "source": "faq.items"
+    },
+    {
       "id": "waitlist-form",
       "name": "Waitlist form",
       "binding": {

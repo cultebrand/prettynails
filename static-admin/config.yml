@@ -33,8 +33,8 @@ backend:
 media_folder: media/uploads
 public_folder: /media/uploads
 
-site_url: https://cultebrand.github.io/prettynails/
-display_url: https://cultebrand.github.io/prettynails/
+site_url: https://put-on.com/
+display_url: https://put-on.com/
 
 collections:
   - name: content
@@ -93,6 +93,25 @@ collections:
                 required: false
                 hint: Read aloud by screen readers. Describe the nails, not the photo.
 
+      - name: faq
+        label: FAQ
+        file: content/faq.json
+        format: json
+        description: >-
+          The questions on /faq. They are also what search engines read as the
+          page's FAQ, so keep an answer to a paragraph and answer the question
+          asked rather than the one you would rather answer.
+        fields:
+          - label: Questions
+            name: items
+            widget: list
+            label_singular: Question
+            summary: "{{fields.question}}"
+            hint: Shown in this order. Put the ones people actually ask first.
+            fields:
+              - { label: Question, name: question, widget: string }
+              - { label: Answer, name: answer, widget: text }
+
       - name: catalog
         label: The seven
         file: content/catalog.json
@@ -131,11 +150,24 @@ collections:
                 widget: string
                 required: false
                 hint: e.g. “Almond · Medium”.
+              - label: How long it wears
+                name: wear
+                widget: string
+                required: false
+                hint: Shown in the spec row on the set's own page, e.g. “2–3 weeks”.
               - label: Price
                 name: price
                 widget: string
                 required: false
                 hint: Free text, so you can write “kr 420” or “from kr 420”.
+              - label: The longer story
+                name: story
+                widget: text
+                required: false
+                hint: >-
+                  Two or three paragraphs on the set's own page — how it is made
+                  and what to know before choosing it. Leave a blank line
+                  between paragraphs. Not shown on the landing page.
 
               # The three colours the set wears. The hero cross-fades to them
               # when someone tries the set on, and the card in “The seven” is

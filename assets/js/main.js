@@ -1,5 +1,5 @@
 /* ===========================================================================
-   Persinails Studio — runtime enhancement
+   MyNails — runtime enhancement
    No build step, and nothing here is load-bearing for reading the page: the
    words and the catalog are baked into index.html (by hand or by the visual
    builder in /static-admin/builder.html). This script only
@@ -18,9 +18,22 @@
   // is actually running, so a blocked script can never strand content hidden.
   document.documentElement.classList.add("js");
 
-  // Everything resolves against the directory the page is served from, so the
-  // same files work at user.github.io/repo/ and at a custom domain root.
-  var BASE = new URL(".", document.baseURI);
+  // Where content/ and media/ live, relative to this page.
+  //
+  // The default is the directory the page is served from, which is what lets
+  // the same files work at user.github.io/repo/ and at a custom domain root.
+  // That default is only right while every page sits at the same depth, and
+  // the set pages do not: at /sets/amour it would look for the catalog in
+  // /sets/content/ and paint every photograph from /sets/media/.
+  //
+  // So a page may name the site root itself, and the generated ones do. The
+  // value is a path, not an origin — "/" for a domain root, "/repo/" for a
+  // project page — and it is resolved against this page either way.
+  var rootHint = document.querySelector('meta[name="site-root"]');
+  var BASE = new URL(
+    rootHint && rootHint.getAttribute("content") ? rootHint.getAttribute("content") : ".",
+    document.baseURI
+  );
 
   /** Resolve a CMS media path (`/media/uploads/x.jpg`) against the site base. */
   function asset(path) {
@@ -182,12 +195,31 @@
     return true;
   }
 
+  /**
+   * A GET that prefers to be recognised but insists on getting through.
+   *
+   * The session cookie is what lets the node answer as "you" rather than as
+   * "a stranger", so the first attempt sends it. But a credentialed request is
+   * only readable if the server names this origin exactly — a reply of
+   * `Access-Control-Allow-Origin: *` is a network error to the browser, not a
+   * response, and the fetch rejects before any status is seen. That is the
+   * shape a public read has when the endpoint is genuinely public and answers
+   * everyone with a wildcard, and it took the contact form's fields down with
+   * it: the page sat on "Loading the form…" for good.
+   *
+   * So a rejection is retried without credentials. Signed in, nothing changes.
+   * Signed out — or blocked by a wildcard — the public answer still arrives,
+   * which is the one the visitor was owed anyway.
+   */
   function getJson(url) {
-    return fetch(url, { credentials: "include" }).then(function (response) {
+    var read = function (response) {
       return response.json().then(function (body) {
         heldForDetails(body);
         return { ok: response.ok, body: body };
       });
+    };
+    return fetch(url, { credentials: "include" }).then(read, function () {
+      return fetch(url, { credentials: "omit" }).then(read);
     });
   }
 
@@ -901,7 +933,9 @@
       if (slot.shape) slot.shape.textContent = set.shape || "";
       if (slot.price) slot.price.textContent = set.price || "";
       if (slot.index) slot.index.textContent = pad(index + 1);
-      if (slot.total) slot.total.textContent = String(sets.length);
+      // `total` rather than the raw count: the eyebrow beside it already reads
+      // "Set 05 of 07", and the counter was rendering "05 / 7" against it.
+      if (slot.total) slot.total.textContent = total;
 
       layers.forEach(function (layer, i) {
         layer.classList.toggle("is-on", i === index);

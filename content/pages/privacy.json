@@ -1,0 +1,9 @@
+{
+  "slug": "privacy",
+  "title": "Privacy — MyNails",
+  "description": "What data this site collects, why, how long it is kept and how to have it deleted.",
+  "access": "public",
+  "redirect_to": "",
+  "nav_label": "",
+  "nav_order": 80
+}

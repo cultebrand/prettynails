@@ -1,5 +1,5 @@
 /* ===========================================================================
-   Persinails Studio — live CMS preview
+   MyNails — live CMS preview
    Replaces Sveltia's abstract field-by-field preview with the real page.
 
    How: Sveltia's Decap-compatible `CMS.registerPreviewTemplate()` renders a
