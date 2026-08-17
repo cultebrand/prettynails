@@ -150,6 +150,27 @@ collections:
                 widget: string
                 required: false
                 hint: e.g. “Almond · Medium”.
+              - label: Run status
+                name: status
+                widget: select
+                required: true
+                default: next-run
+                hint: >-
+                  Decides what search engines are told about availability.
+                  Required with a default on purpose — an optional select here
+                  has hung Sveltia before.
+                options:
+                  - { label: In the next run, value: next-run }
+                  - { label: Only a few left, value: few-left }
+                  - { label: Made to order, value: made-to-order }
+                  - { label: Sold out, value: sold-out }
+              - label: Run note
+                name: run_note
+                widget: string
+                required: false
+                hint: >-
+                  The line shown on the card and the set's page, e.g.
+                  “Run 01 · twelve made · opens October”.
               - label: How long it wears
                 name: wear
                 widget: string
@@ -210,6 +231,23 @@ collections:
                 name: hand_alt
                 widget: string
                 required: false
+
+              - label: Gallery
+                name: gallery
+                widget: list
+                required: false
+                label_singular: Photograph
+                hint: >-
+                  Single nails from this set, cut out and shot on their own.
+                  They fill the gallery on the set's own page, in this order.
+                  Three is the minimum that looks deliberate; nine is plenty.
+                fields:
+                  - { label: Photograph, name: image, widget: image }
+                  - label: Description
+                    name: alt
+                    widget: string
+                    required: false
+                    hint: Read aloud by screen readers. Describe the nail, not the photo.
 
   # Pages and Symbols are where things are CREATED and BOUND: Sveltia owns
   # what a page or symbol IS (slug, title, backend binding); the visual

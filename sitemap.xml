@@ -12,6 +12,8 @@
   <url><loc>https://put-on.com/about</loc><priority>0.6</priority></url>
   <url><loc>https://put-on.com/guide</loc><priority>0.6</priority></url>
   <url><loc>https://put-on.com/faq</loc><priority>0.6</priority></url>
+  <url><loc>https://put-on.com/waitlist</loc><priority>0.7</priority></url>
+  <url><loc>https://put-on.com/shipping</loc><priority>0.5</priority></url>
   <url><loc>https://put-on.com/contact</loc><priority>0.5</priority></url>
   <url><loc>https://put-on.com/privacy</loc><priority>0.2</priority></url>
   <url><loc>https://put-on.com/terms</loc><priority>0.2</priority></url>

@@ -55,6 +55,24 @@
       "nav_order": 50
     },
     {
+      "slug": "waitlist",
+      "title": "Join the waitlist — MyNails",
+      "description": "One email, sent the day the next run of handmade press-on sets is ready to order. Nothing else.",
+      "access": "public",
+      "redirect_to": "",
+      "nav_label": "",
+      "nav_order": 59
+    },
+    {
+      "slug": "shipping",
+      "title": "Shipping & returns — MyNails",
+      "description": "Where we ship, what it costs, how long a set takes to reach you, and how returns and faults are handled.",
+      "access": "public",
+      "redirect_to": "",
+      "nav_label": "",
+      "nav_order": 60
+    },
+    {
       "slug": "privacy",
       "title": "Privacy — MyNails",
       "description": "What data this site collects, why, how long it is kept and how to have it deleted.",

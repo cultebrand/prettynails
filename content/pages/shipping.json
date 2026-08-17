@@ -1,0 +1,9 @@
+{
+  "slug": "shipping",
+  "title": "Shipping & returns — MyNails",
+  "description": "Where we ship, what it costs, how long a set takes to reach you, and how returns and faults are handled.",
+  "access": "public",
+  "redirect_to": "",
+  "nav_label": "",
+  "nav_order": 60
+}

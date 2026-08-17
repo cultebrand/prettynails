@@ -51,6 +51,8 @@ shots shows up as a jump.
 /about             how the sets are made and why the runs are small
 /guide             sizing, applying, wearing, removing, keeping
 /faq               the questions, and the FAQ structured data
+/waitlist          the waitlist as its own URL, for an Instagram bio
+/shipping          zones, costs, times, returns
 /contact           write to the studio
 /privacy /terms    GDPR notice and the consumer terms
 /404.html          served by GitHub Pages for anything else
@@ -69,7 +71,8 @@ is served exactly as it sits on disk. Run it by hand after editing
 `content/catalog.json` or `content/faq.json`:
 
 ```sh
-node tools/pages.mjs      # rewrites those pages and sitemap.xml
+node tools/pages.mjs      # rewrites those pages, sitemap.xml, and the
+                          # shared chrome inside the five hand-written pages
 ```
 
 It never touches `index.html`, `contact.html`, `login.html`, `signup.html` or

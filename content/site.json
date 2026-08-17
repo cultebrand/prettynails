@@ -1,5 +1,9 @@
 {
-  "announcement": "",
+  "announcement": {
+    "text": "Opening October — seven sets, a dozen of each.",
+    "href": "/waitlist",
+    "cta": "Join the waitlist"
+  },
   "backend": {
     "url": "https://p-prettynails.the-montiapple.workers.dev",
     "form": "waitlist"

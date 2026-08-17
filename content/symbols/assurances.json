@@ -1,0 +1,11 @@
+{
+  "id": "assurances",
+  "name": "Assurances",
+  "binding": { "type": "none" },
+  "items": [
+    { "title": "Soak-off gel", "body": "Cured under UV. No MMA, ever." },
+    { "title": "Recyclable tips", "body": "ABS, and the box is the storage." },
+    { "title": "Never tested on animals", "body": "Nothing here, nothing we buy." },
+    { "title": "Made in Copenhagen", "body": "Sculpted, painted and packed by hand." }
+  ]
+}

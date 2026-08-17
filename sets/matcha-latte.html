@@ -21,8 +21,9 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="theme-color" content="#f7f3ef" />
 
-    <link rel="icon" href="/media/uploads/apple-touch-icon-180x180.png" />
-    <link rel="apple-touch-icon" href="/media/uploads/apple-touch-icon-180x180.png" />
+    <link rel="icon" href="/media/uploads/icon-32.png" sizes="32x32" />
+    <link rel="icon" href="/media/uploads/icon-16.png" sizes="16x16" />
+    <link rel="apple-touch-icon" href="/media/uploads/icon-180.png" />
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
@@ -105,14 +106,17 @@
   </head>
   <body>
     <a href="#main" class="skip">Skip to content</a>
-    <aside aria-label="Announcement" data-when="site.announcement" class="banner" hidden>
-      <p data-text="site.announcement"></p>
+    <aside aria-label="Announcement" data-when="site.announcement.text" class="banner">
+      <p><a href="/waitlist"><span data-text="site.announcement.text">Opening October — seven sets, a dozen of each.</span> <span class="banner__cta">Join the waitlist &rarr;</span></a></p>
     </aside>
     <header data-symbol="site-header" class="masthead">
       <a href="/" class="brand"><span class="brand__name">MyNails</span></a>
       <nav aria-label="Pages" data-list="pages.pages" class="masthead__nav"><a href="/shop" aria-current="page">Shop</a><a href="/about">About</a><a href="/guide">Fit &amp; care</a><a href="/faq">FAQ</a><a href="/contact">Contact</a></nav>
-      <a href="/signup" class="btn btn--solid masthead__cta" data-account-when="out">Sign up</a>
-      <a href="/account" class="btn btn--ghost masthead__cta" data-account-when="in">Your account</a>
+      <div class="masthead__end">
+        <a href="/waitlist" class="btn btn--solid masthead__cta">Join the waitlist</a>
+        <a href="/login" class="masthead__account" data-account-when="out">Sign in</a>
+        <a href="/account" class="masthead__account" data-account-when="in">Your account</a>
+      </div>
     </header>
 
     <main id="main">
@@ -139,6 +143,17 @@
           <figure class="detail__macro">
             <img src="/media/uploads/nails/chip-matcha-latte.webp" alt="A macro photograph of the Matcha Latte set — satin marble" loading="lazy" decoding="async" />
           </figure>
+          <div class="nails">
+            <p class="nails__title">Every nail in the set</p>
+            <ul class="nails__grid">
+              <li class="nails__cell"><img src="/media/uploads/nails/isolated/matcha-latte-01.webp" alt="Nail 1 of the Matcha Latte set, photographed on its own — satin marble" loading="lazy" decoding="async" /></li>
+              <li class="nails__cell"><img src="/media/uploads/nails/isolated/matcha-latte-02.webp" alt="Nail 2 of the Matcha Latte set, photographed on its own — satin marble" loading="lazy" decoding="async" /></li>
+              <li class="nails__cell"><img src="/media/uploads/nails/isolated/matcha-latte-03.webp" alt="Nail 3 of the Matcha Latte set, photographed on its own — satin marble" loading="lazy" decoding="async" /></li>
+            </ul>
+            <p class="nails__note">
+              3 of the ten photographed on their own. No two are the same.
+            </p>
+          </div>
         </div>
 
         <div class="detail__lede">
@@ -146,11 +161,17 @@
           <h1 class="detail__title">Matcha Latte</h1>
           <p class="detail__tagline">Sage marble, poured cream</p>
 
+          <p class="detail__price">kr 440</p>
+          <p class="detail__terms">
+            Made to order in Copenhagen · VAT included ·
+            <a href="/shipping">delivery &amp; returns</a>
+          </p>
+          <p class="set__status detail__run">Run 01 · twelve made · opens October</p>
+
           <dl class="specs">
             <div><dt>Finish</dt><dd>Satin marble</dd></div>
             <div><dt>Shape</dt><dd>Almond · Medium</dd></div>
             <div><dt>Wear</dt><dd>2–3 weeks</dd></div>
-            <div><dt>Price</dt><dd>kr 440</dd></div>
           </dl>
 
           <div class="detail__body">
@@ -175,6 +196,72 @@
         </div>
       </article>
 
+      <section class="assurances" data-symbol="assurances">
+        <ul class="assurances__row" data-list="symbol:items">
+          <template data-item><li class="assurance"><p class="assurance__title" data-text="item.title"></p><p class="assurance__body" data-text="item.body"></p></li></template>
+          <li class="assurance"><p class="assurance__title" data-text="item.title">Soak-off gel</p><p class="assurance__body" data-text="item.body">Cured under UV. No MMA, ever.</p></li>
+          <li class="assurance"><p class="assurance__title" data-text="item.title">Recyclable tips</p><p class="assurance__body" data-text="item.body">ABS, and the box is the storage.</p></li>
+          <li class="assurance"><p class="assurance__title" data-text="item.title">Never tested on animals</p><p class="assurance__body" data-text="item.body">Nothing here, nothing we buy.</p></li>
+          <li class="assurance"><p class="assurance__title" data-text="item.title">Made in Copenhagen</p><p class="assurance__body" data-text="item.body">Sculpted, painted and packed by hand.</p></li>
+        </ul>
+      </section>
+
+      <!-- The three nearest sets by price, so the row answers "what else is
+           near this?" rather than "what did we happen to make next?" -->
+      <section class="related">
+        <header class="section-head section-head--split">
+          <h2 class="section-head__title">You might also like</h2>
+          <p class="eyebrow"><a href="/shop">All seven sets →</a></p>
+        </header>
+        <ul class="set-grid">
+          <li class="set" style="--tint: #F8EDEC; --set-deep: #7C4448">
+            <a class="set__link" href="/sets/orchid-veil">
+              <figure class="set__figure">
+                <img src="/media/uploads/nails/chip-orchid-veil.webp" alt="A macro photograph of the Orchid Veil set — aurora pearl" loading="lazy" decoding="async" />
+              </figure>
+              <p class="set__status">Run 01 · eighteen made · opens October</p>
+              <div class="set__head">
+                <h3 class="set__name">Orchid Veil</h3>
+                <p class="set__price">kr 440</p>
+              </div>
+              <p class="set__finish">Aurora pearl</p>
+              <p class="set__note">Blush pink pressed thin enough to read the nail beneath, with an aurora pearl that pulls lilac in daylight and peach under lamps.</p>
+              <span class="set__more">View the set</span>
+            </a>
+          </li>
+          <li class="set" style="--tint: #F7F3EF; --set-deep: #6E5B4E">
+            <a class="set__link" href="/sets/lily-blanc">
+              <figure class="set__figure">
+                <img src="/media/uploads/nails/chip-lily-blanc.webp" alt="A macro photograph of the Lily Blanc set — glazed milk" loading="lazy" decoding="async" />
+              </figure>
+              <p class="set__status">Run 01 · eighteen made · opens October</p>
+              <div class="set__head">
+                <h3 class="set__name">Lily Blanc</h3>
+                <p class="set__price">kr 420</p>
+              </div>
+              <p class="set__finish">Glazed milk</p>
+              <p class="set__note">A translucent milk base under a glazed top coat, each nail drawn with a single lily in white on white. The quietest set we make.</p>
+              <span class="set__more">View the set</span>
+            </a>
+          </li>
+          <li class="set" style="--tint: #F5DCDD; --set-deep: #4A060E">
+            <a class="set__link" href="/sets/cherry-gloss">
+              <figure class="set__figure">
+                <img src="/media/uploads/nails/chip-cherry-gloss.webp" alt="A macro photograph of the Cherry Gloss set — jelly gloss" loading="lazy" decoding="async" />
+              </figure>
+              <p class="set__status">Run 01 · twelve made · nine left</p>
+              <div class="set__head">
+                <h3 class="set__name">Cherry Gloss</h3>
+                <p class="set__price">kr 460</p>
+              </div>
+              <p class="set__finish">Jelly gloss</p>
+              <p class="set__note">Layered translucent red until it holds depth like glass. The gloss is the whole point — it stays wet-looking for the life of the set.</p>
+              <span class="set__more">View the set</span>
+            </a>
+          </li>
+        </ul>
+      </section>
+
       <nav class="pager" aria-label="Other sets">
         <a class="pager__link pager__link--prev" href="/sets/orchid-veil">
           <span class="pager__dir">Previous</span>
@@ -187,7 +274,7 @@
         </a>
       </nav>
 
-      <section id="waitlist" class="waitlist">
+      <section id="waitlist" class="waitlist" style="--wash: #F0F2EA; --shade: #A9B79C; --deep: #4E5A45">
         <div class="waitlist__inner">
           <div>
             <p class="eyebrow">The studio is not open yet</p>
@@ -217,35 +304,104 @@
                 />
                 <button type="submit" class="btn btn--solid">Join the waitlist</button>
               </div>
-              <p role="status" aria-live="polite" class="notify__status"></p>
+              <noscript>
+                <p class="notify__note">
+                  JavaScript is off, so this form cannot send. Email
+                  <a href="mailto:hello@put-on.com">hello@put-on.com</a>
+                  with the subject &quot;Opening notice&quot; and you will be added to the list.
+                </p>
+              </noscript>
+              <p id="waitlist-status" role="status" aria-live="polite" class="notify__status"></p>
             </form>
           </div>
+          <ul class="waitlist__panel">
+            <li>One email, not a newsletter</li>
+            <li>Sent the day a run is ready</li>
+            <li>Never passed to anyone else</li>
+          </ul>
         </div>
       </section>
     </main>
 
     <footer data-symbol="site-footer" class="colophon">
-      <div class="colophon__inner">
-        <a href="/" class="brand"><span class="brand__name">MyNails</span></a>
-        <ul data-list="site.contact.links" class="colophon__links">
-          <li><a href="/shop">Shop</a></li>
-          <li><a href="/about">About</a></li>
-          <li><a href="/guide">Fit &amp; care</a></li>
-          <li><a href="/faq">FAQ</a></li>
-          <li><a href="/contact">Contact</a></li>
-        </ul>
-        <p class="colophon__note">Handmade in Copenhagen</p>
+      <div class="colophon__grid">
+        <div class="colophon__brand">
+          <a href="/" class="brand"><span class="brand__name">MyNails</span></a>
+          <p class="colophon__blurb">
+            Handmade press-on nail sets, made one nail at a time in Copenhagen
+            and sold in small runs.
+          </p>
+          <ul class="colophon__social">
+            <!-- add a social link in Settings → Contact → Footer links -->
+          </ul>
+        </div>
+
+        <nav class="colophon__col" aria-label="Shop">
+          <h2 class="colophon__heading">The seven</h2>
+          <ul>
+            <li><a href="/sets/lily-blanc">Lily Blanc</a></li>
+            <li><a href="/sets/orchid-veil">Orchid Veil</a></li>
+            <li><a href="/sets/matcha-latte">Matcha Latte</a></li>
+            <li><a href="/sets/cherry-gloss">Cherry Gloss</a></li>
+            <li><a href="/sets/etoile">Étoile</a></li>
+            <li><a href="/sets/bunny-cream">Bunny Cream</a></li>
+            <li><a href="/sets/amour">Amour</a></li>
+            <li><a href="/shop"><strong>All seven sets</strong></a></li>
+          </ul>
+        </nav>
+
+        <nav class="colophon__col" aria-label="Help">
+          <h2 class="colophon__heading">Help</h2>
+          <ul>
+            <li><a href="/guide">Fit &amp; care</a></li>
+            <li><a href="/guide#sizing">Sizing</a></li>
+            <li><a href="/shipping">Shipping &amp; returns</a></li>
+            <li><a href="/faq">FAQ</a></li>
+            <li><a href="/contact">Contact</a></li>
+          </ul>
+        </nav>
+
+        <div class="colophon__col colophon__signup">
+          <h2 class="colophon__heading">The waitlist</h2>
+          <p>One email, sent when the next run of sets is ready. Nothing else.</p>
+          <form
+            data-symbol="waitlist-form"
+            class="notify notify--compact"
+            novalidate=""
+            data-form="waitlist"
+            data-success="You are on the list. We will write once, when the sets are ready."
+            method="post"
+            action="https://p-prettynails.the-montiapple.workers.dev/api/f/waitlist"
+          >
+            <div class="notify__row">
+              <label class="visually-hidden" for="footer-email">Email address</label>
+              <input
+                id="footer-email"
+                class="notify__input"
+                type="email"
+                name="email"
+                required=""
+                autocomplete="email"
+                placeholder="you@example.com"
+              />
+              <button type="submit" class="btn btn--solid">Join</button>
+            </div>
+            <p role="status" aria-live="polite" class="notify__status"></p>
+          </form>
+        </div>
       </div>
+
       <div class="colophon__legal">
-        <p>&copy; 2026 MyNails. All rights reserved.</p>
+        <p>&copy; 2026 MyNails · Handmade in Copenhagen, Denmark</p>
         <ul>
           <li><a href="/privacy">Privacy</a></li>
           <li><a href="/terms">Terms</a></li>
+          <li><a href="/shipping">Shipping &amp; returns</a></li>
         </ul>
       </div>
     </footer>
 
-    <script src="/assets/js/render.js?v=18"></script>
-    <script src="/assets/js/main.js?v=18"></script>
+    <script src="/assets/js/render.js?v=19"></script>
+    <script src="/assets/js/main.js?v=19"></script>
   </body>
 </html>

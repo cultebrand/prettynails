@@ -16,7 +16,23 @@
       "image": "/media/uploads/nails/chip-lily-blanc.webp",
       "image_alt": "A macro photograph of the Lily Blanc set — glazed milk",
       "hand": "/media/uploads/nails/hand-lily-blanc.webp",
-      "hand_alt": "The same hand wearing the Lily Blanc press-on set"
+      "hand_alt": "The same hand wearing the Lily Blanc press-on set",
+      "gallery": [
+        {
+          "image": "/media/uploads/nails/isolated/lily-blanc-01.webp",
+          "alt": "Nail 1 of the Lily Blanc set, photographed on its own — glazed milk"
+        },
+        {
+          "image": "/media/uploads/nails/isolated/lily-blanc-02.webp",
+          "alt": "Nail 2 of the Lily Blanc set, photographed on its own — glazed milk"
+        },
+        {
+          "image": "/media/uploads/nails/isolated/lily-blanc-03.webp",
+          "alt": "Nail 3 of the Lily Blanc set, photographed on its own — glazed milk"
+        }
+      ],
+      "status": "next-run",
+      "run_note": "Run 01 · eighteen made · opens October"
     },
     {
       "slug": "orchid-veil",
@@ -34,7 +50,23 @@
       "image": "/media/uploads/nails/chip-orchid-veil.webp",
       "image_alt": "A macro photograph of the Orchid Veil set — aurora pearl",
       "hand": "/media/uploads/nails/hand-orchid-veil.webp",
-      "hand_alt": "The same hand wearing the Orchid Veil press-on set"
+      "hand_alt": "The same hand wearing the Orchid Veil press-on set",
+      "gallery": [
+        {
+          "image": "/media/uploads/nails/isolated/orchid-veil-01.webp",
+          "alt": "Nail 1 of the Orchid Veil set, photographed on its own — aurora pearl"
+        },
+        {
+          "image": "/media/uploads/nails/isolated/orchid-veil-02.webp",
+          "alt": "Nail 2 of the Orchid Veil set, photographed on its own — aurora pearl"
+        },
+        {
+          "image": "/media/uploads/nails/isolated/orchid-veil-03.webp",
+          "alt": "Nail 3 of the Orchid Veil set, photographed on its own — aurora pearl"
+        }
+      ],
+      "status": "next-run",
+      "run_note": "Run 01 · eighteen made · opens October"
     },
     {
       "slug": "matcha-latte",
@@ -52,7 +84,23 @@
       "image": "/media/uploads/nails/chip-matcha-latte.webp",
       "image_alt": "A macro photograph of the Matcha Latte set — satin marble",
       "hand": "/media/uploads/nails/hand-matcha-latte.webp",
-      "hand_alt": "The same hand wearing the Matcha Latte press-on set"
+      "hand_alt": "The same hand wearing the Matcha Latte press-on set",
+      "gallery": [
+        {
+          "image": "/media/uploads/nails/isolated/matcha-latte-01.webp",
+          "alt": "Nail 1 of the Matcha Latte set, photographed on its own — satin marble"
+        },
+        {
+          "image": "/media/uploads/nails/isolated/matcha-latte-02.webp",
+          "alt": "Nail 2 of the Matcha Latte set, photographed on its own — satin marble"
+        },
+        {
+          "image": "/media/uploads/nails/isolated/matcha-latte-03.webp",
+          "alt": "Nail 3 of the Matcha Latte set, photographed on its own — satin marble"
+        }
+      ],
+      "status": "next-run",
+      "run_note": "Run 01 · twelve made · opens October"
     },
     {
       "slug": "cherry-gloss",
@@ -70,7 +118,23 @@
       "image": "/media/uploads/nails/chip-cherry-gloss.webp",
       "image_alt": "A macro photograph of the Cherry Gloss set — jelly gloss",
       "hand": "/media/uploads/nails/hand-cherry-gloss.webp",
-      "hand_alt": "The same hand wearing the Cherry Gloss press-on set"
+      "hand_alt": "The same hand wearing the Cherry Gloss press-on set",
+      "gallery": [
+        {
+          "image": "/media/uploads/nails/isolated/cherry-gloss-01.webp",
+          "alt": "Nail 1 of the Cherry Gloss set, photographed on its own — jelly gloss"
+        },
+        {
+          "image": "/media/uploads/nails/isolated/cherry-gloss-02.webp",
+          "alt": "Nail 2 of the Cherry Gloss set, photographed on its own — jelly gloss"
+        },
+        {
+          "image": "/media/uploads/nails/isolated/cherry-gloss-03.webp",
+          "alt": "Nail 3 of the Cherry Gloss set, photographed on its own — jelly gloss"
+        }
+      ],
+      "status": "few-left",
+      "run_note": "Run 01 · twelve made · nine left"
     },
     {
       "slug": "etoile",
@@ -88,7 +152,23 @@
       "image": "/media/uploads/nails/chip-etoile.webp",
       "image_alt": "A macro photograph of the Étoile set — mirror chrome",
       "hand": "/media/uploads/nails/hand-etoile.webp",
-      "hand_alt": "The same hand wearing the Étoile press-on set"
+      "hand_alt": "The same hand wearing the Étoile press-on set",
+      "gallery": [
+        {
+          "image": "/media/uploads/nails/isolated/etoile-01.webp",
+          "alt": "Nail 1 of the Étoile set, photographed on its own — mirror chrome"
+        },
+        {
+          "image": "/media/uploads/nails/isolated/etoile-02.webp",
+          "alt": "Nail 2 of the Étoile set, photographed on its own — mirror chrome"
+        },
+        {
+          "image": "/media/uploads/nails/isolated/etoile-03.webp",
+          "alt": "Nail 3 of the Étoile set, photographed on its own — mirror chrome"
+        }
+      ],
+      "status": "made-to-order",
+      "run_note": "Made to order · about two weeks"
     },
     {
       "slug": "bunny-cream",
@@ -106,7 +186,23 @@
       "image": "/media/uploads/nails/chip-bunny-cream.webp",
       "image_alt": "A macro photograph of the Bunny Cream set — glazed pearl",
       "hand": "/media/uploads/nails/hand-bunny-cream.webp",
-      "hand_alt": "The same hand wearing the Bunny Cream press-on set"
+      "hand_alt": "The same hand wearing the Bunny Cream press-on set",
+      "gallery": [
+        {
+          "image": "/media/uploads/nails/isolated/bunny-cream-01.webp",
+          "alt": "Nail 1 of the Bunny Cream set, photographed on its own — glazed pearl"
+        },
+        {
+          "image": "/media/uploads/nails/isolated/bunny-cream-02.webp",
+          "alt": "Nail 2 of the Bunny Cream set, photographed on its own — glazed pearl"
+        },
+        {
+          "image": "/media/uploads/nails/isolated/bunny-cream-03.webp",
+          "alt": "Nail 3 of the Bunny Cream set, photographed on its own — glazed pearl"
+        }
+      ],
+      "status": "next-run",
+      "run_note": "Run 01 · twelve made · opens October"
     },
     {
       "slug": "amour",
@@ -124,7 +220,47 @@
       "image": "/media/uploads/nails/chip-amour.webp",
       "image_alt": "A macro photograph of the Amour set — jelly crimson",
       "hand": "/media/uploads/nails/hand-amour.webp",
-      "hand_alt": "The same hand wearing the Amour press-on set"
+      "hand_alt": "The same hand wearing the Amour press-on set",
+      "gallery": [
+        {
+          "image": "/media/uploads/nails/isolated/amour-01.webp",
+          "alt": "Nail 1 of the Amour set, photographed on its own — jelly crimson"
+        },
+        {
+          "image": "/media/uploads/nails/isolated/amour-02.webp",
+          "alt": "Nail 2 of the Amour set, photographed on its own — jelly crimson"
+        },
+        {
+          "image": "/media/uploads/nails/isolated/amour-03.webp",
+          "alt": "Nail 3 of the Amour set, photographed on its own — jelly crimson"
+        },
+        {
+          "image": "/media/uploads/nails/isolated/amour-04.webp",
+          "alt": "Nail 4 of the Amour set, photographed on its own — jelly crimson"
+        },
+        {
+          "image": "/media/uploads/nails/isolated/amour-06.webp",
+          "alt": "Nail 5 of the Amour set, photographed on its own — jelly crimson"
+        },
+        {
+          "image": "/media/uploads/nails/isolated/amour-07.webp",
+          "alt": "Nail 6 of the Amour set, photographed on its own — jelly crimson"
+        },
+        {
+          "image": "/media/uploads/nails/isolated/amour-08.webp",
+          "alt": "Nail 7 of the Amour set, photographed on its own — jelly crimson"
+        },
+        {
+          "image": "/media/uploads/nails/isolated/amour-09.webp",
+          "alt": "Nail 8 of the Amour set, photographed on its own — jelly crimson"
+        },
+        {
+          "image": "/media/uploads/nails/isolated/amour-10.webp",
+          "alt": "Nail 9 of the Amour set, photographed on its own — jelly crimson"
+        }
+      ],
+      "status": "few-left",
+      "run_note": "Run 01 · six made · four left"
     }
   ]
 }

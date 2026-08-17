@@ -259,7 +259,29 @@
     input.id = id;
     input.name = field.name;
     input.className = "notify__input";
+
+    /* The markup this replaces carried required and autocomplete; the drawn
+       version carried neither, so the labels still read "Your email *" while
+       the browser would happily post an empty subject and body. */
+    if (field.required) input.required = true;
+    var AUTOFILL = {
+      email: "email",
+      name: "name",
+      first_name: "given-name",
+      last_name: "family-name",
+      phone: "tel",
+      tel: "tel",
+      address: "street-address",
+      postcode: "postal-code",
+      city: "address-level2",
+      country: "country-name",
+    };
+    var token =
+      AUTOFILL[field.name] ||
+      (field.type === "email" ? "email" : field.type === "tel" ? "tel" : "");
+    if (token) input.autocomplete = token;
     if (field.placeholder) input.placeholder = field.placeholder;
+    else if (input.type === "email") input.placeholder = "you@example.com";
     if (value !== undefined && value !== null) input.value = value;
 
     /* A field the node answers itself, shown so it can be checked rather than
@@ -731,6 +753,14 @@
     document.querySelectorAll("form[data-form], form.notify").forEach(function (form) {
       var action = submitEndpoint(content, form);
       var success = form.dataset.success || "You are on the list. Watch your inbox.";
+
+      // Delegated: renderFormFields() calls replaceChildren() on the field
+      // host, so anything bound to an individual input is thrown away with it.
+      form.addEventListener("input", function (event) {
+        if (event.target && event.target.hasAttribute("aria-invalid")) {
+          clearInvalid(event.target);
+        }
+      });
       form.addEventListener("submit", function (event) {
         event.preventDefault();
 
@@ -742,6 +772,7 @@
 
         if (input && (!input.checkValidity() || !email)) {
           say(status, "That email address is not complete. Check it and try again.", "error");
+          markInvalid(input, status);
           input.focus();
           return;
         }
@@ -753,6 +784,7 @@
         });
         if (blank) {
           say(status, "Something above is still empty.", "error");
+          markInvalid(blank, status);
           blank.focus();
           return;
         }
@@ -771,13 +803,16 @@
             encodeURIComponent("Opening notice") +
             "&body=" +
             encodeURIComponent("Please add " + email + " to the list.");
-          say(status, "Opening your mail app to finish.");
+          say(status, "Opening your mail app to finish.", "ok");
           return;
         }
 
         var button = form.querySelector("button[type='submit']");
-        button.disabled = true;
-        say(status, "Sending…");
+        if (button) {
+          button.disabled = true;
+          button.setAttribute("aria-busy", "true");
+        }
+        say(status, "Sending…", "pending");
 
         // Sent as FormData on purpose: multipart/form-data is a CORS-safe
         // content type, so the browser skips the preflight round trip that
@@ -806,23 +841,49 @@
             var fieldError = (result.body.errors || [])[0];
             if (fieldError) {
               say(status, fieldError.message, "error");
+              markInvalid(
+                form.querySelector('[name="' + fieldError.field + '"]'),
+                status
+              );
               return;
             }
             if (!result.ok || result.body.success === false) {
               say(status, result.body.message || "That did not send. Try again.", "error");
               return;
             }
+            form.querySelectorAll("[aria-invalid]").forEach(clearInvalid);
             form.reset();
-            say(status, result.body.message || success);
+            // The form has done its job; the fields go and the confirmation
+            // takes their place, so nobody submits the same address twice.
+            form.dataset.done = "1";
+            say(status, result.body.message || success, "ok");
           })
           .catch(function () {
             say(status, "That did not send. Try again, or email us directly.", "error");
           })
           .finally(function () {
-            button.disabled = false;
+            if (button) {
+              button.disabled = false;
+              button.removeAttribute("aria-busy");
+            }
           });
       });
     });
+  }
+
+  /* An error that only prints a sentence under a form leaves the reader to
+     find the field it is about. These mark it, and point the field's
+     description at the sentence, so a screen reader reads both together. */
+  function markInvalid(field, status) {
+    if (!field) return;
+    field.setAttribute("aria-invalid", "true");
+    if (status && status.id) field.setAttribute("aria-describedby", status.id);
+  }
+
+  function clearInvalid(field) {
+    if (!field) return;
+    field.removeAttribute("aria-invalid");
+    field.removeAttribute("aria-describedby");
   }
 
   function say(node, message, state) {
@@ -1064,13 +1125,54 @@
     if (!ribbon) return;
 
     var set = function () {
-      var height = Math.round(ribbon.getBoundingClientRect().height);
-      if (height > 0) document.documentElement.style.setProperty("--ribbon-h", height + "px");
+      /* The ribbon's bottom edge, not its height: the announcement bar sits
+         above it, and the masthead that floats over the hero is offset by this
+         value. Measuring only the strip left the header 37-55px high in the
+         ribbon's captions once the bar was switched on. */
+      var rect = ribbon.getBoundingClientRect();
+      var bottom = Math.round(rect.bottom + window.scrollY);
+      if (bottom > 0) document.documentElement.style.setProperty("--ribbon-h", bottom + "px");
     };
 
     set();
     window.addEventListener("resize", set, { passive: true });
     if (document.readyState !== "complete") window.addEventListener("load", set);
+  }
+
+  /* --- stopping the nail strips ---------------------------------------------
+     Two marquees run for ever on the landing page. The only way to stop them
+     was to hold a cursor over one, which is not discoverable and, on a touch
+     screen, latches paused after a tap instead. WCAG 2.2.2 asks for a control.
+
+     The button is built here rather than baked into the markup so it cannot
+     exist as a dead control when this script does not run — and it is not
+     built at all for a visitor who has already asked for less motion, because
+     for them the animation is off and a pause button would be a lie. */
+  function pauseRibbons() {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    document.querySelectorAll(".ribbon").forEach(function (ribbon) {
+      var track = ribbon.querySelector(".ribbon__track");
+      if (!track) return;
+
+      var button = document.createElement("button");
+      button.type = "button";
+      button.className = "ribbon__pause";
+      button.setAttribute("aria-pressed", "false");
+      button.textContent = "Pause";
+
+      button.addEventListener("click", function () {
+        var paused = ribbon.hasAttribute("data-paused");
+        if (paused) ribbon.removeAttribute("data-paused");
+        else ribbon.setAttribute("data-paused", "");
+        button.setAttribute("aria-pressed", paused ? "false" : "true");
+        button.textContent = paused ? "Pause" : "Play";
+      });
+
+      // A sibling of the track, never a child: the bottom ribbon's track is
+      // aria-hidden, and a control inside it would be hidden with it.
+      track.insertAdjacentElement("afterend", button);
+    });
   }
 
   /* --- go ----------------------------------------------------------------- */
@@ -1082,6 +1184,7 @@
   // Chrome first: neither of these needs the content, and both decide where
   // things sit on the screen — they should not wait on a network round trip.
   measureRibbon();
+  pauseRibbons();
   applyDock();
 
   fetchJSON("symbols.json").then(function (manifest) {

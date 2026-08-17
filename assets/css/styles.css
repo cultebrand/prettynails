@@ -26,6 +26,16 @@
   --shade: #e4dad2;
   --deep: #6e5b4e;
 
+  /* --- text on the ground ---
+     Two values, measured against --wash: --ink-soft 7.05:1, --ink-faint 5.13:1.
+     Everything muted on this site used to pick its own percentage between 45%
+     and 78%, and the ones at the bottom of that range failed WCAG AA at the
+     9-13px they were used at — the price, the product card's only call to
+     action, every eyebrow, the footer's legal line. Two tokens, so the next
+     muted thing cannot invent a third failing value. */
+  --ink-soft: color-mix(in srgb, var(--ink) 78%, transparent);
+  --ink-faint: color-mix(in srgb, var(--ink) 68%, transparent);
+
   /* --- hairlines --- */
   --line: color-mix(in srgb, var(--ink) 12%, transparent);
   --line-soft: color-mix(in srgb, var(--ink) 8%, transparent);
@@ -53,12 +63,27 @@
   /* --- the nail ribbon --- */
   --nail-h: 82px;
   --ribbon-gap: clamp(1.75rem, 4vw, 3.25rem);
-  --ribbon-h: calc(var(--nail-h) + 61px);
+  /* Everything above the hero, not just the strip of nails: the floating
+     masthead is offset by this and the hero subtracts it from the viewport.
+     main.js measures the real value; this is the no-JS fallback. */
+  --banner-h: 0px;
+  --ribbon-h: calc(var(--nail-h) + 65px + var(--banner-h));
+}
+
+/* A bar that is actually shown claims its height, measured rather than
+     guessed: the announcement wraps to two lines below 40rem. main.js replaces
+     --ribbon-h with the real measurement; this is what holds with JS off. */
+:root:has(.banner:not([hidden])) {
+  --banner-h: 55px;
 }
 
 @media (min-width: 40rem) {
   :root {
     --nail-h: 96px;
+  }
+
+  :root:has(.banner:not([hidden])) {
+    --banner-h: 37px;
   }
 }
 
@@ -152,14 +177,14 @@ a {
   font-size: var(--step--2);
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--deep) 62%, transparent);
+  color: var(--deep);
 }
 
 /* Inside the hero a label belongs to the set on the hand and takes its ink.
    Everywhere else the page speaks in its own voice. */
 .section-head .eyebrow,
 .waitlist .eyebrow {
-  color: color-mix(in srgb, var(--ink) 55%, transparent);
+  color: color-mix(in srgb, var(--deep) 85%, var(--ink));
 }
 
 .btn,
@@ -182,6 +207,7 @@ a {
     background-color 0.42s ease,
     color 0.42s ease,
     border-color 0.42s ease,
+    opacity 0.42s ease,
     transform 0.42s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
@@ -190,7 +216,7 @@ a {
   color: var(--wash);
 }
 
-.btn--solid:hover {
+.btn--solid:hover:not(:disabled) {
   transform: translateY(-2px);
 }
 
@@ -200,9 +226,39 @@ a {
   border: 1px solid color-mix(in srgb, var(--deep) 28%, transparent);
 }
 
-.btn--ghost:hover {
+.btn--ghost:hover:not(:disabled) {
   border-color: color-mix(in srgb, var(--deep) 60%, transparent);
   transform: translateY(-2px);
+}
+
+/* Mid-submit the button was disabled but still fully opaque, still showing a
+   pointer cursor, and still lifting on hover. */
+.btn:disabled,
+.btn--solid:disabled,
+.btn--ghost:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn[aria-busy="true"] {
+  gap: 0.55rem;
+}
+
+.btn[aria-busy="true"]::after {
+  content: "";
+  width: 12px;
+  height: 12px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 999px;
+  animation: btn-spin 0.7s linear infinite;
+}
+
+@keyframes btn-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .btn:focus-visible,
@@ -228,7 +284,7 @@ a {
 .section-head__blurb {
   margin: 1.25rem 0 0;
   max-width: 46ch;
-  color: color-mix(in srgb, var(--ink) 68%, transparent);
+  color: var(--ink-faint);
 }
 
 /* A section head whose note sits on the far right of the same line. */
@@ -271,6 +327,23 @@ a {
   font-size: var(--step--2);
   letter-spacing: 0.16em;
   text-transform: uppercase;
+}
+
+.banner a {
+  display: block;
+  color: inherit;
+}
+
+.banner__cta {
+  margin-inline-start: 0.35em;
+  padding-bottom: 1px;
+  box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--wash) 55%, transparent);
+  transition: box-shadow 0.3s ease;
+}
+
+.banner a:hover .banner__cta,
+.banner a:focus-visible .banner__cta {
+  box-shadow: inset 0 -1px 0 var(--wash);
 }
 
 /* --- the nail ribbon ------------------------------------------------------ */
@@ -325,6 +398,44 @@ a {
   animation-direction: reverse;
 }
 
+.ribbon[data-paused] .ribbon__row {
+  animation-play-state: paused;
+}
+
+/* Built by main.js, so it never exists as a dead control with JS off, and
+   never at all when the visitor has asked for reduced motion. Right-hand side:
+   .ribbon__nav already owns the left. */
+.ribbon__pause {
+  position: absolute;
+  inset-inline-end: 10px;
+  top: 10px;
+  z-index: 5;
+  min-height: 0;
+  padding: 6px 13px;
+  border: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink) 88%, transparent);
+  color: var(--wash);
+  font: inherit;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.ribbon:hover .ribbon__pause,
+.ribbon__pause:focus-visible,
+.ribbon[data-paused] .ribbon__pause {
+  opacity: 1;
+}
+
+.ribbon__pause:focus-visible {
+  outline: 2px solid var(--rose);
+  outline-offset: 2px;
+}
+
 .ribbon__item {
   display: flex;
   flex-direction: column;
@@ -341,11 +452,13 @@ a {
 }
 
 .ribbon__name {
-  font-size: 9px;
+  /* 10px, not 9: these captions used to repeat four nav words, so nobody had
+     to read them. They name the seven sets now. */
+  font-size: 10px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   white-space: nowrap;
-  color: color-mix(in srgb, var(--ink) 44%, transparent);
+  color: var(--set-deep, var(--ink-faint));
   transition: color 0.3s ease;
 }
 
@@ -366,7 +479,7 @@ a.ribbon__item:focus-visible .ribbon__nail {
 
 a.ribbon__item:hover .ribbon__name,
 a.ribbon__item:focus-visible .ribbon__name {
-  color: var(--rose);
+  color: var(--ink);
 }
 
 /* The named menu, for keyboards and screen readers. Each link is off-screen
@@ -411,12 +524,16 @@ a.ribbon__item:focus-visible .ribbon__name {
 .masthead {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 0.75rem 1.5rem;
   max-width: var(--frame);
   margin-inline: auto;
-  padding: 1.75rem var(--gutter) 0;
+  /* Symmetric, so the header is the same height on the landing page as on
+     every other one. It used to be 63px there and 72px everywhere else, and
+     the right-hand slot swapped a tagline for a filled button on the way. */
+  min-height: 72px;
+  padding: 0.75rem var(--gutter);
 }
 
 /* On the landing page the masthead floats over the tinted hero rather than
@@ -460,7 +577,7 @@ a.ribbon__item:focus-visible .ribbon__name {
 }
 
 .brand__sub {
-  color: color-mix(in srgb, var(--ink) 42%, transparent);
+  color: var(--ink-faint);
 }
 
 /* Held back on the narrowest screens, where the wordmark alone is the header. */
@@ -470,7 +587,7 @@ a.ribbon__item:focus-visible .ribbon__name {
   font-size: var(--step--2);
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--ink) 52%, transparent);
+  color: var(--ink-faint);
 }
 
 @media (min-width: 40rem) {
@@ -489,7 +606,7 @@ a.ribbon__item:focus-visible .ribbon__name {
 }
 
 .masthead__nav a {
-  color: color-mix(in srgb, var(--ink) 62%, transparent);
+  color: var(--ink-faint);
   transition: color 0.3s ease;
 }
 
@@ -497,22 +614,42 @@ a.ribbon__item:focus-visible .ribbon__name {
   color: var(--ink);
 }
 
-.masthead__cta {
+.masthead__end {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
   margin-inline-start: auto;
+}
+
+@media (min-width: 62rem) {
+  .masthead__end {
+    margin-inline-start: 0;
+  }
+}
+
+/* The secondary entrance. Quiet, because an account on a shop that cannot yet
+   take an order is not what a first-time visitor is here to do — the waitlist
+   is, and it is the filled button beside this. */
+.masthead__account {
+  font-size: var(--step--2);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  transition: color 0.3s ease;
+}
+
+.masthead__account:hover {
+  color: var(--ink);
 }
 
 @media (min-width: 62rem) {
   .masthead__nav {
     display: flex;
   }
-
-  .masthead__cta {
-    margin-inline-start: 0;
-  }
 }
 
 @media (max-width: 34rem) {
-  .masthead__cta {
+  .masthead__account {
     display: none;
   }
 }
@@ -579,14 +716,6 @@ a.ribbon__item:focus-visible .ribbon__name {
   }
 }
 
-/* Only once there is room to spare does the hero step in past the sections
-   below it. */
-@media (min-width: 90rem) {
-  .hero__inner {
-    padding-inline: calc(var(--gutter) + 1.25rem);
-  }
-}
-
 .hero__lede {
   grid-area: lede;
   align-self: center;
@@ -629,7 +758,7 @@ a.ribbon__item:focus-visible .ribbon__name {
   max-width: 24rem;
   font-size: var(--step-0);
   line-height: 1.625;
-  color: color-mix(in srgb, var(--deep) 78%, transparent);
+  color: var(--deep);
   animation: hero-rise 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) 0.11s both;
 }
 
@@ -649,11 +778,13 @@ a.ribbon__item:focus-visible .ribbon__name {
   font-size: var(--step--2);
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--deep) 60%, transparent);
+  color: var(--deep);
 }
 
+/* No opacity here: it multiplied against the ink below and took the spec
+   labels under 3:1. The term is subordinate to its value by tracking. */
 .specs dt {
-  opacity: 0.6;
+  opacity: 0.75;
 }
 
 .specs dd {
@@ -745,11 +876,17 @@ html:not(.js) .hero__layers > .hero__layer:first-of-type {
   margin: 0;
   font-family: var(--face-display);
   font-size: 1.125rem;
-  color: color-mix(in srgb, var(--deep) 70%, transparent);
+  color: var(--deep);
 }
 
+/* "01" is the reading, "/ 07" is the scale. That subordination used to come
+   from dropping the ink to 38%, which measured 2.64:1 — under the AA bar at
+   this size. It comes from scale and tracking now, so the total stays legible
+   whichever of the seven inks the hero is currently wearing. */
 .tryon__count span + span {
-  color: color-mix(in srgb, var(--deep) 38%, transparent);
+  font-size: 0.8em;
+  letter-spacing: 0.06em;
+  opacity: 0.72;
 }
 
 .tryon__rail {
@@ -834,11 +971,15 @@ html:not(.js) .hero__layers > .hero__layer:first-of-type {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: color-mix(in srgb, var(--rail-deep) 55%, transparent);
+  /* The unselected chips are subordinate by weight, not by fading the ink —
+     at 10px, 55% of a pale set's ink measured 2.33:1. */
+  color: var(--rail-deep);
+  opacity: 0.78;
 }
 
 .chip[aria-current="true"] .chip__name {
   color: var(--deep);
+  opacity: 1;
 }
 
 /* --- from the studio ------------------------------------------------------ */
@@ -904,13 +1045,13 @@ html:not(.js) .hero__layers > .hero__layer:first-of-type {
   font-size: var(--step--2);
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--piece-deep, var(--ink)) 75%, transparent);
+  color: var(--piece-deep, var(--ink));
 }
 
 .piece__note {
   margin: 0.75rem 0 0;
   max-width: 24rem;
-  color: color-mix(in srgb, var(--ink) 65%, transparent);
+  color: var(--ink-faint);
 }
 
 /* --- how a set goes on ---------------------------------------------------- */
@@ -959,7 +1100,7 @@ html:not(.js) .hero__layers > .hero__layer:first-of-type {
   font-family: var(--face-display);
   font-size: 1.875rem;
   line-height: 1;
-  color: color-mix(in srgb, var(--ink) 38%, transparent);
+  color: var(--ink-faint);
 }
 
 .step__title {
@@ -972,7 +1113,7 @@ html:not(.js) .hero__layers > .hero__layer:first-of-type {
 .step__body {
   margin: 0.5rem 0 0;
   max-width: 20rem;
-  color: color-mix(in srgb, var(--ink) 68%, transparent);
+  color: var(--ink-faint);
 }
 
 /* --- the seven ------------------------------------------------------------ */
@@ -1047,7 +1188,7 @@ html.js .set:not(.is-revealed) {
   font-size: var(--step--2);
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--set-deep) 70%, transparent);
+  color: var(--set-deep);
   box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--set-deep) 30%, transparent);
   transition:
     color 0.3s ease,
@@ -1106,7 +1247,20 @@ html.js .set:not(.is-revealed) {
   letter-spacing: 0.2em;
   text-transform: uppercase;
   white-space: nowrap;
-  color: color-mix(in srgb, var(--ink) 60%, transparent);
+  color: var(--ink-faint);
+}
+
+/* Scarcity that is shown against a product rather than asserted in prose. */
+.set__status {
+  display: inline-block;
+  margin: 0 0 0.75rem;
+  padding: 0.3em 0.8em;
+  border-radius: 999px;
+  font-size: var(--step--2);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--set-deep, var(--deep));
+  background: color-mix(in srgb, var(--set-deep, var(--deep)) 12%, transparent);
 }
 
 .set__finish {
@@ -1114,13 +1268,13 @@ html.js .set:not(.is-revealed) {
   font-size: var(--step--2);
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--set-deep) 75%, transparent);
+  color: var(--set-deep);
 }
 
 .set__note {
   margin: 0.9rem 0 0;
   max-width: 24rem;
-  color: color-mix(in srgb, var(--ink) 72%, transparent);
+  color: var(--ink-faint);
 }
 
 .sets__closer {
@@ -1138,7 +1292,13 @@ html.js .set:not(.is-revealed) {
 
 .waitlist {
   padding: 6rem var(--gutter);
-  border-top: 1px solid var(--line);
+  /* A wash of the set's own glow rather than the flat cream it used to be. The
+     mix is kept low, and the two text tokens are re-mixed stronger inside the
+     band, because Amour's glow is a saturated red and the site-wide values are
+     tuned for cream. */
+  background: color-mix(in srgb, var(--shade) 26%, var(--wash));
+  --ink-soft: color-mix(in srgb, var(--ink) 92%, transparent);
+  --ink-faint: color-mix(in srgb, var(--ink) 86%, transparent);
   scroll-margin-top: 1.5rem;
 }
 
@@ -1158,7 +1318,7 @@ html.js .set:not(.is-revealed) {
 
 @media (min-width: 64rem) {
   .waitlist__inner {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr) minmax(0, 26rem) minmax(0, 16rem);
   }
 }
 
@@ -1168,9 +1328,47 @@ html.js .set:not(.is-revealed) {
   font-size: var(--step-3);
   font-weight: 400;
   line-height: 1.02;
+  color: var(--deep);
+}
+
+/* Third column: what joining actually commits you to, said before you type
+   rather than in a privacy page nobody opens. */
+.waitlist__panel {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--step--1);
+  color: var(--ink-soft);
+}
+
+.waitlist__panel li {
+  padding: 0.6rem 0;
+  border-top: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
+}
+
+.waitlist__panel li:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.waitlist .notify {
+  max-width: 34rem;
 }
 
 /* --- forms ---------------------------------------------------------------- */
+
+/* With JavaScript off these post straight to a JSON endpoint, which answers
+   200 application/json — a white page of JSON on somebody else's domain with
+   no way back. The <noscript> beside each form says what to do instead; this
+   stops the button inviting the press that lands there. */
+html:not(.js) .notify__row .btn {
+  display: none;
+}
+
+html:not(.js) .notify__input {
+  pointer-events: none;
+  opacity: 0.55;
+}
 
 .notify {
   margin: 0;
@@ -1181,7 +1379,7 @@ html.js .set:not(.is-revealed) {
   font-size: var(--step--2);
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--ink) 55%, transparent);
+  color: var(--ink-faint);
 }
 
 .notify__row {
@@ -1204,12 +1402,12 @@ html.js .set:not(.is-revealed) {
 }
 
 .notify__input::placeholder {
-  color: color-mix(in srgb, var(--ink) 40%, transparent);
+  color: var(--ink-faint);
 }
 
 .notify__input:focus-visible {
   outline: none;
-  border-color: color-mix(in srgb, var(--ink) 70%, transparent);
+  border-color: var(--ink-faint);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--rose) 18%, transparent);
 }
 
@@ -1240,13 +1438,13 @@ html.js .set:not(.is-revealed) {
 
 .notify__input--locked {
   background: color-mix(in srgb, var(--ink) 5%, transparent);
-  color: color-mix(in srgb, var(--ink) 60%, transparent);
+  color: var(--ink-faint);
 }
 
 .notify__note {
   margin: 0.9rem 0 0;
   font-size: var(--step--1);
-  color: color-mix(in srgb, var(--ink) 55%, transparent);
+  color: var(--ink-faint);
 }
 
 .notify__status {
@@ -1259,10 +1457,67 @@ html.js .set:not(.is-revealed) {
   color: var(--rose);
 }
 
+/* Sending, sent and failed used to be the same faint line of text in the same
+   colour, so the only way to know a submission had landed was that the words
+   changed. */
+.notify__status[data-state="pending"] {
+  color: var(--ink-faint);
+}
+
+.notify__status[data-state="pending"]::before {
+  content: "";
+  display: inline-block;
+  width: 0.75em;
+  height: 0.75em;
+  margin-inline-end: 0.5em;
+  border: 1.5px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 999px;
+  vertical-align: -0.1em;
+  animation: notify-spin 0.8s linear infinite;
+}
+
+@keyframes notify-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.notify__status[data-state="ok"] {
+  font-size: var(--step-0);
+  color: var(--deep);
+}
+
+.notify__status[data-state="ok"]::before {
+  content: "✓";
+  margin-inline-end: 0.5em;
+}
+
+/* Once it has sent, the fields go and the confirmation stands in their place.
+   Not .notify__row — the stacked contact form's children are a field host and
+   a button, not a row. */
+.notify[data-done] > :not(.notify__status) {
+  display: none;
+}
+
+.notify[data-done] .notify__status {
+  margin: 0;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+/* A field the message is about says so, rather than leaving the reader to
+   work out which of five it means. */
+.notify__input[aria-invalid="true"] {
+  border-color: var(--rose);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--rose) 22%, transparent);
+}
+
 .waitlist__note {
   margin: 0 0 1.75rem;
   max-width: 28rem;
-  color: color-mix(in srgb, var(--ink) 70%, transparent);
+  color: var(--ink-faint);
 }
 
 .waitlist .notify {
@@ -1316,7 +1571,7 @@ html.js .set:not(.is-revealed) {
   font-size: var(--step--2);
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--ink) 52%, transparent);
+  color: var(--ink-faint);
 }
 
 .colophon__links {
@@ -1332,7 +1587,7 @@ html.js .set:not(.is-revealed) {
 }
 
 .colophon__links a {
-  color: color-mix(in srgb, var(--ink) 55%, transparent);
+  color: var(--ink-faint);
   transition: color 0.3s ease;
 }
 
@@ -1435,7 +1690,7 @@ html.js .set:not(.is-revealed) {
   gap: 5px;
   min-height: 54px;
   border-radius: 20px;
-  color: color-mix(in srgb, var(--ink) 52%, transparent);
+  color: var(--ink-faint);
   -webkit-tap-highlight-color: transparent;
   transition:
     color 0.38s ease,
@@ -1497,7 +1752,10 @@ html.js .set:not(.is-revealed) {
 }
 
 .account {
-  max-width: var(--measure);
+  /* --frame, not --measure: --frame already includes the two gutters this
+     rule then pads by, and counting them twice stepped the h1 20px right of
+     the wordmark on every account-shaped page. */
+  max-width: var(--frame);
   margin-inline: auto;
   padding: clamp(4rem, 9vw, 7rem) var(--gutter) clamp(4rem, 8vw, 6rem);
 }
@@ -1548,7 +1806,7 @@ html.js .set:not(.is-revealed) {
   font-size: var(--step--2);
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--ink) 55%, transparent);
+  color: var(--ink-faint);
 }
 
 .account__field .notify__input {
@@ -1579,7 +1837,7 @@ html.js .set:not(.is-revealed) {
 .account__note {
   margin: 0.75rem 0 0;
   font-size: var(--step--1);
-  color: color-mix(in srgb, var(--ink) 55%, transparent);
+  color: var(--ink-faint);
 }
 
 .account .section-head__blurb a {
@@ -1613,7 +1871,7 @@ html.js .set:not(.is-revealed) {
   font-size: var(--step--2);
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--ink) 45%, transparent);
+  color: var(--ink-faint);
 }
 
 .account__actions {
@@ -1654,7 +1912,7 @@ html.js .set:not(.is-revealed) {
 .passkey__when {
   display: block;
   font-size: var(--step--1);
-  color: color-mix(in srgb, var(--ink) 50%, transparent);
+  color: var(--ink-faint);
 }
 
 .passkey__remove {
@@ -1781,7 +2039,7 @@ body > .masthead {
   margin: 0;
   padding: 0;
   list-style: none;
-  color: color-mix(in srgb, var(--ink) 45%, transparent);
+  color: var(--ink-faint);
 }
 
 .crumbs li + li::before {
@@ -1791,7 +2049,7 @@ body > .masthead {
 }
 
 .crumbs a {
-  color: color-mix(in srgb, var(--ink) 62%, transparent);
+  color: var(--ink-faint);
   transition: color 0.3s ease;
 }
 
@@ -1880,7 +2138,38 @@ body > .masthead {
 .detail__tagline {
   margin: 1rem 0 0;
   font-size: var(--step-1);
-  color: color-mix(in srgb, var(--ink) 70%, transparent);
+  color: var(--ink-faint);
+}
+
+/* The price used to be the fourth cell of a 11px uppercase spec row, styled
+   exactly like FINISH and SHAPE, and on a phone it orphaned onto a line of its
+   own about 1,300px down the page. It is the number the whole page is about. */
+.detail__price {
+  margin: 1.5rem 0 0;
+  font-family: var(--face-display);
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  line-height: 1;
+  color: var(--deep);
+}
+
+.detail__terms {
+  margin: 0.6rem 0 0;
+  font-size: var(--step--1);
+  color: var(--ink-faint);
+}
+
+.detail__terms a {
+  color: var(--ink-soft);
+  box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--ink) 30%, transparent);
+}
+
+.detail__terms a:hover {
+  color: var(--ink);
+  box-shadow: inset 0 -1px 0 var(--ink);
+}
+
+.detail__run {
+  margin-top: 1.15rem;
 }
 
 .detail__body {
@@ -1890,7 +2179,7 @@ body > .masthead {
 
 .detail__body p {
   margin: 0 0 1.15rem;
-  color: color-mix(in srgb, var(--ink) 78%, transparent);
+  color: var(--ink-soft);
 }
 
 .detail__includes {
@@ -1905,7 +2194,7 @@ body > .masthead {
   padding-inline-start: 1.5rem;
   margin-bottom: 0.85rem;
   font-size: var(--step--1);
-  color: color-mix(in srgb, var(--ink) 72%, transparent);
+  color: var(--ink-faint);
 }
 
 .detail__includes li::before {
@@ -1929,7 +2218,148 @@ body > .masthead {
 .detail__aside {
   margin: 1.25rem 0 0;
   font-size: var(--step--1);
-  color: color-mix(in srgb, var(--ink) 52%, transparent);
+  color: var(--ink-faint);
+}
+
+/* --- every nail in the set ------------------------------------------------ *
+   Cut-out single nails, on tiles tinted with the set's own --wash. These
+   photographs already existed in the repo and were only ever marquee filler;
+   on the set's own page they are the closest a screen gets to picking one up.
+   The grid fills rather than fits, so a set with three looks as deliberate as
+   the one with nine. */
+
+.nails {
+  margin-top: 0.5rem;
+}
+
+.nails__title,
+.nails__note {
+  margin: 0;
+  font-size: var(--step--2);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+/* Flex with a fixed basis rather than an auto-fill grid: a grid sized to the
+   column would make a three-nail set's tiles twice the size of a nine-nail
+   set's, and the seven pages have to look like one shop. */
+.nails__grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin: 0.9rem 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nails__cell {
+  position: relative;
+  flex: 0 0 82px;
+  /* The tile is the shape, not the photograph. Left to size itself the cell
+     grew to whatever height each nail happened to be shot at — these files run
+     from 95x238 to 160x310 — and the row came out ragged. Pinning the image
+     inside an absolutely positioned box makes the ratio authoritative and lets
+     `contain` do the fitting. */
+  aspect-ratio: 3 / 5;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--wash) 70%, #fff);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 7%, transparent);
+}
+
+.nails__cell img {
+  position: absolute;
+  inset: 0.5rem;
+  object-fit: contain;
+  filter: drop-shadow(-4px 7px 9px color-mix(in srgb, #3c2820 18%, transparent));
+}
+
+.nails__note {
+  letter-spacing: 0.12em;
+  text-transform: none;
+  font-size: var(--step--1);
+}
+
+/* --- the assurances strip ------------------------------------------------- *
+   Four facts, carried next to the buy moment. They lived only as the last
+   paragraph of /about, four headings down, where a shopper looking at a set
+   never met them. */
+
+.assurances {
+  max-width: var(--frame);
+  margin: clamp(3.5rem, 7vw, 5rem) auto 0;
+  padding-inline: var(--gutter);
+}
+
+.assurances__row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-block: 1px solid var(--line);
+}
+
+@media (min-width: 48rem) {
+  .assurances__row {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.assurance {
+  padding: 1.35rem 1.25rem 1.35rem 0;
+}
+
+.assurance + .assurance {
+  border-inline-start: 1px solid var(--line-soft);
+  padding-inline-start: 1.25rem;
+}
+
+@media (max-width: 47.99rem) {
+  .assurance:nth-child(odd) {
+    border-inline-start: 0;
+    padding-inline-start: 0;
+  }
+
+  .assurance:nth-child(n + 3) {
+    border-block-start: 1px solid var(--line-soft);
+  }
+}
+
+.assurance__title {
+  margin: 0;
+  font-size: var(--step--2);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.assurance__body {
+  margin: 0.45rem 0 0;
+  font-size: var(--step--1);
+  line-height: 1.55;
+  color: var(--ink-faint);
+}
+
+/* --- related sets --------------------------------------------------------- */
+
+.related {
+  max-width: var(--frame);
+  margin-inline: auto;
+  padding: clamp(4rem, 8vw, 6rem) var(--gutter) 0;
+}
+
+.related .set-grid {
+  gap: 2.5rem 2rem;
+}
+
+.related .eyebrow a {
+  box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--ink) 30%, transparent);
+}
+
+.related .eyebrow a:hover {
+  color: var(--ink);
+  box-shadow: inset 0 -1px 0 var(--ink);
 }
 
 /* --- previous / next ------------------------------------------------------ */
@@ -1960,7 +2390,7 @@ body > .masthead {
   font-size: var(--step--2);
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--ink) 45%, transparent);
+  color: var(--ink-faint);
 }
 
 .pager__name {
@@ -1974,7 +2404,7 @@ body > .masthead {
   font-size: var(--step--2);
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--ink) 55%, transparent);
+  color: var(--ink-faint);
 }
 
 .pager__all:hover,
@@ -1990,7 +2420,10 @@ body > .masthead {
 .prose {
   max-width: var(--frame);
   margin-inline: auto;
-  padding: clamp(3rem, 6vw, 5rem) var(--gutter) 0;
+  /* A closing measure. With `0` here the last paragraph of /about, /guide, /faq
+     and both legal pages ended exactly on the footer hairline — six pages that
+     stopped rather than ended. */
+  padding: clamp(3rem, 6vw, 5rem) var(--gutter) clamp(4rem, 8vw, 6rem);
 }
 
 /* Wide enough for a display headline to break where it wants to rather than
@@ -2026,7 +2459,7 @@ body > .masthead {
   max-width: 62ch;
   font-size: var(--step-0);
   line-height: 1.72;
-  color: color-mix(in srgb, var(--ink) 78%, transparent);
+  color: var(--ink-soft);
 }
 
 /* Headings are scroll targets now, so they must not land under the masthead. */
@@ -2060,7 +2493,7 @@ body > .masthead {
   font-size: var(--step--2);
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--ink) 45%, transparent);
+  color: var(--ink-faint);
 }
 
 .toc ol {
@@ -2077,7 +2510,7 @@ body > .masthead {
 .toc a {
   display: block;
   padding: 0.4rem 0;
-  color: color-mix(in srgb, var(--ink) 62%, transparent);
+  color: var(--ink-soft);
   transition: color 0.3s ease;
 }
 
@@ -2085,7 +2518,7 @@ body > .masthead {
   content: counter(toc, decimal-leading-zero);
   margin-inline-end: 0.75rem;
   font-family: var(--face-display);
-  color: color-mix(in srgb, var(--ink) 32%, transparent);
+  color: var(--ink-faint);
 }
 
 .toc a:hover {
@@ -2156,7 +2589,7 @@ body > .masthead {
 
 .prose__cta p {
   margin: 0;
-  color: color-mix(in srgb, var(--ink) 68%, transparent);
+  color: var(--ink-faint);
 }
 
 /* --- the FAQ -------------------------------------------------------------- */
@@ -2208,7 +2641,7 @@ body > .masthead {
 .faq__a {
   margin: 0.85rem 0 0;
   line-height: 1.7;
-  color: color-mix(in srgb, var(--ink) 74%, transparent);
+  color: var(--ink-soft);
 }
 
 /* --- 404 ------------------------------------------------------------------ */
@@ -2235,7 +2668,7 @@ body > .masthead {
 }
 
 .notfound__list a {
-  color: color-mix(in srgb, var(--ink) 60%, transparent);
+  color: var(--ink-faint);
 }
 
 .notfound__list a:hover {
@@ -2266,7 +2699,7 @@ body > .masthead {
   background: color-mix(in srgb, var(--ink) 2.5%, transparent);
   font-size: var(--step--1);
   line-height: 1.7;
-  color: color-mix(in srgb, var(--ink) 72%, transparent);
+  color: var(--ink-faint);
 }
 
 .contact__aside p {
@@ -2292,7 +2725,7 @@ body > .masthead {
   font-weight: 400;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--ink) 50%, transparent);
+  color: var(--ink-faint);
 }
 
 .contact__aside-title + p {
@@ -2302,7 +2735,127 @@ body > .masthead {
 .contact__aside-note {
   padding-top: 1.25rem;
   border-top: 1px solid var(--line-soft);
-  color: color-mix(in srgb, var(--ink) 50%, transparent);
+  color: var(--ink-faint);
+}
+
+/* --- the footer ----------------------------------------------------------- *
+   Four columns: who this is, the whole shop, the pages that answer questions,
+   and the waitlist. The set links matter twice over — they are the fastest way
+   into any product from any page, and they are the internal linking a shop of
+   this size otherwise has none of. */
+
+.colophon__grid {
+  display: grid;
+  gap: clamp(2.25rem, 5vw, 3rem) clamp(2rem, 5vw, 4rem);
+  max-width: var(--measure);
+  margin-inline: auto;
+}
+
+@media (min-width: 40rem) {
+  .colophon__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 64rem) {
+  .colophon__grid {
+    /* The brand column and the signup column both carry a sentence; the two
+       link columns only carry words, so they take less. */
+    grid-template-columns: 1.35fr 0.85fr 0.85fr 1.25fr;
+  }
+}
+
+.colophon__blurb {
+  margin: 1rem 0 0;
+  max-width: 30ch;
+  font-size: var(--step--1);
+  line-height: 1.65;
+  color: var(--ink-faint);
+}
+
+.colophon__social {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin: 1.25rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--step--2);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.colophon__social a {
+  color: var(--ink-faint);
+  box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--ink) 25%, transparent);
+  transition: color 0.3s ease;
+}
+
+.colophon__social a:hover {
+  color: var(--ink);
+}
+
+.colophon__heading {
+  margin: 0 0 1rem;
+  font-size: var(--step--2);
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.colophon__col ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--step--1);
+}
+
+.colophon__col li + li {
+  margin-top: 0.6rem;
+}
+
+.colophon__col a {
+  color: var(--ink-faint);
+  transition: color 0.3s ease;
+}
+
+.colophon__col a:hover {
+  color: var(--ink);
+}
+
+.colophon__col strong {
+  font-weight: 400;
+  box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--ink) 30%, transparent);
+}
+
+.colophon__signup p {
+  margin: 0 0 1.15rem;
+  max-width: 32ch;
+  font-size: var(--step--1);
+  line-height: 1.65;
+  color: var(--ink-faint);
+}
+
+/* The footer's copy of the waitlist form is narrower than the section-sized one
+   on the landing page, so its field and button stack rather than squeeze. */
+.notify--compact .notify__row {
+  gap: 0.6rem;
+}
+
+.notify--compact .notify__input {
+  flex: 1 1 100%;
+  font-size: var(--step--1);
+}
+
+.notify--compact .btn {
+  flex: 1 1 auto;
+}
+
+@media (min-width: 40rem) and (max-width: 63.99rem) {
+  .notify--compact .notify__input {
+    flex: 1 1 12rem;
+  }
 }
 
 /* --- the legal line under the footer -------------------------------------- */
@@ -2318,7 +2871,7 @@ body > .masthead {
   padding-top: 1.5rem;
   border-top: 1px solid var(--line-soft);
   font-size: var(--step--2);
-  color: color-mix(in srgb, var(--ink) 45%, transparent);
+  color: var(--ink-faint);
 }
 
 .colophon__legal p {
@@ -2370,5 +2923,15 @@ body > .masthead {
     opacity: 1;
     transform: none;
     transition: none;
+  }
+
+  .notify__status[data-state="pending"]::before {
+    animation: none;
+  }
+
+  /* content: none rather than animation: none — a frozen ring reads as broken
+     rather than as still. */
+  .btn[aria-busy="true"]::after {
+    content: none;
   }
 }

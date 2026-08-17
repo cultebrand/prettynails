@@ -27,6 +27,7 @@ const read = (p) => JSON.parse(readFileSync(join(ROOT, p), "utf8"));
 const site = read("content/site.json");
 const catalog = read("content/catalog.json");
 const faq = read("content/faq.json");
+const assurances = read("content/symbols/assurances.json");
 const craft = read("content/craft.json");
 
 const BRAND = "MyNails";
@@ -40,6 +41,9 @@ const YEAR = 2026;
    gets escaped on the way into markup — not because the editor is hostile, but
    because an apostrophe in a product name should not be able to end an
    attribute. */
+const isFilled = (v) =>
+  v != null && (typeof v === "string" ? v.trim() !== "" : Array.isArray(v) ? v.length > 0 : true);
+
 const esc = (s) =>
   String(s ?? "")
     .replace(/&/g, "&amp;")
@@ -164,8 +168,9 @@ function head({ title, description, path, jsonld = [], preload = [] }) {
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="theme-color" content="#f7f3ef" />
 
-    <link rel="icon" href="/media/uploads/apple-touch-icon-180x180.png" />
-    <link rel="apple-touch-icon" href="/media/uploads/apple-touch-icon-180x180.png" />
+    <link rel="icon" href="/media/uploads/icon-32.png" sizes="32x32" />
+    <link rel="icon" href="/media/uploads/icon-16.png" sizes="16x16" />
+    <link rel="apple-touch-icon" href="/media/uploads/icon-180.png" />
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
@@ -190,57 +195,149 @@ ${ACCESS_SCRIPT}
   </head>
   <body>
     <a href="#main" class="skip">Skip to content</a>
-    <aside aria-label="Announcement" data-when="site.announcement" class="banner" hidden>
-      <p data-text="site.announcement"></p>
+${banner()}`;
+}
+
+/* The announcement bar, baked open when there is something to announce.
+   `data-when` binds the TEXT, not the object around it: render.js's isFilled
+   ends in `return true` for any non-null object, so binding the wrapper
+   un-hides an empty bar. Baked rather than left to JavaScript because the one
+   component built to say when this shop opens should not need a script to say
+   it. */
+function banner() {
+  const a = site.announcement || {};
+  const text = typeof a === "string" ? a : a.text;
+  if (!isFilled(text)) {
+    return `    <aside aria-label="Announcement" data-when="site.announcement.text" class="banner" hidden>
+      <p data-text="site.announcement.text"></p>
+    </aside>
+`;
+  }
+  const inner =
+    isFilled(a.href) && isFilled(a.cta)
+      ? `<a href="${esc(a.href)}"><span data-text="site.announcement.text">${esc(text)}</span> <span class="banner__cta">${esc(a.cta)} &rarr;</span></a>`
+      : `<span data-text="site.announcement.text">${esc(text)}</span>`;
+  return `    <aside aria-label="Announcement" data-when="site.announcement.text" class="banner">
+      <p>${inner}</p>
     </aside>
 `;
 }
 
-function masthead(current) {
+function masthead(current, float) {
   const links = MENU.map(
     (m) => `<a href="${m.href}"${m.href === current ? ' aria-current="page"' : ""}>${m.label}</a>`,
   ).join("");
-  return `    <header data-symbol="site-header" class="masthead">
+  return `    <header data-symbol="site-header" class="masthead${float ? " masthead--float" : ""}">
       <a href="/" class="brand"><span class="brand__name">${BRAND}</span></a>
       <nav aria-label="Pages" data-list="pages.pages" class="masthead__nav">${links}</nav>
-      <a href="/signup" class="btn btn--solid masthead__cta" data-account-when="out">Sign up</a>
-      <a href="/account" class="btn btn--ghost masthead__cta" data-account-when="in">Your account</a>
+      <div class="masthead__end">
+        <a href="/waitlist" class="btn btn--solid masthead__cta">Join the waitlist</a>
+        <a href="/login" class="masthead__account" data-account-when="out">Sign in</a>
+        <a href="/account" class="masthead__account" data-account-when="in">Your account</a>
+      </div>
     </header>
 
     <main id="main">
 `;
 }
 
+/* --- the footer ------------------------------------------------------------
+   Written once here and stamped into every page, generated and hand-owned
+   alike (see syncChrome at the bottom), because a footer that differs by one
+   link between two pages is the exact thing that reads as unfinished.
+
+   Four columns: who this is, the whole shop, the pages that answer questions,
+   and one more chance to join the waitlist — which is the only conversion this
+   site has while the shop is shut. */
 function footer() {
-  const links = site.contact.links
-    .filter((l) => l.url && l.label)
-    .map((l) => {
-      const ext = /^https?:/.test(l.url);
-      return `          <li><a href="${esc(l.url)}"${ext ? ' rel="noopener" target="_blank"' : ""}>${esc(l.label)}</a></li>`;
-    })
+  const social = site.contact.links
+    .filter((l) => l.url && l.label && /^https?:/.test(l.url))
+    .map(
+      (l) =>
+        `            <li><a href="${esc(l.url)}" rel="noopener" target="_blank">${esc(l.label)}</a></li>`,
+    )
+    .join("\n");
+
+  const sets = catalog.items
+    .map((i) => `            <li><a href="/sets/${esc(i.slug)}">${esc(i.title)}</a></li>`)
     .join("\n");
 
   return `    </main>
 
     <footer data-symbol="site-footer" class="colophon">
-      <div class="colophon__inner">
-        <a href="/" class="brand"><span class="brand__name">${BRAND}</span></a>
-        <ul data-list="site.contact.links" class="colophon__links">
-${links}
-        </ul>
-        <p class="colophon__note">Handmade in Copenhagen</p>
+      <div class="colophon__grid">
+        <div class="colophon__brand">
+          <a href="/" class="brand"><span class="brand__name">${BRAND}</span></a>
+          <p class="colophon__blurb">
+            Handmade press-on nail sets, made one nail at a time in Copenhagen
+            and sold in small runs.
+          </p>
+          <ul class="colophon__social">
+${social || "            <!-- add a social link in Settings → Contact → Footer links -->"}
+          </ul>
+        </div>
+
+        <nav class="colophon__col" aria-label="Shop">
+          <h2 class="colophon__heading">The seven</h2>
+          <ul>
+${sets}
+            <li><a href="/shop"><strong>All seven sets</strong></a></li>
+          </ul>
+        </nav>
+
+        <nav class="colophon__col" aria-label="Help">
+          <h2 class="colophon__heading">Help</h2>
+          <ul>
+            <li><a href="/guide">Fit &amp; care</a></li>
+            <li><a href="/guide#sizing">Sizing</a></li>
+            <li><a href="/shipping">Shipping &amp; returns</a></li>
+            <li><a href="/faq">FAQ</a></li>
+            <li><a href="/contact">Contact</a></li>
+          </ul>
+        </nav>
+
+        <div class="colophon__col colophon__signup">
+          <h2 class="colophon__heading">The waitlist</h2>
+          <p>One email, sent when the next run of sets is ready. Nothing else.</p>
+          <form
+            data-symbol="waitlist-form"
+            class="notify notify--compact"
+            novalidate=""
+            data-form="waitlist"
+            data-success="You are on the list. We will write once, when the sets are ready."
+            method="post"
+            action="${esc(site.backend.url)}/api/f/waitlist"
+          >
+            <div class="notify__row">
+              <label class="visually-hidden" for="footer-email">Email address</label>
+              <input
+                id="footer-email"
+                class="notify__input"
+                type="email"
+                name="email"
+                required=""
+                autocomplete="email"
+                placeholder="you@example.com"
+              />
+              <button type="submit" class="btn btn--solid">Join</button>
+            </div>
+            <p role="status" aria-live="polite" class="notify__status"></p>
+          </form>
+        </div>
       </div>
+
       <div class="colophon__legal">
-        <p>&copy; ${YEAR} ${BRAND}. All rights reserved.</p>
+        <p>&copy; ${YEAR} ${BRAND} · Handmade in Copenhagen, Denmark</p>
         <ul>
           <li><a href="/privacy">Privacy</a></li>
           <li><a href="/terms">Terms</a></li>
+          <li><a href="/shipping">Shipping &amp; returns</a></li>
         </ul>
       </div>
     </footer>
 
-    <script src="/assets/js/render.js?v=18"></script>
-    <script src="/assets/js/main.js?v=18"></script>
+    <script src="/assets/js/render.js?v=19"></script>
+    <script src="/assets/js/main.js?v=19"></script>
   </body>
 </html>
 `;
@@ -278,6 +375,7 @@ const setCard = (item) => `          <li class="set" style="--tint: ${esc(item.w
               <figure class="set__figure">
                 <img src="${esc(item.image)}" alt="${esc(item.image_alt)}" loading="lazy" decoding="async" />
               </figure>
+              ${item.run_note ? `<p class="set__status">${esc(item.run_note)}</p>` : ""}
               <div class="set__head">
                 <h3 class="set__name">${esc(item.title)}</h3>
                 <p class="set__price">${esc(item.price)}</p>
@@ -288,11 +386,13 @@ const setCard = (item) => `          <li class="set" style="--tint: ${esc(item.w
             </a>
           </li>`;
 
-const waitlistBlock = (heading, note) => `      <section id="waitlist" class="waitlist">
+const waitlistBlock = ({ heading, note, item, level = 2 }) => `      <section id="waitlist" class="waitlist"${
+    item ? ` style="--wash: ${esc(item.wash)}; --shade: ${esc(item.shade)}; --deep: ${esc(item.deep)}"` : ""
+  }>
         <div class="waitlist__inner">
           <div>
             <p class="eyebrow">The studio is not open yet</p>
-            <h2 class="waitlist__title">${esc(heading)}</h2>
+            <h${level} class="waitlist__title">${esc(heading)}</h${level}>
           </div>
           <div>
             <p class="waitlist__note">${esc(note)}</p>
@@ -318,10 +418,39 @@ const waitlistBlock = (heading, note) => `      <section id="waitlist" class="wa
                 />
                 <button type="submit" class="btn btn--solid">Join the waitlist</button>
               </div>
-              <p role="status" aria-live="polite" class="notify__status"></p>
+              <noscript>
+                <p class="notify__note">
+                  JavaScript is off, so this form cannot send. Email
+                  <a href="mailto:${esc(site.contact.email)}">${esc(site.contact.email)}</a>
+                  with the subject &quot;Opening notice&quot; and you will be added to the list.
+                </p>
+              </noscript>
+              <p id="waitlist-status" role="status" aria-live="polite" class="notify__status"></p>
             </form>
           </div>
+          <ul class="waitlist__panel">
+            <li>One email, not a newsletter</li>
+            <li>Sent the day a run is ready</li>
+            <li>Never passed to anyone else</li>
+          </ul>
         </div>
+      </section>
+`;
+
+/* The four facts that make this worth 540 kr, carried next to the buy moment
+   rather than only as the last paragraph of /about. Deliberately only the
+   facts the box list does not already state — printing "twelve sizes" twice
+   200px apart reads worse than not printing it at all. */
+const assurancesBlock = () => `      <section class="assurances" data-symbol="assurances">
+        <ul class="assurances__row" data-list="symbol:items">
+          <template data-item><li class="assurance"><p class="assurance__title" data-text="item.title"></p><p class="assurance__body" data-text="item.body"></p></li></template>
+${assurances.items
+  .map(
+    (a) =>
+      `          <li class="assurance"><p class="assurance__title" data-text="item.title">${esc(a.title)}</p><p class="assurance__body" data-text="item.body">${esc(a.body)}</p></li>`,
+  )
+  .join("\n")}
+        </ul>
       </section>
 `;
 
@@ -369,10 +498,11 @@ ${catalog.items.map(setCard).join("\n")}
         </ul>
       </section>
 
-${waitlistBlock(
-  "Sets are made in small runs, and small runs go quickly.",
-  "Leave an address and we’ll write once — when the first seven sets are ready to order. Nothing else, ever.",
-)}`,
+${assurancesBlock()}
+${waitlistBlock({
+  heading: "Sets are made in small runs, and small runs go quickly.",
+  note: "Leave an address and we’ll write once — when the first seven sets are ready to order. Nothing else, ever.",
+})}`,
 );
 
 /* Set detail × 7 ----------------------------------------------------------- */
@@ -401,7 +531,11 @@ catalog.items.forEach((item, index) => {
             url: `${ORIGIN}/sets/${item.slug}`,
             price: String(item.price).replace(/[^\d.]/g, ""),
             priceCurrency: "DKK",
-            availability: "https://schema.org/PreOrder",
+            availability:
+              "https://schema.org/" +
+              ({ "sold-out": "SoldOut", "few-left": "LimitedAvailability", "made-to-order": "MadeToOrder" }[
+                item.status
+              ] || "PreOrder"),
           },
         },
         crumbs([
@@ -434,6 +568,28 @@ catalog.items.forEach((item, index) => {
           <figure class="detail__macro">
             <img src="${esc(item.image)}" alt="${esc(item.image_alt)}" loading="lazy" decoding="async" />
           </figure>
+${
+  (item.gallery || []).length
+    ? `          <div class="nails">
+            <p class="nails__title">Every nail in the set</p>
+            <ul class="nails__grid">
+${item.gallery
+  .map(
+    (g) =>
+      `              <li class="nails__cell"><img src="${esc(g.image)}" alt="${esc(g.alt)}" loading="lazy" decoding="async" /></li>`,
+  )
+  .join("\n")}
+            </ul>
+            <p class="nails__note">
+              ${item.gallery.length} of the ten photographed on their own. ${
+                item.slug === "amour" || item.slug === "matcha-latte"
+                  ? "No two are the same."
+                  : "Sizes are matched to your hand from the twelve in the box."
+              }
+            </p>
+          </div>`
+    : ""
+}
         </div>
 
         <div class="detail__lede">
@@ -441,11 +597,17 @@ catalog.items.forEach((item, index) => {
           <h1 class="detail__title">${esc(item.title)}</h1>
           <p class="detail__tagline">${esc(item.tagline)}</p>
 
+          <p class="detail__price">${esc(item.price)}</p>
+          <p class="detail__terms">
+            Made to order in Copenhagen · VAT included ·
+            <a href="/shipping">delivery &amp; returns</a>
+          </p>
+          ${item.run_note ? `<p class="set__status detail__run">${esc(item.run_note)}</p>` : ""}
+
           <dl class="specs">
             <div><dt>Finish</dt><dd>${esc(item.finish)}</dd></div>
             <div><dt>Shape</dt><dd>${esc(item.shape)}</dd></div>
             <div><dt>Wear</dt><dd>${esc(item.wear)}</dd></div>
-            <div><dt>Price</dt><dd>${esc(item.price)}</dd></div>
           </dl>
 
           <div class="detail__body">
@@ -469,6 +631,28 @@ catalog.items.forEach((item, index) => {
         </div>
       </article>
 
+${assurancesBlock()}
+      <!-- The three nearest sets by price, so the row answers "what else is
+           near this?" rather than "what did we happen to make next?" -->
+      <section class="related">
+        <header class="section-head section-head--split">
+          <h2 class="section-head__title">You might also like</h2>
+          <p class="eyebrow"><a href="/shop">All seven sets →</a></p>
+        </header>
+        <ul class="set-grid">
+${catalog.items
+  .filter((o) => o.slug !== item.slug)
+  .sort(
+    (a, b) =>
+      Math.abs(Number(String(a.price).replace(/\D/g, "")) - Number(String(item.price).replace(/\D/g, ""))) -
+      Math.abs(Number(String(b.price).replace(/\D/g, "")) - Number(String(item.price).replace(/\D/g, ""))),
+  )
+  .slice(0, 3)
+  .map(setCard)
+  .join("\n")}
+        </ul>
+      </section>
+
       <nav class="pager" aria-label="Other sets">
         <a class="pager__link pager__link--prev" href="/sets/${esc(prev.slug)}">
           <span class="pager__dir">Previous</span>
@@ -481,10 +665,11 @@ catalog.items.forEach((item, index) => {
         </a>
       </nav>
 
-${waitlistBlock(
-  `${item.title} is made in small runs, and small runs go quickly.`,
-  "Leave an address and we’ll write once — when this set is ready to order. Nothing else, ever.",
-)}`,
+${waitlistBlock({
+  heading: `${item.title} is made in small runs, and small runs go quickly.`,
+  note: "Leave an address and we’ll write once — when this set is ready to order. Nothing else, ever.",
+  item,
+})}`,
   );
 });
 
@@ -569,7 +754,11 @@ ${longform(`          <p class="prose__lede">
           <a class="btn btn--solid" href="/contact">Write to the studio</a>
         </aside>
       </section>
-`,
+
+${waitlistBlock({
+  heading: "Sets are made in small runs, and small runs go quickly.",
+  note: "Leave an address and we’ll write once — when the next run is ready to order. Nothing else, ever.",
+})}`,
 );
 
 /* Fit & care --------------------------------------------------------------- */
@@ -676,7 +865,11 @@ ${longform(`          <h2>Sizing</h2>
           <a class="btn btn--solid" href="/contact">Ask the studio</a>
         </aside>
       </section>
-`,
+
+${waitlistBlock({
+  heading: "Sets are made in small runs, and small runs go quickly.",
+  note: "Leave an address and we’ll write once — when the next run is ready to order. Nothing else, ever.",
+})}`,
 );
 
 /* FAQ ---------------------------------------------------------------------- */
@@ -724,7 +917,36 @@ ${faq.items
           <a class="btn btn--solid" href="/contact">Write to the studio</a>
         </aside>
       </section>
-`,
+
+${waitlistBlock({
+  heading: "Sets are made in small runs, and small runs go quickly.",
+  note: "Leave an address and we’ll write once — when the next run is ready to order. Nothing else, ever.",
+})}`,
+);
+
+/* /waitlist ---------------------------------------------------------------- *
+   The banner, the header and eleven in-page buttons all point at the waitlist;
+   until now none of them could be linked to from outside the site, because it
+   only ever existed as an anchor inside other pages. */
+OWNED["waitlist.html"] = page(
+  {
+    title: `Join the waitlist — ${BRAND}`,
+    description:
+      "One email, sent the day the next run of handmade press-on sets is ready to order. Nothing else.",
+    path: "/waitlist",
+    current: "",
+    jsonld: [
+      crumbs([
+        { name: "Home", href: "/" },
+        { name: "Waitlist", href: "/waitlist" },
+      ]),
+    ],
+  },
+  waitlistBlock({
+    heading: "Sets are made in small runs, and small runs go quickly.",
+    note: "Leave an address and we’ll write once — when the next run is ready to order. Nothing else, ever.",
+    level: 1,
+  }),
 );
 
 /* Legal -------------------------------------------------------------------- */
@@ -750,9 +972,126 @@ const legal = (slug, title, description, body) => {
         </header>
 ${longform(body)}
       </section>
-`,
+
+${waitlistBlock({
+  heading: "Sets are made in small runs, and small runs go quickly.",
+  note: "Leave an address and we’ll write once — when the next run is ready to order. Nothing else, ever.",
+})}`,
   );
 };
+
+/* Shipping & returns ------------------------------------------------------ *
+   Its own page rather than a clause buried in /terms. It is the page a shopper
+   looks for before they trust a studio they have not heard of, and burying it
+   in legal prose is how a site tells them not to bother. */
+OWNED["shipping.html"] = page(
+  {
+    title: `Shipping &amp; returns — ${BRAND}`,
+    description:
+      "Where we ship, what it costs, how long a set takes to reach you, and how returns and faults are handled.",
+    path: "/shipping",
+    current: "",
+    jsonld: [
+      crumbs([
+        { name: "Home", href: "/" },
+        { name: "Shipping & returns", href: "/shipping" },
+      ]),
+    ],
+  },
+  `      <section class="prose">
+        <header class="section-head">
+          <p class="eyebrow">Shipping &amp; returns</p>
+          <h1 class="section-head__title">Getting a set to you, and back</h1>
+          <p class="section-head__blurb">
+            Everything is made and packed by hand in Copenhagen. Nothing is drop-shipped,
+            so the honest answer to “when will it arrive” depends on which run it is in.
+          </p>
+        </header>
+
+${longform(`          <p class="prose__lede">
+            The shop is not open for orders yet. This page is what will apply the
+            moment it is, and it is here now so nobody has to guess.
+          </p>
+
+          <h2>Where we ship</h2>
+          <p>
+            Denmark first, then the rest of the EU. Outside the EU is not offered yet —
+            customs on a small parcel of handmade goods costs more than the goods, and
+            we would rather not put you through it.
+          </p>
+
+          <h2>What it costs</h2>
+          <p>
+            Denmark: a flat 39 kr, and free over 500 kr. Rest of the EU: a flat 79 kr,
+            and free over 800 kr. The exact amount is shown before you pay, never after.
+          </p>
+
+          <h2>How long it takes</h2>
+          <p>
+            Sets are made in runs, not held on a shelf. A set that is already finished
+            and boxed leaves within two working days. A set still being made leaves when
+            its run does, and the expected date is stated on the set before you order.
+          </p>
+          <p>
+            Once it is posted: one to two working days inside Denmark, three to six
+            across the EU. You get a tracking number by email when it leaves, not a
+            week later.
+          </p>
+
+          <h2>How it arrives</h2>
+          <p>
+            In a rigid box, each nail in its own recess, with glue, adhesive tabs, a
+            mini file and a cuticle stick. The box is the storage: a set you soak off
+            properly goes back in it and back on four or five times.
+          </p>
+
+          <h2>Changing or cancelling an order</h2>
+          <p>
+            Before a set is made, write to us and it is changed or cancelled with no
+            fuss. Once a custom set is under way it cannot be cancelled, because it
+            cannot be sold to anyone else.
+          </p>
+
+          <h2>Returns</h2>
+          <p>
+            Fourteen days from the day it reaches you, no reason needed. Tell us by
+            email inside those fourteen days and send the set back unused and in its
+            box. We refund the price and standard delivery within fourteen days of it
+            arriving. Return postage is yours.
+          </p>
+          <p class="prose__warn">
+            Two things cannot come back: a set that has been worn, on hygiene grounds,
+            and a custom set made to your own design and measurements. Both are the law
+            rather than our preference, and the custom one is said again before any
+            custom order is confirmed.
+          </p>
+
+          <h2>If something is wrong with it</h2>
+          <p>
+            You have a two-year right of complaint under Danish law. A set that arrives
+            damaged, or turns out to be faulty, is replaced or refunded and you do not
+            pay return postage. Photograph the box before you take anything out of it
+            and write to us the same week.
+          </p>
+
+          <h2>If a nail breaks later</h2>
+          <p>
+            Every box holds two spares for exactly this. If you get through both, write
+            to us — single replacement nails are made and posted at cost for the life
+            of the set.
+          </p>`)}
+
+        <aside class="prose__cta">
+          <p>Something here not covered?</p>
+          <a class="btn btn--solid" href="/contact">Write to the studio</a>
+        </aside>
+      </section>
+
+${waitlistBlock({
+  heading: "Sets are made in small runs, and small runs go quickly.",
+  note: "Leave an address and we’ll write once — when the next run is ready to order. Nothing else, ever.",
+})}`,
+);
 
 legal(
   "privacy",
@@ -932,6 +1271,76 @@ OWNED["404.html"] = page(
 `,
 );
 
+/* --- chrome, stamped into the hand-owned pages too -------------------------
+   index.html, contact.html, login.html, signup.html and account.html have
+   hand-written bodies this file must not touch. Their footer is not part of
+   that body — it is site chrome, and a footer that gains a column on twelve
+   pages and not on five is precisely the drift that reads as unfinished.
+
+   So the footer between <footer data-symbol="site-footer"> and </footer> is
+   replaced with the canonical one, and nothing else in the file is. Same for
+   the menu inside the masthead, which is the other thing that must match
+   everywhere. The masthead itself is left alone: the landing page's floats
+   over the hero and carries a note the others do not. */
+const HAND_OWNED = [
+  "index.html",
+  "contact.html",
+  "login.html",
+  "signup.html",
+  "account.html",
+];
+
+function syncChrome() {
+  const canonical = footer();
+  const body = canonical.slice(
+    canonical.indexOf('<footer data-symbol="site-footer"'),
+    canonical.indexOf("</footer>") + "</footer>".length,
+  );
+  const menu = MENU.map((m) => `<a href="${m.href}">${m.label}</a>`).join("");
+  const bar = banner().trim();
+  const headerOf = (float) => {
+    const m = masthead("", float);
+    return m.slice(m.indexOf("<header"), m.indexOf("</header>") + "</header>".length);
+  };
+
+  let touched = 0;
+  for (const file of HAND_OWNED) {
+    const path = join(ROOT, file);
+    let html = readFileSync(path, "utf8");
+    const before = html;
+
+    // The landing page's footer clears the floating dock; the others have none.
+    const dockGap = / class="colophon dock-gap"/.test(html) ? " dock-gap" : "";
+    html = html.replace(
+      /<footer data-symbol="site-footer"[\s\S]*?<\/footer>/,
+      body.replace('class="colophon"', `class="colophon${dockGap}"`),
+    );
+
+    // The whole masthead, not just its menu: the landing page carried a
+    // tagline where every other page carried a filled button, so the header
+    // changed shape and height the moment anybody left the front door.
+    const floats = /class="masthead masthead--float"/.test(html);
+    html = html.replace(
+      /<header data-symbol="site-header"[\s\S]*?<\/header>/,
+      headerOf(floats),
+    );
+
+    // Four of these shipped the announcement aside without `hidden`, so with
+    // JS off they drew an empty dark strip above the masthead.
+    html = html.replace(/ *<aside aria-label="Announcement"[\s\S]*?<\/aside>/, "    " + bar);
+
+    // Both scripts are versioned together; the footer above bumped them.
+    html = html.replace(/\?v=1[0-9]"/g, '?v=19"');
+
+    if (html !== before) {
+      writeFileSync(path, html);
+      touched += 1;
+      console.log("  synced chrome in", file);
+    }
+  }
+  return touched;
+}
+
 /* --- write ---------------------------------------------------------------- */
 
 let written = 0;
@@ -952,6 +1361,8 @@ const urls = [
   { loc: "/about", priority: "0.6" },
   { loc: "/guide", priority: "0.6" },
   { loc: "/faq", priority: "0.6" },
+  { loc: "/waitlist", priority: "0.7" },
+  { loc: "/shipping", priority: "0.5" },
   { loc: "/contact", priority: "0.5" },
   { loc: "/privacy", priority: "0.2" },
   { loc: "/terms", priority: "0.2" },
@@ -966,4 +1377,6 @@ ${urls.map((u) => `  <url><loc>${ORIGIN}${u.loc}</loc><priority>${u.priority}</p
 `,
 );
 console.log("  wrote sitemap.xml");
-console.log(`\n${written + 1} files written.`);
+
+const synced = syncChrome();
+console.log(`\n${written + 1} files written, ${synced} hand-owned pages synced.`);
