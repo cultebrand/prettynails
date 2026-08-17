@@ -40,6 +40,41 @@
   --line: color-mix(in srgb, var(--ink) 12%, transparent);
   --line-soft: color-mix(in srgb, var(--ink) 8%, transparent);
 
+  /* --- one lamp, high and to the right ---
+     The hero already has this light: its glow sits at 62% 26% and the hand
+     throws down and to the left. Nothing else on the page obeyed it, which is
+     why the cream half read as printed onto the paper rather than set down on
+     it — every photograph was a rectangle with a 1px ring and no shadow at
+     all. These are that same lamp, written once.
+
+     Two shadows, never one. The tight one says the object is touching the
+     ground; the wide one says how far above it. A single soft blur is a fog,
+     and a fog is what a flat thing sits in.
+
+     Negative x throughout, because the light is on the right. Get that sign
+     wrong on one object and the whole page stops agreeing about where the
+     lamp is — which the eye reads long before it can say why. */
+  --cast: #3c2820;
+  --lift:
+    0 1px 1.5px -1px color-mix(in srgb, var(--cast) 24%, transparent),
+    -3px 7px 12px -8px color-mix(in srgb, var(--cast) 26%, transparent),
+    -10px 26px 40px -24px color-mix(in srgb, var(--cast) 32%, transparent);
+  /* Reached for: further off the ground, so the contact edge tightens while
+     the ambient half spreads and deepens. Both move, or it reads as the
+     shadow growing rather than the object rising. */
+  --lift-high:
+    0 1px 1px -1px color-mix(in srgb, var(--cast) 30%, transparent),
+    -6px 15px 22px -12px color-mix(in srgb, var(--cast) 28%, transparent),
+    -24px 52px 68px -30px color-mix(in srgb, var(--cast) 38%, transparent);
+  /* The lamp catches the top rim of anything raised. One line, and a tile
+     stops being a hole in the page and becomes a thing lying on it. */
+  --rim: inset 0 1px 0 rgba(255, 255, 255, 0.66);
+  --edge: inset 0 0 0 1px color-mix(in srgb, var(--ink) 8%, transparent);
+
+  /* Everything that is reached for arrives on this curve: fast away from the
+     resting place, long and slow into the new one. */
+  --reach: cubic-bezier(0.16, 1, 0.3, 1);
+
   /* --- type --- */
   --face-display: "Italiana", "Times New Roman", Times, serif;
   --face-body: "Jost", ui-sans-serif, system-ui, -apple-system, sans-serif;
@@ -127,6 +162,22 @@
   --line-soft: color-mix(in srgb, var(--ink) 9%, transparent);
   --rose: #f5a3b4;
   color: var(--ink);
+  /* Same lamp, different room. A warm brown shadow on a warm near-black is
+     lighter than the ground it falls on, which is the one way to make a
+     shadow look painted on: it has to go to black here, and go further,
+     because there is no paper white left to fall away from. */
+  --cast: #000;
+  --lift:
+    0 1px 2px -1px color-mix(in srgb, var(--cast) 60%, transparent),
+    -4px 10px 16px -10px color-mix(in srgb, var(--cast) 62%, transparent),
+    -14px 32px 44px -22px color-mix(in srgb, var(--cast) 72%, transparent);
+  --lift-high:
+    0 1px 2px -1px color-mix(in srgb, var(--cast) 66%, transparent),
+    -8px 20px 28px -14px color-mix(in srgb, var(--cast) 66%, transparent),
+    -28px 60px 76px -28px color-mix(in srgb, var(--cast) 82%, transparent);
+  /* The rim is a reflection of the lamp, so on the dark it is a glint rather
+     than a highlight. At cream's 66% it read as a scratch. */
+  --rim: inset 0 1px 0 rgba(255, 255, 255, 0.14);
 }
 
 /* The case: one continuous dark field behind the announcement, the strip of
@@ -197,12 +248,24 @@
     0 18px 26px -18px rgba(0, 0, 0, 0.9);
 }
 
-/* The one being worn turns its own light on. */
+/* The one being worn turns its own light on. It is also thirty pixels nearer
+   than the other six now, so it gets the shadow of something held out in front
+   of the row rather than lying in it — cast onto the tiles behind it.
+
+   The reach is the constraint, not the taste. The rail scrolls, so it clips on
+   both axes, and a shadow longer than the padding under the tile comes out with
+   a straight cut across it — which is worse than no shadow, because a shadow
+   with a hard edge is the one thing that cannot happen. Thirty pixels forward
+   throws about twenty down: box-shadow reach is offset + blur/2 + spread, and
+   the sum of that has to stay inside the forty pixels of room below the tile.
+   Lengthen either shadow and the guillotine comes back. */
 :root[data-ground="lit"] .hero .chip[aria-current="true"] .chip__frame {
   box-shadow:
     0 0 0 1px color-mix(in srgb, var(--lume, var(--ink)) 70%, transparent),
     0 0 36px -6px color-mix(in oklab, var(--glow, var(--shade)) 60%, transparent),
-    0 20px 30px -18px #000;
+    var(--rim),
+    -6px 14px 20px -12px #000,
+    -12px 26px 30px -22px rgba(0, 0, 0, 0.75);
 }
 
 :root[data-ground="lit"] .hero .chip__name,
@@ -232,10 +295,14 @@
 :root[data-ground="lit"] .hero::after {
   content: "";
   position: absolute;
-  inset: 0;
+  /* Bled past the edges so the pool of light can move without ever dragging
+     an uncovered corner into the frame. */
+  inset: -6%;
   z-index: 4;
   pointer-events: none;
   background: radial-gradient(122% 96% at 50% 42%, transparent 40%, rgba(0, 0, 0, 0.5) 100%);
+  /* Fixed to the wall, with the wall. */
+  transform: translate3d(calc(var(--hand-turn, 0) * -2px), calc(var(--hand-pitch, 0) * -1.4px), 0);
 }
 
 :root[data-ground="lit"] .hero__hand,
@@ -613,19 +680,56 @@ a {
   outline-offset: 2px;
 }
 
+/* Each nail is its own object with its own vanishing point, rather than
+   twenty-one of them sharing the strip's. A single perspective across a
+   marquee would sweep every nail through the same turn as it drifted, which is
+   a fairground ride; a nail's own centre keeps it a small thing seen
+   close up, held at whatever angle it was set down at. */
 .ribbon__item {
   display: flex;
   flex-direction: column;
   align-items: center;
   flex-shrink: 0;
   margin: 0;
+  perspective: 460px;
 }
 
 .ribbon__nail {
   height: var(--nail-h);
   width: auto;
   margin-bottom: 10px;
-  filter: drop-shadow(-4px 8px 11px color-mix(in srgb, #3c2820 20%, transparent));
+  filter: drop-shadow(-4px 8px 11px color-mix(in srgb, var(--cast) 20%, transparent));
+}
+
+/* The angles. Each nail already carries an inline `transform: rotate(Xdeg)`
+   from the builder, and an inline declaration wins — so the turn is written
+   with the `rotate` longhand instead, which is a separate property and
+   composes ahead of it. In-plane spin from the markup, turn away from the
+   viewer from here.
+
+   A five-step cycle against seven sets, so the same set never lands on the
+   same angle twice in a row and the strip reads as a tray somebody tipped
+   nails onto rather than a pattern. Kept under fifteen degrees: these are flat
+   photographs, and past that the illusion stops being a nail turning and
+   starts being a nail squashed. */
+.ribbon__item:nth-child(5n + 1) .ribbon__nail {
+  rotate: y 13deg;
+}
+
+.ribbon__item:nth-child(5n + 2) .ribbon__nail {
+  rotate: y -7deg;
+}
+
+.ribbon__item:nth-child(5n + 3) .ribbon__nail {
+  rotate: y 4deg;
+}
+
+.ribbon__item:nth-child(5n + 4) .ribbon__nail {
+  rotate: y -14deg;
+}
+
+.ribbon__item:nth-child(5n + 5) .ribbon__nail {
+  rotate: y 9deg;
 }
 
 .ribbon__name {
@@ -645,13 +749,29 @@ a.ribbon__item {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* This lift never once happened. Every nail carries an inline
+   `transform: rotate(…)` from the builder, and an inline declaration beats a
+   stylesheet one no matter how the selector is weighted — so the rule below
+   used to be overwritten before it was ever applied, and picking a nail out of
+   the strip did nothing at all. Written as the `translate` and `scale`
+   longhands it composes with the markup's transform instead of losing to it,
+   and the nail comes up off the strip toward you as well as toward the top of
+   it. */
 a.ribbon__item .ribbon__nail {
-  transition: transform 0.42s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition:
+    translate 0.42s var(--reach),
+    scale 0.42s var(--reach),
+    rotate 0.42s var(--reach),
+    filter 0.42s ease-out;
 }
 
 a.ribbon__item:hover .ribbon__nail,
 a.ribbon__item:focus-visible .ribbon__nail {
-  transform: translateY(-5px) scale(1.05);
+  translate: 0 -7px;
+  scale: 1.08;
+  /* Square to the viewer: whichever way it was lying, the one being looked at
+     turns to face you. */
+  rotate: y 0deg;
 }
 
 a.ribbon__item:hover .ribbon__name,
@@ -864,6 +984,13 @@ a.ribbon__item:focus-visible .ribbon__name {
     color-mix(in srgb, var(--shade) 46%, transparent),
     transparent 70%
   );
+  /* The case turns around the hand rather than sliding past it: the hand goes
+     one way and the wall behind it goes the other. Two things moving in
+     opposite directions is the strongest depth cue there is, and it is the
+     difference between orbiting an object and panning past a picture of one.
+     The type does not join in — it is printed on the page, not standing in the
+     room, and moving it is where this sort of thing starts to feel cheap. */
+  transform: translate3d(calc(var(--hand-turn, 0) * -3.4px), calc(var(--hand-pitch, 0) * -2.4px), 0);
   transition: background 1.1s ease-out;
 }
 
@@ -1011,8 +1138,45 @@ a.ribbon__item:focus-visible .ribbon__name {
   grid-area: stage;
   justify-self: center;
   position: relative;
+  isolation: isolate;
   width: min(74vw, 34svh);
   aspect-ratio: 1200 / 1579;
+  /* The hand is looked at through a perspective rather than pasted flat, so
+     when it turns it foreshortens instead of skewing. The vanishing point sits
+     high and right, where the wrist enters the frame and where the lamp is:
+     one point of view and one light, agreeing. */
+  perspective: 1150px;
+  perspective-origin: 60% 30%;
+}
+
+/* The hand's shadow on the back of the case. The drop-shadow on the image
+   hugs its outline, which is what a cut-out pasted to a page has; what a hand
+   held up in a room also has is this — a soft mass thrown behind and below it,
+   far enough off the wall to have gone shapeless. It slides opposite the turn,
+   so the light stays where it is while the hand moves in it.
+
+   A gradient under a transform rather than a second drop-shadow on the image:
+   there are eight stacked photographs in this frame and re-filtering them all
+   sixty times a second is not a thing to spend a phone's battery on. */
+.hero__stage::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 14% -12% -6% -16%;
+  pointer-events: none;
+  background: radial-gradient(
+    52% 44% at 44% 52%,
+    color-mix(in srgb, var(--cast) 46%, transparent),
+    transparent 74%
+  );
+  /* Further than the hand travels, and the same way: turning the right face
+     into a light that is on the right sweeps the shadow away to the left. The
+     gap opening between an object and its shadow is the whole of depth. */
+  transform: translate3d(
+    calc(var(--hand-turn, 0) * 2.6px),
+    calc(var(--hand-pitch, 0) * 1.8px),
+    0
+  );
 }
 
 @media (min-width: 64rem) {
@@ -1027,6 +1191,10 @@ a.ribbon__item:focus-visible .ribbon__name {
     width: auto;
     height: 72svh;
     justify-self: auto;
+    /* Standing further back from a taller object: the same turn reads as a
+       gentler foreshortening, which is what stops a 72svh hand from looking
+       like it is being fanned. */
+    perspective: 1600px;
   }
 }
 
@@ -1044,6 +1212,35 @@ a.ribbon__item:focus-visible .ribbon__name {
      read as unfinished rather than deliberate. Every layer gets the same mask
      so the cross-fade between sets stays seamless. */
   mask-image: linear-gradient(to bottom, transparent 0, #000 8%);
+}
+
+/* Given a box of its own so it can be turned. Absolute and inset to zero puts
+   it exactly over the stage, which is where its layers were already resolving
+   to — they move from being positioned against the stage to being positioned
+   against this, in the same place, and now they turn with the bare hand
+   underneath them instead of staying behind while it moves. */
+.hero__layers {
+  position: absolute;
+  inset: 0;
+}
+
+/* The turn. The bare hand and the stack of sets laid over it carry the same
+   two angles, or the cross-fade comes apart mid-gesture.
+
+   The pivot is the wrist, not the middle of the frame: a hand held up turns
+   where it meets the arm, so the fingertips travel and the wrist barely does.
+   Pivoting at the centre is the tell that something is a picture being
+   rotated rather than an object being turned.
+
+   No transition — main.js damps these itself, frame by frame. A transition
+   here would chase a value that is already chasing the cursor, and letting go
+   would be a differently-timed second motion rather than the same one
+   running down. */
+.hero__hand,
+.hero__layers {
+  transform: translate3d(calc(var(--hand-turn, 0) * 1.1px), calc(var(--hand-pitch, 0) * -0.9px), 0)
+    rotateY(calc(var(--hand-turn, 0) * 1deg)) rotateX(calc(var(--hand-pitch, 0) * 1deg));
+  transform-origin: 74% 6%;
 }
 
 /* Every set is drawn on top of the bare hand and faded in, so switching sets
@@ -1153,7 +1350,16 @@ html:not(.js) .hero__layers > .hero__layer:first-of-type {
   scroll-padding-inline: var(--gutter);
   display: flex;
   gap: 0.75rem;
-  padding: 0.5rem 0;
+  /* Room for a tile to stand up and come forward. The rail scrolls
+     horizontally, and a scroll container clips on both axes whatever you write
+     for the other one, so the lift has to be paid for in padding or it is
+     sliced off at the top. */
+  padding: 1.25rem 0 0.75rem;
+  /* The perspective is not here, and cannot be: a vanishing point shared by the
+     whole row would need `transform-style: preserve-3d` on the chips to reach
+     the tiles inside them, and the unselected chips are dimmed with `opacity`,
+     which forces its children flat again. Each tile gets its own eye instead —
+     see .chip__button. */
   margin: 0;
   list-style: none;
   overflow-x: auto;
@@ -1185,6 +1391,11 @@ html:not(.js) .hero__layers > .hero__layer:first-of-type {
   transition:
     opacity 0.5s ease-out,
     transform 0.5s ease-out;
+  /* The tile inside is looked at through this, from directly in front of it.
+     Close, because it is a 117px object a hand's length away, and a distant eye
+     on a small thing gives you an orthographic drawing of it: the tile would
+     lie back without getting shorter, which is a squash, not a turn. */
+  perspective: 620px;
 }
 
 .chip__button:hover {
@@ -1197,6 +1408,9 @@ html:not(.js) .hero__layers > .hero__layer:first-of-type {
   transform: translateY(-6px);
 }
 
+/* Each tile is lying back on the shelf. The one being worn stands up and comes
+   forward far enough to overlap its neighbours — which is the point: the seven
+   are a row of objects and one of them has been picked out of it. */
 .chip__frame {
   position: relative;
   display: block;
@@ -1204,14 +1418,23 @@ html:not(.js) .hero__layers > .hero__layer:first-of-type {
   aspect-ratio: 1 / 1;
   border-radius: 14px;
   background: #fbfaf9;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 8%, transparent);
-  transition: box-shadow 0.5s ease;
+  box-shadow: var(--edge);
+  transform: rotateX(11deg);
+  transform-origin: 50% 100%;
+  transition:
+    box-shadow 0.5s ease,
+    transform 0.55s var(--reach);
+}
+
+.chip__button:hover .chip__frame {
+  transform: rotateX(5deg) translateZ(10px);
 }
 
 .chip[aria-current="true"] .chip__frame {
   box-shadow:
     inset 0 0 0 1px color-mix(in srgb, var(--deep) 45%, transparent),
-    0 10px 24px -16px color-mix(in srgb, #3c2820 70%, transparent);
+    0 10px 24px -16px color-mix(in srgb, var(--cast) 70%, transparent);
+  transform: rotateX(0deg) translateZ(30px);
 }
 
 .chip__frame img {
@@ -1251,6 +1474,35 @@ html:not(.js) .hero__layers > .hero__layer:first-of-type {
   scroll-margin-top: 1.5rem;
 }
 
+/* The dark hero ended and the cream began on a straight cut, and a straight cut
+   between two grounds is what makes a page read as two pages stacked. The set's
+   own glow spills over the edge and warms the paper under it for about a third
+   of a screen, so the light in the hero is the same light in the room below it.
+
+   A radial rather than a linear band: the sections are width-capped and centre
+   themselves past 1496px, and a linear fade would show its two vertical edges
+   on a wide monitor. A radial has no edges to show, at any width. */
+:root[data-ground="lit"] .studio {
+  position: relative;
+  isolation: isolate;
+}
+
+:root[data-ground="lit"] .studio::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset-block-start: 0;
+  inset-inline: 0;
+  height: min(38svh, 26rem);
+  pointer-events: none;
+  background: radial-gradient(
+    118% 100% at 64% 0%,
+    color-mix(in oklab, var(--glow, var(--shade)) 22%, transparent),
+    transparent 72%
+  );
+  transition: background 1.1s ease-out;
+}
+
 .pieces {
   display: grid;
   gap: clamp(2.5rem, 5vw, 3.5rem) 2rem;
@@ -1267,8 +1519,12 @@ html:not(.js) .hero__layers > .hero__layer:first-of-type {
 
 .piece {
   margin: 0;
+  perspective: 1100px;
 }
 
+/* A photograph of ten nails laid out on a table wants to be a photograph lying
+   on a table. It used to be a hole cut in the page: a 1px ring, no shadow, no
+   lit edge, nothing between it and the paper. */
 .piece__figure {
   position: relative;
   margin: 0;
@@ -1276,18 +1532,41 @@ html:not(.js) .hero__layers > .hero__layer:first-of-type {
   aspect-ratio: 3 / 4;
   border-radius: 18px;
   background: color-mix(in srgb, var(--ink) 4%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 8%, transparent);
+  box-shadow: var(--edge), var(--rim), var(--lift);
   /* The flat-lays are the smallest photographs on the site — the narrowest is
      388px wide. Left uncapped, a two-column grid on a wide screen blew that up
      past 650px and the softness was the first thing anyone saw. Capped, the
      worst case is a 1.2x upscale. Raise this when better files are shot. */
   max-width: 29rem;
+  transform: rotateY(calc(var(--turn, 0) * 1deg)) rotateX(calc(var(--pitch, 0) * 1deg));
+  transition:
+    box-shadow 0.5s ease-out,
+    transform 0.4s var(--reach);
 }
 
+.piece:hover .piece__figure {
+  box-shadow: var(--edge), var(--rim), var(--lift-high);
+}
+
+/* The photograph moves against its own frame, so there is depth inside the
+   tile as well as under it — the frame is a window onto the table rather than
+   a picture of one. */
 .piece__figure img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  /* Held a hair over its frame at rest, which is the headroom the parallax
+     spends — without it the picture drags its own edge into view the first
+     time it moves. */
+  scale: 1.035;
+  transform: translate3d(calc(var(--turn, 0) * -1px), calc(var(--pitch, 0) * -1px), 0);
+  transition:
+    scale 0.55s var(--reach),
+    transform 0.5s var(--reach);
+}
+
+.piece:hover .piece__figure img {
+  scale: 1.075;
 }
 
 .piece__title {
@@ -1344,10 +1623,14 @@ html:not(.js) .hero__layers > .hero__layer:first-of-type {
   }
 }
 
+/* The rule over each step is a shelf edge rather than a drawn line: the lamp
+   catches its top and the paper falls away underneath. Two hairlines, one light
+   and one dark, which is all a bevel has ever been. */
 .step {
   counter-increment: step;
   padding-top: 1.5rem;
   border-top: 1px solid var(--line);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
 }
 
 /* The number is drawn rather than typed, so a step added in the CMS numbers
@@ -1405,16 +1688,27 @@ html:not(.js) .hero__layers > .hero__layer:first-of-type {
 }
 
 /* Revealed on scroll, but only once JavaScript has said so. Without it the
-   cards are simply visible — which is also what a crawler and a printer see. */
-html.js .set:not(.is-revealed) {
+   cards are simply visible — which is also what a crawler and a printer see.
+
+   The card used to slide up the page. It stands up off it now: tipped back and
+   set behind the plane of the paper, then coming upright as it arrives. The
+   distance travelled is the same; what changed is that it is an object being
+   put down rather than a rectangle being nudged. */
+   The perspective is written into the transform rather than onto the grid: a
+   grid-wide vanishing point would tip the outer columns toward the middle, and
+   these seven are a row of equals, not a fan. Each card gets its own eye. */
+html.js .set:not(.is-revealed),
+html.js .piece:not(.is-revealed) {
   opacity: 0;
-  transform: translateY(18px);
+  transform: perspective(1500px) rotateX(7deg) translate3d(0, 24px, -60px);
 }
 
-.set {
+.set,
+.piece {
+  transform-origin: 50% 100%;
   transition:
     opacity 0.7s ease-out,
-    transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+    transform 0.85s var(--reach);
   transition-delay: var(--reveal-delay, 0ms);
 }
 
@@ -1424,6 +1718,13 @@ html.js .set:not(.is-revealed) {
 .set__link {
   display: block;
   color: inherit;
+  /* On the anchor rather than on the card, because the anchor is the figure's
+     own parent: perspective only reaches a child's transform, and a card-level
+     vanishing point would be flattened at this element on the way down —
+     leaving the tile rotating without ever foreshortening, which is the exact
+     look of a flat thing pretending. Nothing else in here is transformed, so
+     the type is untouched. */
+  perspective: 1000px;
 }
 
 .set__link:focus-visible {
@@ -1432,12 +1733,19 @@ html.js .set:not(.is-revealed) {
   border-radius: 20px;
 }
 
+/* Inside the frame the photograph moves against it, so the tile is a window
+   with something behind it rather than a picture printed on it. Two planes
+   moving by different amounts is the whole trick, and it costs a translate. */
 .set__link .set__figure img {
-  transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+  scale: 1.03;
+  transform: translate3d(calc(var(--turn, 0) * -1px), calc(var(--pitch, 0) * -1px), 0);
+  transition:
+    scale 0.7s var(--reach),
+    transform 0.5s var(--reach);
 }
 
 .set__link:hover .set__figure img {
-  transform: scale(1.03);
+  scale: 1.075;
 }
 
 .set__more {
@@ -1465,7 +1773,56 @@ html.js .set:not(.is-revealed) {
   aspect-ratio: 1 / 1;
   border-radius: 18px;
   background: var(--tint);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 8%, transparent);
+  box-shadow: var(--edge), var(--rim), var(--lift);
+  /* Only the tile turns. The name, the price and the note stay flat on the
+     page, because they are the label printed beside the object and not part of
+     it — and because rotated type resamples into mush. A whole card tipping
+     under the cursor is the effect everyone reaches for and the reason it
+     always looks like a trick. */
+  transform: rotateY(calc(var(--turn, 0) * 1deg)) rotateX(calc(var(--pitch, 0) * 1deg));
+  transition:
+    box-shadow 0.55s ease-out,
+    transform 0.4s var(--reach);
+}
+
+.set__link:hover .set__figure {
+  box-shadow: var(--edge), var(--rim), var(--lift-high);
+}
+
+/* Every one of the seven is described by its finish — glazed, jelly, pearl,
+   mirror chrome. Gloss is the product, so gloss is what answers when somebody
+   reaches for it: a band of light crossing the tile once, the way it would if
+   you tilted the real thing under a lamp.
+
+   Leaving is not the entrance backwards. The band fades out where it is and
+   the return is snapped through afterwards, unseen — a sheen that walks back
+   across the tile on mouse-out is a machine showing its rails. */
+.set__figure::after {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    102deg,
+    transparent 38%,
+    rgba(255, 255, 255, 0.5) 50%,
+    transparent 62%
+  );
+  mix-blend-mode: soft-light;
+  opacity: 0;
+  transform: translateX(-58%);
+  transition:
+    opacity 0.18s ease-out,
+    transform 0s 0.18s;
+}
+
+.set__link:hover .set__figure::after {
+  opacity: 1;
+  transform: translateX(58%);
+  transition:
+    opacity 0.2s ease-out,
+    transform 1.15s var(--reach);
 }
 
 .set__figure img {
@@ -1558,6 +1915,14 @@ html.js .set:not(.is-revealed) {
   --ink-soft: color-mix(in srgb, var(--ink) 92%, transparent);
   --ink-faint: color-mix(in srgb, var(--ink) 86%, transparent);
   scroll-margin-top: 1.5rem;
+  /* Everything else on this page rises off the paper. This one sinks into it —
+     a band pressed into the page rather than laid on it, shadowed along its two
+     long edges where the paper turns down. Depth needs both directions or the
+     page is a stack of raised things with nothing to be raised from. */
+  box-shadow:
+    inset 0 10px 20px -16px color-mix(in srgb, var(--cast) 62%, transparent),
+    inset 0 -10px 20px -16px color-mix(in srgb, var(--cast) 46%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--cast) 16%, transparent);
 }
 
 @media (min-width: 40rem) {
@@ -2522,14 +2887,25 @@ body > .masthead {
   aspect-ratio: 3 / 5;
   border-radius: 12px;
   background: color-mix(in srgb, var(--wash) 70%, #fff);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 7%, transparent);
+  /* The closest a screen gets to picking one up, so the tile is a thing held
+     out rather than a swatch printed down: lit along its top rim, and lifting
+     under the hand. */
+  box-shadow: var(--edge), var(--rim), var(--lift);
+  transition:
+    box-shadow 0.4s ease-out,
+    translate 0.4s var(--reach);
+}
+
+.nails__cell:hover {
+  box-shadow: var(--edge), var(--rim), var(--lift-high);
+  translate: 0 -4px;
 }
 
 .nails__cell img {
   position: absolute;
   inset: 0.5rem;
   object-fit: contain;
-  filter: drop-shadow(-4px 7px 9px color-mix(in srgb, #3c2820 18%, transparent));
+  filter: drop-shadow(-4px 7px 9px color-mix(in srgb, var(--cast) 18%, transparent));
 }
 
 .nails__note {
@@ -3173,14 +3549,43 @@ body > .masthead {
   .btn--ghost,
   .dock,
   .dock__plate,
-  .dock__link {
+  .dock__link,
+  .chip__frame,
+  .set__figure,
+  .piece__figure,
+  .nails__cell {
     transition-duration: 1ms;
   }
 
-  .set {
+  .set,
+  .piece {
     opacity: 1;
     transform: none;
     transition: none;
+  }
+
+  /* The depth stays — a lit rim, a cast shadow and a tile lying back on a shelf
+     are all still, and asking for less motion is not asking for a flat page.
+     What goes is everything that moves: the hand no longer follows a cursor
+     (main.js does not start that loop at all), the tiles no longer turn under
+     one, and the band of light does not cross the gloss. */
+  .hero__hand,
+  .hero__layers,
+  .hero__glow,
+  .hero__stage::before,
+  .hero::after,
+  .set__figure,
+  .piece__figure,
+  .set__figure img,
+  .piece__figure img {
+    --hand-turn: 0;
+    --hand-pitch: 0;
+    --turn: 0;
+    --pitch: 0;
+  }
+
+  .set__figure::after {
+    display: none;
   }
 
   .notify__status[data-state="pending"]::before {

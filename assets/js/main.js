@@ -940,6 +940,180 @@
     });
   }
 
+  /* --- the hand in the room -------------------------------------------------
+     Everything around the hand says it is an object under a lamp: a cast
+     shadow, a lit rim on every tile, a vignette that puts the light on it. And
+     then it never moved, which is what makes a composition feel plastered —
+     not the absence of animation but the absence of a point of view.
+
+     So the hand turns. Two angles, written to the panel; the stylesheet decides
+     what they mean and what follows them. The shadow on the wall behind goes
+     the same way and further, the pool of light goes the other way, and the
+     type does not move at all — it is printed on the page rather than standing
+     in the room. Reading depth out of that is not a decision anyone makes
+     consciously; it is just how looking works.
+
+     The damping is here rather than in a CSS transition. A transition would be
+     chasing a target that is itself chasing the cursor, so the two lags
+     compound and letting go becomes a second, differently-timed motion. One
+     spring, run frame by frame: it follows while you move, runs down when you
+     stop, and the loop ends when there is nothing left to move. */
+
+  function liftHero() {
+    var hero = document.querySelector(".hero[data-hero-panel]");
+    var stage = hero && hero.querySelector(".hero__stage");
+    if (!stage) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    // Degrees at the edge of the panel. Past about seven the hand stops
+    // turning and starts fanning: these are photographs, not models, and a
+    // flat thing rotated too far reads as a flat thing rotated.
+    var TURN = 5.6;
+    var PITCH = 3.4;
+    // A thirteenth of the remaining distance per frame — heavy enough that the
+    // hand trails your cursor with some weight, light enough that it is never
+    // a beat behind it.
+    var EASE = 0.078;
+
+    var want = { turn: 0, pitch: 0 };
+    var at = { turn: 0, pitch: 0 };
+    var frame = 0;
+    // A finger is only listened to while it is held down: on a touch screen a
+    // pointermove without a pointerdown is a scroll going past, and turning the
+    // hand for that would fight the page.
+    var held = false;
+
+    function step() {
+      frame = 0;
+      at.turn += (want.turn - at.turn) * EASE;
+      at.pitch += (want.pitch - at.pitch) * EASE;
+      hero.style.setProperty("--hand-turn", at.turn.toFixed(3));
+      hero.style.setProperty("--hand-pitch", at.pitch.toFixed(3));
+      if (Math.abs(want.turn - at.turn) > 0.003 || Math.abs(want.pitch - at.pitch) > 0.003) {
+        run();
+      }
+    }
+
+    function run() {
+      if (!frame) frame = window.requestAnimationFrame(step);
+    }
+
+    function aim(event) {
+      var box = hero.getBoundingClientRect();
+      if (!box.width || !box.height) return;
+      var nx = Math.max(-1, Math.min(1, ((event.clientX - box.left) / box.width) * 2 - 1));
+      var ny = Math.max(-1, Math.min(1, ((event.clientY - box.top) / box.height) * 2 - 1));
+      // Turning *toward* the pointer: a positive rotateY takes the right edge
+      // away from the viewer, so facing right is a negative angle.
+      want.turn = -nx * TURN;
+      want.pitch = ny * PITCH;
+      run();
+    }
+
+    function rest() {
+      want.turn = 0;
+      want.pitch = 0;
+      run();
+    }
+
+    hero.addEventListener(
+      "pointermove",
+      function (event) {
+        if (event.pointerType === "touch" && !held) return;
+        aim(event);
+      },
+      { passive: true }
+    );
+
+    /* A drag across the hand already goes to the next set. While it is being
+       dragged the hand should also go with the finger — pushing an object and
+       watching it turn is the only version of this that a touch screen can
+       have, and it is a better one than a cursor gets. */
+    stage.addEventListener(
+      "pointerdown",
+      function (event) {
+        if (event.pointerType === "touch") held = true;
+      },
+      { passive: true }
+    );
+
+    ["pointerup", "pointercancel"].forEach(function (name) {
+      window.addEventListener(
+        name,
+        function () {
+          if (!held) return;
+          held = false;
+          rest();
+        },
+        { passive: true }
+      );
+    });
+
+    hero.addEventListener("pointerleave", rest, { passive: true });
+    // Scrolling the hero out from under a stationary cursor does not fire
+    // pointerleave, and a hand left turned at the top of a page you have left
+    // is a hand stuck mid-gesture.
+    window.addEventListener(
+      "scroll",
+      function () {
+        if (held) return;
+        if (hero.getBoundingClientRect().bottom < 0 && (want.turn || want.pitch)) rest();
+      },
+      { passive: true }
+    );
+  }
+
+  /* --- turning a tile toward whoever is reaching for it ----------------------
+     The seven cards and the two studio flat-lays are photographs of objects, so
+     they answer a cursor the way an object would: the tile turns to face it and
+     the picture inside the tile moves against its own frame. Two planes at
+     different rates is the whole of it.
+
+     Delegated to the two lists rather than bound per card, because the cards
+     are re-rendered from the CMS after this runs and a listener on a node that
+     has since been replaced is a listener on nothing. */
+
+  function tiltTiles() {
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    var TURN = 4.6;
+    var PITCH = 3.4;
+
+    document.querySelectorAll(".set-grid, .pieces").forEach(function (list) {
+      var open = null;
+
+      function clear() {
+        if (!open) return;
+        open.style.removeProperty("--turn");
+        open.style.removeProperty("--pitch");
+        open = null;
+      }
+
+      list.addEventListener(
+        "pointermove",
+        function (event) {
+          var tile = event.target.closest && event.target.closest(".set, .piece");
+          if (!tile) {
+            clear();
+            return;
+          }
+          if (tile !== open) clear();
+          open = tile;
+          var box = tile.getBoundingClientRect();
+          if (!box.width || !box.height) return;
+          var nx = ((event.clientX - box.left) / box.width) * 2 - 1;
+          var ny = ((event.clientY - box.top) / box.height) * 2 - 1;
+          tile.style.setProperty("--turn", (-nx * TURN).toFixed(2));
+          tile.style.setProperty("--pitch", (ny * PITCH).toFixed(2));
+        },
+        { passive: true }
+      );
+
+      list.addEventListener("pointerleave", clear, { passive: true });
+    });
+  }
+
   /* --- trying a set on ------------------------------------------------------
      The hero is one photograph of a bare hand with every set laid over it. A
      chip swaps which layer is showing and re-declares the panel's three
@@ -1204,6 +1378,11 @@
   measureRibbon();
   pauseRibbons();
   applyDock();
+  // Both read the markup that is already on the page and neither waits on the
+  // catalog: the hand is baked in, and the tilt is delegated to the two lists
+  // rather than to the cards inside them.
+  liftHero();
+  tiltTiles();
 
   fetchJSON("symbols.json").then(function (manifest) {
     var symbolEntries = {};
@@ -1230,11 +1409,30 @@
       applyAccounts(content);
       applyHero(content);
 
-      var cards = document.querySelectorAll(".set");
-      cards.forEach(function (node, index) {
-        node.style.setProperty("--reveal-delay", (index % 3) * 70 + "ms");
+      /* The seven and the studio's two both stand up off the page as they
+         arrive. The stagger restarts at each list rather than running across
+         both, so a row of three is a row of three: counting in document order
+         is enough for that, because siblings are always contiguous in it. */
+      var risers = document.querySelectorAll(".set, .piece");
+      var list = null;
+      var seat = 0;
+      risers.forEach(function (node) {
+        if (node.parentNode !== list) {
+          list = node.parentNode;
+          seat = 0;
+        }
+        node.style.setProperty("--reveal-delay", (seat % 3) * 70 + "ms");
+        seat += 1;
       });
-      reveal(cards);
+      reveal(risers);
+    });
+  }).catch(function (error) {
+    /* Nothing above is load-bearing for reading the page — except that the
+       cards are held at opacity 0 until something says to show them. If any of
+       it throws, that something has to be this. */
+    console.warn("[content]", error && error.message);
+    document.querySelectorAll(".set, .piece").forEach(function (node) {
+      node.classList.add("is-revealed");
     });
   });
 })();
