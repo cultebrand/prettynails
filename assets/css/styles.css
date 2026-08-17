@@ -1964,12 +1964,13 @@ html.js .tray:not(.is-revealed) {
 
 @media (min-width: 64rem) {
   .case__head {
-    /* The words take five twelfths and the key takes seven. The old head put a
-       46ch paragraph in the left third and left the other two thirds empty. */
-    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    /* The words take seven twelfths and the shared facts take four. It was
+       5/7 the other way when the right-hand column held a seven-row index of
+       the catalogue; four short rows do not need more than a third. */
+    grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
     /* Both columns start on the same line. Hanging them from the baseline
-       instead dropped the headline two hundred pixels down the page to meet
-       the last row of the key, and left the corner the eye lands on empty. */
+       instead dropped the headline two hundred pixels down the page, and left
+       the corner the eye lands on empty. */
     align-items: start;
   }
 }
@@ -1984,7 +1985,11 @@ html.js .tray:not(.is-revealed) {
 
 .case__blurb {
   margin: 1.25rem 0 0;
-  max-width: 42ch;
+  /* 42ch when this column was five twelfths. At seven it left a third of the
+     column empty between the last word and the facts panel, which read as a
+     layout that had lost something rather than as air. */
+  max-width: 54ch;
+  text-wrap: pretty;
   color: var(--ink-faint);
 }
 
@@ -2012,125 +2017,43 @@ html.js .tray:not(.is-revealed) {
   box-shadow: inset 0 -1px 0 var(--ink);
 }
 
-/* --- the printed key ------------------------------------------------------ */
+/* --- what the seven share -------------------------------------------------- */
 
-.key__title {
-  margin: 0 0 0.75rem;
-  font-size: var(--step--2);
-  font-weight: 400;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-}
+/* Four facts true of the whole catalogue, which is the only kind of fact that
+   belongs above the photographs. What stood here was a seven-row index of the
+   sets themselves — name, finish, shape, price and run, all five of which the
+   label under each photograph carries anyway. Six of its shape cells read
+   "Almond · Medium" and five of its run cells ended "in the first run", so two
+   of its seven columns were one string repeated down the page; and on a phone
+   the whole thing had to be scrolled past twice before a nail appeared.
 
-/* The numerals are each set's place in the catalogue, not its place in this
-   list, so a key sorted by price runs 01 02 03 04 06 05 07 — which reads as a
-   mistake until the sort is named. Two words, and the jump becomes the point. */
-.key__by {
-  opacity: 0.72;
-}
-
-.key__by::before {
-  content: "· ";
-}
-
-.key__rows {
+   Nothing below is typed. It is derived from content/catalog.json in
+   tools/pages.mjs, so an eighth set or a new price cannot leave it lying. */
+.tally {
   margin: 0;
-  padding: 0;
-  list-style: none;
   border-block-start: 1px solid var(--line);
 }
 
-.key__row a,
-.key__head {
+.tally > div {
   display: grid;
-  /* numeral · nail · name · finish · shape · price · run */
-  grid-template-columns:
-    1.75rem 22px minmax(5.5rem, 1.1fr) minmax(5rem, 1.1fr)
-    minmax(5rem, 1fr) 3.75rem minmax(6rem, 1.2fr);
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.5rem 0;
+  grid-template-columns: minmax(4.5rem, auto) minmax(0, 1fr);
+  gap: 0.35rem 1.25rem;
+  align-items: baseline;
+  padding: 0.7rem 0;
   border-block-end: 1px solid var(--line-soft);
-  color: inherit;
 }
 
-.key__head {
-  border-block-end-color: var(--line);
-  font-size: 9px;
+.tally dt {
+  font-size: var(--step--2);
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--ink-faint);
-  padding-block: 0.35rem;
 }
 
-.key__row a {
-  transition: background-color 0.25s ease;
-}
-
-.key__row a:hover {
-  background: color-mix(in srgb, var(--ink) 4%, transparent);
-}
-
-.key__no {
-  font-family: var(--face-display);
-  font-size: var(--step--1);
-  color: var(--ink-faint);
-}
-
-/* The one cut-out nail from the set, at the size of a printer's mark. */
-.key__thumb img {
-  display: block;
-  width: 22px;
-  height: 34px;
-  object-fit: contain;
-  filter: drop-shadow(-2px 3px 4px color-mix(in srgb, var(--cast) 30%, transparent));
-}
-
-.key__name {
-  font-family: var(--face-display);
-  font-size: var(--step-0);
-}
-
-.key__finish,
-.key__shape,
-.key__run {
-  font-size: var(--step--2);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-}
-
-.key__price {
-  font-size: var(--step--2);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  white-space: nowrap;
+.tally dd {
+  margin: 0;
+  text-wrap: pretty;
   color: var(--ink-soft);
-}
-
-/* Below the two-column head the key keeps its rows but drops the spec cells to
-   a second line, rather than becoming a horizontal scroller nobody finds. */
-@media (max-width: 47.99rem) {
-  .key__head {
-    display: none;
-  }
-
-  .key__row a {
-    grid-template-columns: 1.75rem 22px minmax(0, 1fr) auto;
-    row-gap: 0.15rem;
-    padding: 0.7rem 0;
-  }
-
-  .key__finish,
-  .key__shape,
-  .key__run {
-    grid-column: 3 / -1;
-  }
-
-  .key__shape {
-    display: none;
-  }
 }
 
 /* --- the case ------------------------------------------------------------- */
@@ -2157,36 +2080,42 @@ html.js .tray:not(.is-revealed) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  /* Seven into two columns leaves one over; the last one takes the full width
-     rather than sitting beside a hole. */
-  .case__trays > .tray:last-child {
+  /* An odd catalogue leaves one over; that one takes the full width rather
+     than sitting beside a hole. Written from the arithmetic — :nth-child(odd)
+     on the last item is exactly the orphan case — so an eighth set pairs off
+     and this stops firing on its own. It used to fire on any last child, and
+     an even catalogue would have got a stray full-width row. */
+  .case__trays > .tray:last-child:nth-child(odd) {
     grid-column: 1 / -1;
   }
 }
 
 @media (min-width: 64rem) {
-  /* Six columns, so seven compartments fill three shelves exactly — three of
-     two columns, then two of three — with no media query fencing the pattern
-     and no orphan row. NOTE: the spans below assume exactly seven sets. An
-     eighth added in the CMS puts the ragged row back; change the two spans
-     together if the catalogue ever grows. */
-  .case__trays {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+  /* Two columns all the way up. This was six columns arranged 3-2-2, which
+     gave the narrowest compartments and the most cramped labels to the first
+     three sets — the only three anybody sees without scrolling, and one of
+     them the image the browser is told to preload. Wider is the point of a
+     wide screen; the shelves are equals now. */
+
+  /* Except the orphan, which lays its label beside the photograph instead of
+     under it. Full-bleed at this width a 3:2 compartment is over 800px tall
+     on its own, and the finale of the page should not be a wall. */
+  .case__trays > .tray:last-child:nth-child(odd) {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(1.5rem, 3vw, 2.5rem);
   }
 
-  .case__trays > .tray {
-    grid-column: span 2;
-  }
-
-  .case__trays > .tray:nth-child(n + 4) {
-    grid-column: span 3;
+  .case__trays > .tray:last-child:nth-child(odd) .tray__label {
+    padding-block: 0;
   }
 }
 
 .tray {
   position: relative;
-  /* The key's links land here, and the masthead is not sticky on this page —
-     but the announcement bar is above it, so leave a little air. */
+  /* Deep links to #set-<slug> land here, and the masthead is not sticky on
+     this page — but the announcement bar is above it, so leave a little air. */
   scroll-margin-top: 2rem;
   /* For the figure inside. Same reason as .set__link: perspective only reaches
      a child, and the figure is this element's grandchild through no wrapper —
@@ -2254,6 +2183,17 @@ html.js .tray:not(.is-revealed) {
   background: color-mix(in srgb, var(--wash) 78%, #fff);
   rotate: -1.5deg;
   box-shadow: var(--rim), var(--lift);
+}
+
+/* Hung in alternating corners down the case. The seven photographs behind
+   these are already the same hand in the same pose; seven prints pinned to the
+   same corner at the same size and the same angle on top of them was the one
+   thing here that read as a slot being filled rather than a print being put
+   somewhere. The side is set per compartment in tools/pages.mjs. */
+.tray__figure[data-pin="start"] .tray__worn {
+  inset-inline-start: 1.5%;
+  inset-inline-end: auto;
+  rotate: 1.5deg;
 }
 
 /* --- the label, printed beside the object --------------------------------- */
@@ -2371,6 +2311,27 @@ html.js .tray:not(.is-revealed) {
   border-radius: 0;
   border: 0;
   background: color-mix(in srgb, var(--set-deep, var(--ink)) 55%, transparent);
+}
+
+/* The whole compartment has been the link to the set's page since it was
+   built, and nothing said so: a name, a price, a spec line and a run note,
+   none of which look like they go anywhere. This carries the set's own name
+   rather than "View the set", so the seven read as seven destinations and not
+   as one control stamped out seven times. */
+.tray__more {
+  display: inline-block;
+  margin-top: 0.9rem;
+  font-size: var(--step--2);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--set-deep, var(--ink));
+  box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--set-deep, var(--ink)) 28%, transparent);
+  transition: box-shadow 0.3s ease;
+}
+
+.tray:hover .tray__more,
+.tray:focus-within .tray__more {
+  box-shadow: inset 0 -1px 0 var(--set-deep, var(--ink));
 }
 
 /* --- what arrives --------------------------------------------------------- */

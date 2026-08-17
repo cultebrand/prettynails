@@ -40,7 +40,7 @@ const YEAR = 2026;
    and syncChrome() rewrote the hand-owned pages to ?v=19 — so the landing page
    and the shop asked for two different builds of the same file. Bump this once
    when either asset changes; nothing else in here carries a version. */
-const ASSET_V = 20;
+const ASSET_V = 21;
 
 /* --- escaping --------------------------------------------------------------
    Every value below comes from content/*.json, which a non-technical editor
@@ -406,22 +406,57 @@ const setCard = (item) => `          <li class="set" style="--tint: ${esc(item.w
    renderSymbolItems has no item index, so a CMS re-bind could never reproduce
    "01"–"07" — which is why the case is not CMS-bound and says so in the markup. */
 
-/* One line of the printed key. The numeral is the set's place in the
-   catalogue, not its place in this list — the key is sorted by price, and the
-   set pages already call Amour "Set 07 of 07". */
-const keyRow = (item, index) => `            <li class="key__row">
-              <a href="#set-${esc(item.slug)}">
-                <span class="key__no">${String(index + 1).padStart(2, "0")}</span>
-                <span class="key__thumb" aria-hidden="true"><img src="${esc(
-                  item.gallery && item.gallery[0] ? item.gallery[0].image : item.image,
-                )}" alt="" loading="lazy" decoding="async" width="22" height="34" /></span>
-                <span class="key__name">${esc(item.title)}</span>
-                <span class="key__finish">${esc(item.finish)}</span>
-                <span class="key__shape">${esc(item.shape)}</span>
-                <span class="key__price">${esc(item.price)}</span>
-                <span class="key__run">${esc(item.run_note || "")}</span>
-              </a>
-            </li>`;
+/* What the seven have in common, stated once.
+
+   This replaces a seven-row index that sat above the photographs and repeated
+   every set's name, finish, shape, price and run — the same seven facts the
+   labels below already carry, in a table sorted by price whose numerals ran
+   01 02 03 04 06 05 07 because they were catalogue positions. On a phone it
+   was two screens of spreadsheet before the first nail.
+
+   These four are the opposite: only what is true of the whole catalogue, so
+   nothing here is printed a second time further down. All of it is read out
+   of content/catalog.json rather than typed, so it cannot drift from the
+   sets. */
+const money = (price) => Number(String(price).replace(/\D/g, ""));
+
+/* Six of the seven are "Almond · Medium". A column repeating one string seven
+   times is not information; the exception is. */
+const commonShape = [...catalog.items.reduce((tally, item) => tally.set(item.shape, (tally.get(item.shape) || 0) + 1), new Map())].sort(
+  (a, b) => b[1] - a[1],
+)[0][0];
+
+const lastWord = (shape) => shape.split("·").pop().trim();
+
+const tally = () => {
+  const prices = catalog.items.map((item) => money(item.price));
+  const wears = [...new Set(catalog.items.map((item) => item.wear))];
+  /* Only the notes that open with a count — "Made to order · about 2 weeks"
+     has a number in it that is a fortnight, not a quantity. */
+  const runs = catalog.items
+    .map((item) => /^(\d+)\b/.exec(item.run_note || ""))
+    .filter(Boolean)
+    .map((match) => Number(match[1]));
+  const odd = catalog.items.filter((item) => item.shape !== commonShape);
+
+  const rows = [
+    ["Price", `kr ${Math.min(...prices)} – ${Math.max(...prices)}`],
+    [
+      "Shape",
+      odd.length
+        ? `${commonShape.replace(" · ", ", ").toLowerCase().replace(/^./, (c) => c.toUpperCase())} — ${odd
+            .map((item) => `${item.title} is ${lastWord(item.shape).toLowerCase()}`)
+            .join(", ")}`
+        : commonShape,
+    ],
+    ["Wear", `${wears.join(", ")} on the hand`],
+    ["Run", runs.length ? `${Math.min(...runs)} to ${Math.max(...runs)} of each set` : "Made in small runs"],
+  ];
+
+  return `          <dl class="tally">
+${rows.map(([term, value]) => `            <div><dt>${esc(term)}</dt><dd>${esc(value)}</dd></div>`).join("\n")}
+          </dl>`;
+};
 
 /* One compartment of the case: the set's ten nails lying in its own tint, the
    photograph of it worn tucked into the corner, and four short lines of label
@@ -434,7 +469,13 @@ const caseTray = (item, index) => {
   return `            <li class="tray" id="set-${esc(item.slug)}" data-status="${esc(item.status || "")}" style="--tint: ${esc(
     item.wash,
   )}; --set-shade: ${esc(item.shade)}; --set-deep: ${esc(item.deep)}">
-              <figure class="tray__figure">
+              <figure class="tray__figure" data-pin="${
+                /* By shelf, not by compartment. Alternating every tile puts
+                   the two prints of a row either side of the gutter facing
+                   each other, which crowds it and reads as symmetry; by shelf
+                   they walk down the page instead. Two columns above 40rem. */
+                Math.floor(index / 2) % 2 ? "start" : "end"
+              }">
                 <img class="tray__lay" src="${esc(item.lay)}" alt="${esc(item.lay_alt)}" width="1350" height="900" ${
                   eager
                     ? 'loading="eager" fetchpriority="high"'
@@ -452,9 +493,20 @@ const caseTray = (item, index) => {
                   )}">${esc(item.title)}</a></h3>
                   <p class="tray__price">${esc(item.price)}</p>
                 </div>
-                <p class="tray__spec">${esc(item.finish)} · ${esc(item.shape)}</p>
+                <p class="tray__spec">${esc(
+                  /* The head states the shape the catalogue shares. Repeating
+                     "Almond · Medium" under six of seven photographs spends a
+                     line on the one fact that never distinguishes them; the
+                     set that departs from it still says so. */
+                  item.shape === commonShape ? item.finish : `${item.finish} · ${lastWord(item.shape)}`,
+                )}</p>
                 <p class="tray__line">${esc(item.tagline)}</p>
                 <p class="tray__run">${esc(item.run_note || "")}</p>
+                <!-- A span, not an anchor: .tray__link::after already covers the
+                     whole compartment, so a second link here would be a target
+                     nothing can reach. This is the affordance for the one that
+                     is there — the tile was clickable with no sign of it. -->
+                <span class="tray__more" aria-hidden="true">See ${esc(item.title)}</span>
               </div>
             </li>`;
 };
@@ -571,10 +623,14 @@ OWNED["shop.html"] = page(
           <div class="case__lede">
             <p class="eyebrow">Every set we make</p>
             <h1 class="case__title">The seven</h1>
+            <!-- The old blurb spent its three sentences on ten nails, two
+                 spares, twelve sizes and four or five wears — every one of
+                 which "What arrives" prints again two thousand pixels down
+                 the same page. This says the thing only the shop can say. -->
             <p class="case__blurb">
-              Ten nails on one idea, sculpted and painted by hand — about four hours a
-              set, and fourteen for Amour. Twelve sizes in every box, plus two spares,
-              and the set goes back in the box to be worn again four or five times.
+              Seven sets, and that is the whole catalogue. Each one is a single idea
+              carried across ten nails, sculpted and painted here in Copenhagen: about
+              four hours of work for most of them, and fourteen for Amour.
             </p>
             <p class="case__facts">
               <a href="/guide#sizing">How to size</a>
@@ -583,25 +639,7 @@ OWNED["shop.html"] = page(
             </p>
           </div>
 
-          <div class="key">
-            <h2 class="key__title">The index <span class="key__by">by price</span></h2>
-            <ol class="key__rows">
-              <li class="key__head" aria-hidden="true">
-                <span class="key__no">№</span>
-                <span class="key__thumb"></span>
-                <span class="key__name">Set</span>
-                <span class="key__finish">Finish</span>
-                <span class="key__shape">Shape</span>
-                <span class="key__price">Price</span>
-                <span class="key__run">Run</span>
-              </li>
-${catalog.items
-  .map((item, index) => ({ item, index }))
-  .sort((a, b) => Number(a.item.price.replace(/\D/g, "")) - Number(b.item.price.replace(/\D/g, "")))
-  .map(({ item, index }) => keyRow(item, index))
-  .join("\n")}
-            </ol>
-          </div>
+${tally()}
         </div>
 
         <h2 class="visually-hidden">All seven sets</h2>
@@ -621,12 +659,17 @@ ${catalog.items.map(caseTray).join("\n")}
         </figure>
         <div class="closer__body">
           <h2 class="closer__title" id="whats-in-the-box">What arrives</h2>
+          <!-- Figures, not words. Every quantity on this page used to be
+               spelled out — ten nails, twelve sizes, eighteen in the first
+               run — which is a fine rule for a sentence and the wrong one for
+               a list somebody is scanning. The prose still spells them; the
+               counts here and in the facts panel are read, not read aloud. -->
           <ul class="closer__list">
-            <li>Ten nails, plus two spares</li>
-            <li>Twelve sizes, so it fits without a fitting</li>
+            <li>10 nails, plus 2 spares</li>
+            <li>12 sizes in the box, so it fits without a fitting</li>
             <li>Glue, adhesive tabs, a file and a cuticle stick</li>
             <li>The box is the storage — the set goes back in it</li>
-            <li>Worn four or five times with care</li>
+            <li>Worn 4 or 5 times with care</li>
           </ul>
           <p class="closer__links">
             <a href="/guide#sizing">Find your size</a> ·
