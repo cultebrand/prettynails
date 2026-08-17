@@ -1693,18 +1693,21 @@ html:not(.js) .hero__layers > .hero__layer:first-of-type {
    The card used to slide up the page. It stands up off it now: tipped back and
    set behind the plane of the paper, then coming upright as it arrives. The
    distance travelled is the same; what changed is that it is an object being
-   put down rather than a rectangle being nudged. */
+   put down rather than a rectangle being nudged.
+
    The perspective is written into the transform rather than onto the grid: a
    grid-wide vanishing point would tip the outer columns toward the middle, and
    these seven are a row of equals, not a fan. Each card gets its own eye. */
 html.js .set:not(.is-revealed),
-html.js .piece:not(.is-revealed) {
+html.js .piece:not(.is-revealed),
+html.js .tray:not(.is-revealed) {
   opacity: 0;
   transform: perspective(1500px) rotateX(7deg) translate3d(0, 24px, -60px);
 }
 
 .set,
-.piece {
+.piece,
+.tray {
   transform-origin: 50% 100%;
   transition:
     opacity 0.7s ease-out,
@@ -1727,8 +1730,9 @@ html.js .piece:not(.is-revealed) {
   perspective: 1000px;
 }
 
-.set__link:focus-visible {
-  outline: 2px solid var(--deep);
+.set__link:focus-visible,
+.tray__link:focus-visible {
+  outline: 2px solid var(--set-deep, var(--deep));
   outline-offset: 6px;
   border-radius: 20px;
 }
@@ -1736,7 +1740,9 @@ html.js .piece:not(.is-revealed) {
 /* Inside the frame the photograph moves against it, so the tile is a window
    with something behind it rather than a picture printed on it. Two planes
    moving by different amounts is the whole trick, and it costs a translate. */
-.set__link .set__figure img {
+.set__link .set__figure img,
+.tray .tray__lay,
+.closer__figure img {
   scale: 1.03;
   transform: translate3d(calc(var(--turn, 0) * -1px), calc(var(--pitch, 0) * -1px), 0);
   transition:
@@ -1744,7 +1750,9 @@ html.js .piece:not(.is-revealed) {
     transform 0.5s var(--reach);
 }
 
-.set__link:hover .set__figure img {
+.set__link:hover .set__figure img,
+.tray:hover .tray__lay,
+.tray:focus-within .tray__lay {
   scale: 1.075;
 }
 
@@ -1761,12 +1769,15 @@ html.js .piece:not(.is-revealed) {
     box-shadow 0.3s ease;
 }
 
-.set__link:hover .set__more {
+.set__link:hover .set__more,
+.set__link:focus-visible .set__more {
   color: var(--set-deep);
   box-shadow: inset 0 -1px 0 var(--set-deep);
 }
 
-.set__figure {
+.set__figure,
+.tray__figure,
+.closer__figure {
   position: relative;
   overflow: hidden;
   margin: 0;
@@ -1785,7 +1796,10 @@ html.js .piece:not(.is-revealed) {
     transform 0.4s var(--reach);
 }
 
-.set__link:hover .set__figure {
+.set__link:hover .set__figure,
+.set__link:focus-within .set__figure,
+.tray:hover .tray__figure,
+.tray:focus-within .tray__figure {
   box-shadow: var(--edge), var(--rim), var(--lift-high);
 }
 
@@ -1797,7 +1811,8 @@ html.js .piece:not(.is-revealed) {
    Leaving is not the entrance backwards. The band fades out where it is and
    the return is snapped through afterwards, unseen — a sheen that walks back
    across the tile on mouse-out is a machine showing its rails. */
-.set__figure::after {
+.set__figure::after,
+.tray__figure::after {
   content: "";
   position: absolute;
   inset: -20%;
@@ -1817,7 +1832,9 @@ html.js .piece:not(.is-revealed) {
     transform 0s 0.18s;
 }
 
-.set__link:hover .set__figure::after {
+.set__link:hover .set__figure::after,
+.tray:hover .tray__figure::after,
+.tray:focus-within .tray__figure::after {
   opacity: 1;
   transform: translateX(58%);
   transition:
@@ -1825,7 +1842,9 @@ html.js .piece:not(.is-revealed) {
     transform 1.15s var(--reach);
 }
 
-.set__figure img {
+.set__figure img,
+.tray__figure img,
+.closer__figure img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -1901,6 +1920,528 @@ html.js .piece:not(.is-revealed) {
 
 .sets__closer .btn--solid {
   background: var(--ink);
+}
+
+/* ===========================================================================
+   THE SHOP — the case and its printed key
+
+   /shop used to render the same seven cards as the landing page, in the same
+   partial, from the same photographs — a second copy of a section the visitor
+   had usually just scrolled past. And the photographs could not tell the seven
+   apart: measured on the decoded pixels, 86% of every card frame was identical
+   across all seven sets, because they are one hand in one pose with the colour
+   changed. A shop whose whole promise is "ten nails on one idea, made by hand"
+   was showing two fingers and a tint.
+
+   So the page is a case now. Two halves, doing two different jobs:
+
+     the key    finding and comparing. Seven aligned rows, sorted by price,
+                every spec on one line. Plain anchors, works with JS off, and
+                it fills the 942px of bare cream the old head band wasted.
+     the case   wanting. Seven compartments sunk into the page, each holding
+                that set's ten nails photographed on their own, with the same
+                set worn tucked into the corner as a small print.
+
+   Nothing here invents a colour, a face or a step. The compartments are the
+   per-set tints that were already in the catalogue and too close together to
+   read on cream — against a sunk field, with a different photograph in each,
+   they separate.
+   =========================================================================== */
+
+.case {
+  max-width: var(--frame);
+  margin-inline: auto;
+  /* Not --section-top. That is 128px of air for clearing a hero, and this page
+     has none: the head follows the masthead directly. */
+  padding: clamp(1.5rem, 3vw, 2.5rem) var(--gutter) 0;
+}
+
+.case__head {
+  display: grid;
+  gap: clamp(2rem, 4vw, 3rem);
+  margin-bottom: clamp(2.5rem, 5vw, 3.75rem);
+}
+
+@media (min-width: 64rem) {
+  .case__head {
+    /* The words take five twelfths and the key takes seven. The old head put a
+       46ch paragraph in the left third and left the other two thirds empty. */
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    /* Both columns start on the same line. Hanging them from the baseline
+       instead dropped the headline two hundred pixels down the page to meet
+       the last row of the key, and left the corner the eye lands on empty. */
+    align-items: start;
+  }
+}
+
+.case__title {
+  margin: 0.75rem 0 0;
+  font-family: var(--face-display);
+  font-size: var(--step-3);
+  font-weight: 400;
+  line-height: 1.02;
+}
+
+.case__blurb {
+  margin: 1.25rem 0 0;
+  max-width: 42ch;
+  color: var(--ink-faint);
+}
+
+/* The three questions this page never answered and never linked to. */
+.case__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  margin: 1.5rem 0 0;
+  font-size: var(--step--2);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.case__facts a {
+  color: var(--ink-soft);
+  box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--ink) 25%, transparent);
+  transition:
+    color 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.case__facts a:hover {
+  color: var(--ink);
+  box-shadow: inset 0 -1px 0 var(--ink);
+}
+
+/* --- the printed key ------------------------------------------------------ */
+
+.key__title {
+  margin: 0 0 0.75rem;
+  font-size: var(--step--2);
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+/* The numerals are each set's place in the catalogue, not its place in this
+   list, so a key sorted by price runs 01 02 03 04 06 05 07 — which reads as a
+   mistake until the sort is named. Two words, and the jump becomes the point. */
+.key__by {
+  opacity: 0.72;
+}
+
+.key__by::before {
+  content: "· ";
+}
+
+.key__rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-block-start: 1px solid var(--line);
+}
+
+.key__row a,
+.key__head {
+  display: grid;
+  /* numeral · nail · name · finish · shape · price · run */
+  grid-template-columns:
+    1.75rem 22px minmax(5.5rem, 1.1fr) minmax(5rem, 1.1fr)
+    minmax(5rem, 1fr) 3.75rem minmax(6rem, 1.2fr);
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  border-block-end: 1px solid var(--line-soft);
+  color: inherit;
+}
+
+.key__head {
+  border-block-end-color: var(--line);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  padding-block: 0.35rem;
+}
+
+.key__row a {
+  transition: background-color 0.25s ease;
+}
+
+.key__row a:hover {
+  background: color-mix(in srgb, var(--ink) 4%, transparent);
+}
+
+.key__no {
+  font-family: var(--face-display);
+  font-size: var(--step--1);
+  color: var(--ink-faint);
+}
+
+/* The one cut-out nail from the set, at the size of a printer's mark. */
+.key__thumb img {
+  display: block;
+  width: 22px;
+  height: 34px;
+  object-fit: contain;
+  filter: drop-shadow(-2px 3px 4px color-mix(in srgb, var(--cast) 30%, transparent));
+}
+
+.key__name {
+  font-family: var(--face-display);
+  font-size: var(--step-0);
+}
+
+.key__finish,
+.key__shape,
+.key__run {
+  font-size: var(--step--2);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.key__price {
+  font-size: var(--step--2);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--ink-soft);
+}
+
+/* Below the two-column head the key keeps its rows but drops the spec cells to
+   a second line, rather than becoming a horizontal scroller nobody finds. */
+@media (max-width: 47.99rem) {
+  .key__head {
+    display: none;
+  }
+
+  .key__row a {
+    grid-template-columns: 1.75rem 22px minmax(0, 1fr) auto;
+    row-gap: 0.15rem;
+    padding: 0.7rem 0;
+  }
+
+  .key__finish,
+  .key__shape,
+  .key__run {
+    grid-column: 3 / -1;
+  }
+
+  .key__shape {
+    display: none;
+  }
+}
+
+/* --- the case ------------------------------------------------------------- */
+
+/* The second thing on this site pressed into the page rather than laid on it —
+   the waitlist band is the first, and this borrows its recipe. Everything
+   inside it is raised; the field is what they are raised from. */
+.case__trays {
+  display: grid;
+  gap: clamp(0.9rem, 2vw, 1.5rem);
+  margin: 0;
+  padding: clamp(1rem, 2.5vw, 2rem);
+  list-style: none;
+  border-radius: 22px;
+  background: color-mix(in srgb, var(--ink) 4%, var(--wash));
+  box-shadow:
+    inset 0 10px 20px -16px color-mix(in srgb, var(--cast) 62%, transparent),
+    inset 0 -10px 20px -16px color-mix(in srgb, var(--cast) 46%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--cast) 14%, transparent);
+}
+
+@media (min-width: 40rem) {
+  .case__trays {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* Seven into two columns leaves one over; the last one takes the full width
+     rather than sitting beside a hole. */
+  .case__trays > .tray:last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (min-width: 64rem) {
+  /* Six columns, so seven compartments fill three shelves exactly — three of
+     two columns, then two of three — with no media query fencing the pattern
+     and no orphan row. NOTE: the spans below assume exactly seven sets. An
+     eighth added in the CMS puts the ragged row back; change the two spans
+     together if the catalogue ever grows. */
+  .case__trays {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .case__trays > .tray {
+    grid-column: span 2;
+  }
+
+  .case__trays > .tray:nth-child(n + 4) {
+    grid-column: span 3;
+  }
+}
+
+.tray {
+  position: relative;
+  /* The key's links land here, and the masthead is not sticky on this page —
+     but the announcement bar is above it, so leave a little air. */
+  scroll-margin-top: 2rem;
+  /* For the figure inside. Same reason as .set__link: perspective only reaches
+     a child, and the figure is this element's grandchild through no wrapper —
+     it is a direct child, so this is where the vanishing point belongs. */
+  perspective: 1000px;
+}
+
+/* The compartment. Its floor is the set's own wash, and its walls throw a
+   shadow tinted with that set's --shade — the one place on the cream ground
+   where the third colour of the trio does any work. */
+.tray__figure {
+  aspect-ratio: 3 / 2;
+  border-radius: 16px;
+  padding: 6.5%;
+  background: var(--tint);
+}
+
+.tray__figure::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  /* On the ::before rather than in the figure's own box-shadow, because the
+     hover rule swaps that whole property for --lift-high and would take the
+     compartment walls with it. */
+  box-shadow:
+    inset 0 8px 16px -12px color-mix(in srgb, var(--cast) 55%, transparent),
+    inset 0 -7px 14px -12px color-mix(in srgb, var(--set-shade, var(--shade)) 85%, transparent);
+}
+
+/* The ten nails, lying in the compartment. */
+.tray__lay {
+  position: relative;
+  z-index: 1;
+  border-radius: 9px;
+  box-shadow: var(--rim), var(--lift);
+}
+
+/* The same set on a hand, at the size of a print somebody pinned there. The
+   photograph is one of the seven already in the repo, which have never once
+   been shown on this page — identical pose across all seven, which is a defect
+   at card size and a virtue at this one. */
+/* Scoped through the figure deliberately: the shared `.tray__figure img` rule
+   this borrows from the set cards is a class-plus-element selector, and a bare
+   .tray__worn would lose to it and be stretched to fill the compartment. */
+.tray__figure .tray__worn {
+  position: absolute;
+  z-index: 2;
+  /* Hung off the corner rather than laid on the middle of it: the ten-nail
+     photograph is the thing being sold, and Étoile's crystals and Bunny
+     Cream's rabbits are small enough that a print sitting further in covers the
+     one nail somebody came to look at. */
+  inset-block-end: 1.5%;
+  inset-inline-end: 1.5%;
+  width: clamp(74px, 21%, 132px);
+  height: auto;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  object-position: 50% 62%;
+  border-radius: 7px;
+  /* Warmer than white. At near-white it punched a hole in the compartment
+     instead of lying in it. */
+  background: color-mix(in srgb, var(--wash) 78%, #fff);
+  rotate: -1.5deg;
+  box-shadow: var(--rim), var(--lift);
+}
+
+/* --- the label, printed beside the object --------------------------------- */
+
+.tray__label {
+  padding: 0.9rem 0.15rem 0.2rem;
+}
+
+.tray__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.6rem;
+  margin: 0;
+}
+
+.tray__no {
+  font-family: var(--face-display);
+  font-size: var(--step--1);
+  color: var(--ink-faint);
+}
+
+/* An <h3>, so the seven are navigable by heading and not only by link — but
+   sized and weighted as a label, because it is one. */
+.tray__name {
+  margin: 0;
+  font-family: var(--face-display);
+  font-size: var(--step-2);
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.tray__price {
+  margin: 0;
+}
+
+/* The price outranks the specs here: it is the number somebody is deciding
+   about, and it used to be set at 11px in the faintest ink on the page. */
+.tray__price {
+  margin-inline-start: auto;
+  font-size: var(--step-1);
+  color: var(--set-deep, var(--ink));
+}
+
+/* The whole compartment is the target, so the accessible name comes off the
+   anchor's aria-label — "Lily Blanc — glazed milk, kr 420" instead of the
+   two hundred characters the old card read out. Nothing else inside .tray may
+   want its own click after this. */
+.tray__link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: 22px;
+}
+
+/* An outline follows the element's own box, and this anchor's box is four words
+   of a set name — so a keyboard ring drawn on it frames the title while the
+   thing that is actually about to be activated is the whole compartment. Drawn
+   on the tray instead. Where :has() is missing the anchor keeps its own ring
+   from the shared rule above, which is smaller but never absent. */
+.tray:has(.tray__link:focus-visible) {
+  outline: 2px solid var(--set-deep, var(--deep));
+  outline-offset: 7px;
+  border-radius: 24px;
+}
+
+.tray:has(.tray__link:focus-visible) .tray__link {
+  outline: none;
+}
+
+.tray__spec {
+  margin: 0.5rem 0 0;
+  font-size: var(--step--2);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--set-deep, var(--ink));
+}
+
+.tray__line {
+  margin: 0.4rem 0 0;
+  color: var(--ink-faint);
+}
+
+/* How many were made, marked rather than asserted. The dot is a second channel
+   on top of the words, never the only one — the run text stays readable, so
+   the marker can never be the sole carrier of the fact. */
+.tray__run {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.6rem 0 0;
+  font-size: var(--step--2);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.tray__run::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  border: 1px solid var(--set-deep, var(--ink));
+}
+
+.tray[data-status="few-left"] .tray__run::before {
+  background: var(--set-deep, var(--ink));
+}
+
+.tray[data-status="next-run"] .tray__run::before {
+  width: 10px;
+  height: 1px;
+  border-radius: 0;
+  border: 0;
+  background: color-mix(in srgb, var(--set-deep, var(--ink)) 55%, transparent);
+}
+
+/* --- what arrives --------------------------------------------------------- */
+
+/* Every assurance on this page asserts a physical object — "the box is the
+   storage", "twelve sizes in every box" — and the box had never been shown.
+   Someone is being asked to wait until October for a thing they cannot see. */
+.case__closer {
+  display: grid;
+  gap: clamp(1.5rem, 4vw, 3rem);
+  align-items: center;
+  max-width: var(--frame);
+  margin: clamp(3.5rem, 7vw, 5.5rem) auto 0;
+  padding-inline: var(--gutter);
+}
+
+@media (min-width: 48rem) {
+  .case__closer {
+    grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+  }
+}
+
+.closer__figure {
+  margin: 0;
+  aspect-ratio: 3 / 2;
+  border-radius: 18px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--ink) 4%, var(--wash));
+  box-shadow: var(--edge), var(--rim), var(--lift);
+}
+
+.closer__title {
+  margin: 0;
+  font-family: var(--face-display);
+  font-size: var(--step-2);
+  font-weight: 400;
+  line-height: 1.3;
+}
+
+.closer__list {
+  margin: 1.25rem 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--ink-soft);
+}
+
+.closer__list li {
+  padding: 0.6rem 0;
+  border-block-start: 1px solid var(--line-soft);
+}
+
+.closer__list li:first-child {
+  border-block-start: 0;
+  padding-block-start: 0;
+}
+
+.closer__links {
+  margin: 1.25rem 0 0;
+  font-size: var(--step--2);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.closer__links a {
+  color: var(--ink-soft);
+  box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--ink) 25%, transparent);
+}
+
+.closer__links a:hover {
+  color: var(--ink);
 }
 
 /* --- the waitlist --------------------------------------------------------- */
@@ -2950,12 +3491,12 @@ body > .masthead {
 }
 
 @media (max-width: 47.99rem) {
-  .assurance:nth-child(odd) {
+  .assurance:nth-of-type(odd) {
     border-inline-start: 0;
     padding-inline-start: 0;
   }
 
-  .assurance:nth-child(n + 3) {
+  .assurance:nth-of-type(n + 3) {
     border-block-start: 1px solid var(--line-soft);
   }
 }
@@ -3552,13 +4093,16 @@ body > .masthead {
   .dock__link,
   .chip__frame,
   .set__figure,
+  .tray__figure,
+  .closer__figure,
   .piece__figure,
   .nails__cell {
     transition-duration: 1ms;
   }
 
   .set,
-  .piece {
+  .piece,
+  .tray {
     opacity: 1;
     transform: none;
     transition: none;
@@ -3584,7 +4128,8 @@ body > .masthead {
     --pitch: 0;
   }
 
-  .set__figure::after {
+  .set__figure::after,
+  .tray__figure::after {
     display: none;
   }
 

@@ -31,8 +31,9 @@
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Italiana&amp;family=Jost:wght@300..600&amp;display=swap"
     />
-    <link rel="stylesheet" href="/assets/css/styles.css?v=18" />
-    <link rel="stylesheet" href="/assets/css/page.css?v=18" />
+    <link rel="stylesheet" href="/assets/css/styles.css?v=20" />
+    <link rel="stylesheet" href="/assets/css/page.css?v=20" />
+    <link rel="preload" as="image" href="/media/uploads/nails/lay-lily-blanc.webp" />
 
     <!-- Where content/ and media/ live. These pages are not all at the same
          depth — a set's page is /sets/<slug> — so main.js is told the root
@@ -140,122 +141,264 @@
     </header>
 
     <main id="main">
-      <section class="sets sets--page">
-        <header class="section-head">
-          <p class="eyebrow">Every set we make</p>
-          <h1 class="section-head__title">The seven</h1>
-          <p class="section-head__blurb">
-            Each set is ten nails on one idea, made in a small run and packed with twelve
-            sizes so it fits without a fitting. Nothing here is printed or bought in.
+      <nav class="crumbs" aria-label="Breadcrumb">
+        <ol>
+          <li><a href="/">Home</a></li>
+          <li><a href="/shop" aria-current="page">Shop</a></li>
+        </ol>
+      </nav>
+
+      <section class="case">
+        <div class="case__head">
+          <div class="case__lede">
+            <p class="eyebrow">Every set we make</p>
+            <h1 class="case__title">The seven</h1>
+            <p class="case__blurb">
+              Ten nails on one idea, sculpted and painted by hand — about four hours a
+              set, and fourteen for Amour. Twelve sizes in every box, plus two spares,
+              and the set goes back in the box to be worn again four or five times.
+            </p>
+            <p class="case__facts">
+              <a href="/guide#sizing">How to size</a>
+              <a href="/shipping">Shipping &amp; returns</a>
+              <a href="/faq">Questions</a>
+            </p>
+          </div>
+
+          <div class="key">
+            <h2 class="key__title">The index <span class="key__by">by price</span></h2>
+            <ol class="key__rows">
+              <li class="key__head" aria-hidden="true">
+                <span class="key__no">№</span>
+                <span class="key__thumb"></span>
+                <span class="key__name">Set</span>
+                <span class="key__finish">Finish</span>
+                <span class="key__shape">Shape</span>
+                <span class="key__price">Price</span>
+                <span class="key__run">Run</span>
+              </li>
+            <li class="key__row">
+              <a href="#set-lily-blanc">
+                <span class="key__no">01</span>
+                <span class="key__thumb" aria-hidden="true"><img src="/media/uploads/nails/isolated/lily-blanc-01.webp" alt="" loading="lazy" decoding="async" width="22" height="34" /></span>
+                <span class="key__name">Lily Blanc</span>
+                <span class="key__finish">Glazed milk</span>
+                <span class="key__shape">Almond · Medium</span>
+                <span class="key__price">kr 420</span>
+                <span class="key__run">Eighteen in the first run</span>
+              </a>
+            </li>
+            <li class="key__row">
+              <a href="#set-orchid-veil">
+                <span class="key__no">02</span>
+                <span class="key__thumb" aria-hidden="true"><img src="/media/uploads/nails/isolated/orchid-veil-01.webp" alt="" loading="lazy" decoding="async" width="22" height="34" /></span>
+                <span class="key__name">Orchid Veil</span>
+                <span class="key__finish">Aurora pearl</span>
+                <span class="key__shape">Almond · Medium</span>
+                <span class="key__price">kr 440</span>
+                <span class="key__run">Eighteen in the first run</span>
+              </a>
+            </li>
+            <li class="key__row">
+              <a href="#set-matcha-latte">
+                <span class="key__no">03</span>
+                <span class="key__thumb" aria-hidden="true"><img src="/media/uploads/nails/isolated/matcha-latte-01.webp" alt="" loading="lazy" decoding="async" width="22" height="34" /></span>
+                <span class="key__name">Matcha Latte</span>
+                <span class="key__finish">Satin marble</span>
+                <span class="key__shape">Almond · Medium</span>
+                <span class="key__price">kr 440</span>
+                <span class="key__run">Twelve in the first run</span>
+              </a>
+            </li>
+            <li class="key__row">
+              <a href="#set-cherry-gloss">
+                <span class="key__no">04</span>
+                <span class="key__thumb" aria-hidden="true"><img src="/media/uploads/nails/isolated/cherry-gloss-01.webp" alt="" loading="lazy" decoding="async" width="22" height="34" /></span>
+                <span class="key__name">Cherry Gloss</span>
+                <span class="key__finish">Jelly gloss</span>
+                <span class="key__shape">Almond · Medium</span>
+                <span class="key__price">kr 460</span>
+                <span class="key__run">Twelve in the first run</span>
+              </a>
+            </li>
+            <li class="key__row">
+              <a href="#set-bunny-cream">
+                <span class="key__no">06</span>
+                <span class="key__thumb" aria-hidden="true"><img src="/media/uploads/nails/isolated/bunny-cream-01.webp" alt="" loading="lazy" decoding="async" width="22" height="34" /></span>
+                <span class="key__name">Bunny Cream</span>
+                <span class="key__finish">Glazed pearl</span>
+                <span class="key__shape">Almond · Medium</span>
+                <span class="key__price">kr 460</span>
+                <span class="key__run">Twelve in the first run</span>
+              </a>
+            </li>
+            <li class="key__row">
+              <a href="#set-etoile">
+                <span class="key__no">05</span>
+                <span class="key__thumb" aria-hidden="true"><img src="/media/uploads/nails/isolated/etoile-01.webp" alt="" loading="lazy" decoding="async" width="22" height="34" /></span>
+                <span class="key__name">Étoile</span>
+                <span class="key__finish">Mirror chrome</span>
+                <span class="key__shape">Almond · Medium</span>
+                <span class="key__price">kr 520</span>
+                <span class="key__run">Made to order, about two weeks</span>
+              </a>
+            </li>
+            <li class="key__row">
+              <a href="#set-amour">
+                <span class="key__no">07</span>
+                <span class="key__thumb" aria-hidden="true"><img src="/media/uploads/nails/isolated/amour-01.webp" alt="" loading="lazy" decoding="async" width="22" height="34" /></span>
+                <span class="key__name">Amour</span>
+                <span class="key__finish">Jelly crimson</span>
+                <span class="key__shape">Almond · Long</span>
+                <span class="key__price">kr 540</span>
+                <span class="key__run">Six in the first run — the smallest</span>
+              </a>
+            </li>
+            </ol>
+          </div>
+        </div>
+
+        <h2 class="visually-hidden">All seven sets</h2>
+        <!-- Not CMS-bound on purpose: no data-symbol, no data-list. The label
+             carries an ordinal, and render.js's renderSymbolItems has no item
+             index, so a re-bind could only ever produce these tiles without
+             their numbers. The seven live in content/catalog.json and this file
+             renders them; edit the catalogue and re-run tools/pages.mjs. -->
+        <ol class="case__trays">
+            <li class="tray" id="set-lily-blanc" data-status="next-run" style="--tint: #F7F3EF; --set-shade: #E4DAD2; --set-deep: #6E5B4E">
+              <figure class="tray__figure">
+                <img class="tray__lay" src="/media/uploads/nails/lay-lily-blanc.webp" alt="Ten milk-white almond nails laid out in two rows of five, each drawn with a single white lily in white on white" width="1350" height="900" loading="eager" fetchpriority="high" decoding="async" />
+                <img class="tray__worn" src="/media/uploads/nails/hand-lily-blanc.webp" alt="" loading="lazy" decoding="async" />
+              </figure>
+              <div class="tray__label">
+                <div class="tray__head">
+                  <span class="tray__no">01</span>
+                  <h3 class="tray__name"><a class="tray__link" href="/sets/lily-blanc" aria-label="Lily Blanc — glazed milk, kr 420">Lily Blanc</a></h3>
+                  <p class="tray__price">kr 420</p>
+                </div>
+                <p class="tray__spec">Glazed milk · Almond · Medium</p>
+                <p class="tray__line">Milk glaze, hand-drawn lily</p>
+                <p class="tray__run">Eighteen in the first run</p>
+              </div>
+            </li>
+            <li class="tray" id="set-orchid-veil" data-status="next-run" style="--tint: #F8EDEC; --set-shade: #D9A6A6; --set-deep: #7C4448">
+              <figure class="tray__figure">
+                <img class="tray__lay" src="/media/uploads/nails/lay-orchid-veil.webp" alt="Ten blush-pink almond nails in two rows of five, pearl shifting lilac to peach, two of them painted with an orchid" width="1350" height="900" loading="eager" fetchpriority="high" decoding="async" />
+                <img class="tray__worn" src="/media/uploads/nails/hand-orchid-veil.webp" alt="" loading="lazy" decoding="async" />
+              </figure>
+              <div class="tray__label">
+                <div class="tray__head">
+                  <span class="tray__no">02</span>
+                  <h3 class="tray__name"><a class="tray__link" href="/sets/orchid-veil" aria-label="Orchid Veil — aurora pearl, kr 440">Orchid Veil</a></h3>
+                  <p class="tray__price">kr 440</p>
+                </div>
+                <p class="tray__spec">Aurora pearl · Almond · Medium</p>
+                <p class="tray__line">Sheer blush, aurora pearl</p>
+                <p class="tray__run">Eighteen in the first run</p>
+              </div>
+            </li>
+            <li class="tray" id="set-matcha-latte" data-status="next-run" style="--tint: #F0F2EA; --set-shade: #A9B79C; --set-deep: #4E5A45">
+              <figure class="tray__figure">
+                <img class="tray__lay" src="/media/uploads/nails/lay-matcha-latte.webp" alt="Ten almond nails in two rows of five, sage green marbled through warm cream, no two of them alike" width="1350" height="900" loading="eager" fetchpriority="high" decoding="async" />
+                <img class="tray__worn" src="/media/uploads/nails/hand-matcha-latte.webp" alt="" loading="lazy" decoding="async" />
+              </figure>
+              <div class="tray__label">
+                <div class="tray__head">
+                  <span class="tray__no">03</span>
+                  <h3 class="tray__name"><a class="tray__link" href="/sets/matcha-latte" aria-label="Matcha Latte — satin marble, kr 440">Matcha Latte</a></h3>
+                  <p class="tray__price">kr 440</p>
+                </div>
+                <p class="tray__spec">Satin marble · Almond · Medium</p>
+                <p class="tray__line">Sage marble, poured cream</p>
+                <p class="tray__run">Twelve in the first run</p>
+              </div>
+            </li>
+            <li class="tray" id="set-cherry-gloss" data-status="few-left" style="--tint: #F5DCDD; --set-shade: #7C1220; --set-deep: #4A060E">
+              <figure class="tray__figure">
+                <img class="tray__lay" src="/media/uploads/nails/lay-cherry-gloss.webp" alt="Ten almond nails in two rows of five in layered translucent red under a thick wet gloss, with no art on them at all" width="1350" height="900" loading="lazy" fetchpriority="low" decoding="async" />
+                <img class="tray__worn" src="/media/uploads/nails/hand-cherry-gloss.webp" alt="" loading="lazy" decoding="async" />
+              </figure>
+              <div class="tray__label">
+                <div class="tray__head">
+                  <span class="tray__no">04</span>
+                  <h3 class="tray__name"><a class="tray__link" href="/sets/cherry-gloss" aria-label="Cherry Gloss — jelly gloss, kr 460">Cherry Gloss</a></h3>
+                  <p class="tray__price">kr 460</p>
+                </div>
+                <p class="tray__spec">Jelly gloss · Almond · Medium</p>
+                <p class="tray__line">Jelly crimson, wet finish</p>
+                <p class="tray__run">Twelve in the first run</p>
+              </div>
+            </li>
+            <li class="tray" id="set-etoile" data-status="made-to-order" style="--tint: #EFEEF0; --set-shade: #A9A7AC; --set-deep: #4A484E">
+              <figure class="tray__figure">
+                <img class="tray__lay" src="/media/uploads/nails/lay-etoile.webp" alt="Ten mirror-chrome almond nails in two rows of five, reflecting the room, set with small four-point crystal stars" width="1350" height="900" loading="lazy" fetchpriority="low" decoding="async" />
+                <img class="tray__worn" src="/media/uploads/nails/hand-etoile.webp" alt="" loading="lazy" decoding="async" />
+              </figure>
+              <div class="tray__label">
+                <div class="tray__head">
+                  <span class="tray__no">05</span>
+                  <h3 class="tray__name"><a class="tray__link" href="/sets/etoile" aria-label="Étoile — mirror chrome, kr 520">Étoile</a></h3>
+                  <p class="tray__price">kr 520</p>
+                </div>
+                <p class="tray__spec">Mirror chrome · Almond · Medium</p>
+                <p class="tray__line">Liquid chrome, set crystal</p>
+                <p class="tray__run">Made to order, about two weeks</p>
+              </div>
+            </li>
+            <li class="tray" id="set-bunny-cream" data-status="next-run" style="--tint: #F8F0EA; --set-shade: #DDC0B2; --set-deep: #7A5748">
+              <figure class="tray__figure">
+                <img class="tray__lay" src="/media/uploads/nails/lay-bunny-cream.webp" alt="Ten milky nude almond nails in two rows of five, two of them carrying a sculpted white rabbit the size of a grain of rice" width="1350" height="900" loading="lazy" fetchpriority="low" decoding="async" />
+                <img class="tray__worn" src="/media/uploads/nails/hand-bunny-cream.webp" alt="" loading="lazy" decoding="async" />
+              </figure>
+              <div class="tray__label">
+                <div class="tray__head">
+                  <span class="tray__no">06</span>
+                  <h3 class="tray__name"><a class="tray__link" href="/sets/bunny-cream" aria-label="Bunny Cream — glazed pearl, kr 460">Bunny Cream</a></h3>
+                  <p class="tray__price">kr 460</p>
+                </div>
+                <p class="tray__spec">Glazed pearl · Almond · Medium</p>
+                <p class="tray__line">Glazed nude, a small rabbit</p>
+                <p class="tray__run">Twelve in the first run</p>
+              </div>
+            </li>
+            <li class="tray" id="set-amour" data-status="few-left" style="--tint: #F8E0E1; --set-shade: #B3202F; --set-deep: #521016">
+              <figure class="tray__figure">
+                <img class="tray__lay" src="/media/uploads/nails/lay-amour.webp" alt="Ten crimson almond nails scattered in two rows, with hearts, a gingham bow, a soda bottle and a love letter built up in relief" width="1350" height="900" loading="lazy" fetchpriority="low" decoding="async" />
+                <img class="tray__worn" src="/media/uploads/nails/hand-amour.webp" alt="" loading="lazy" decoding="async" />
+              </figure>
+              <div class="tray__label">
+                <div class="tray__head">
+                  <span class="tray__no">07</span>
+                  <h3 class="tray__name"><a class="tray__link" href="/sets/amour" aria-label="Amour — jelly crimson, kr 540">Amour</a></h3>
+                  <p class="tray__price">kr 540</p>
+                </div>
+                <p class="tray__spec">Jelly crimson · Almond · Long</p>
+                <p class="tray__line">Jelly crimson, sculpted by hand</p>
+                <p class="tray__run">Six in the first run — the smallest</p>
+              </div>
+            </li>
+        </ol>
+      </section>
+
+      <section class="case__closer" aria-labelledby="whats-in-the-box">
+        <figure class="closer__figure">
+          <img src="/media/uploads/nails/box-open.webp" alt="An open box: ten almond nails seated in a die-cut card insert, with spares, a glue vial and adhesive tabs in the lid" width="1350" height="900" loading="lazy" decoding="async" />
+        </figure>
+        <div class="closer__body">
+          <h2 class="closer__title" id="whats-in-the-box">What arrives</h2>
+          <ul class="closer__list">
+            <li>Ten nails, plus two spares</li>
+            <li>Twelve sizes, so it fits without a fitting</li>
+            <li>Glue, adhesive tabs, a file and a cuticle stick</li>
+            <li>The box is the storage — the set goes back in it</li>
+            <li>Worn four or five times with care</li>
+          </ul>
+          <p class="closer__links">
+            <a href="/guide#sizing">Find your size</a> ·
+            <a href="/guide">Fit &amp; care</a> ·
+            <a href="/shipping">Shipping &amp; returns</a>
           </p>
-        </header>
-        <ul class="set-grid">
-          <li class="set" style="--tint: #F7F3EF; --set-deep: #6E5B4E">
-            <a class="set__link" href="/sets/lily-blanc">
-              <figure class="set__figure">
-                <img src="/media/uploads/nails/chip-lily-blanc.webp" alt="A macro photograph of the Lily Blanc set — glazed milk" loading="lazy" decoding="async" />
-              </figure>
-              <p class="set__status">Run 01 · eighteen made · opens October</p>
-              <div class="set__head">
-                <h3 class="set__name">Lily Blanc</h3>
-                <p class="set__price">kr 420</p>
-              </div>
-              <p class="set__finish">Glazed milk</p>
-              <p class="set__note">A translucent milk base under a glazed top coat, each nail drawn with a single lily in white on white. The quietest set we make.</p>
-              <span class="set__more">View the set</span>
-            </a>
-          </li>
-          <li class="set" style="--tint: #F8EDEC; --set-deep: #7C4448">
-            <a class="set__link" href="/sets/orchid-veil">
-              <figure class="set__figure">
-                <img src="/media/uploads/nails/chip-orchid-veil.webp" alt="A macro photograph of the Orchid Veil set — aurora pearl" loading="lazy" decoding="async" />
-              </figure>
-              <p class="set__status">Run 01 · eighteen made · opens October</p>
-              <div class="set__head">
-                <h3 class="set__name">Orchid Veil</h3>
-                <p class="set__price">kr 440</p>
-              </div>
-              <p class="set__finish">Aurora pearl</p>
-              <p class="set__note">Blush pink pressed thin enough to read the nail beneath, with an aurora pearl that pulls lilac in daylight and peach under lamps.</p>
-              <span class="set__more">View the set</span>
-            </a>
-          </li>
-          <li class="set" style="--tint: #F0F2EA; --set-deep: #4E5A45">
-            <a class="set__link" href="/sets/matcha-latte">
-              <figure class="set__figure">
-                <img src="/media/uploads/nails/chip-matcha-latte.webp" alt="A macro photograph of the Matcha Latte set — satin marble" loading="lazy" decoding="async" />
-              </figure>
-              <p class="set__status">Run 01 · twelve made · opens October</p>
-              <div class="set__head">
-                <h3 class="set__name">Matcha Latte</h3>
-                <p class="set__price">kr 440</p>
-              </div>
-              <p class="set__finish">Satin marble</p>
-              <p class="set__note">Sage folded into warm cream and left to marble, no two nails alike. Finished satin, so it reads matte until the light catches it.</p>
-              <span class="set__more">View the set</span>
-            </a>
-          </li>
-          <li class="set" style="--tint: #F5DCDD; --set-deep: #4A060E">
-            <a class="set__link" href="/sets/cherry-gloss">
-              <figure class="set__figure">
-                <img src="/media/uploads/nails/chip-cherry-gloss.webp" alt="A macro photograph of the Cherry Gloss set — jelly gloss" loading="lazy" decoding="async" />
-              </figure>
-              <p class="set__status">Run 01 · twelve made · nine left</p>
-              <div class="set__head">
-                <h3 class="set__name">Cherry Gloss</h3>
-                <p class="set__price">kr 460</p>
-              </div>
-              <p class="set__finish">Jelly gloss</p>
-              <p class="set__note">Layered translucent red until it holds depth like glass. The gloss is the whole point — it stays wet-looking for the life of the set.</p>
-              <span class="set__more">View the set</span>
-            </a>
-          </li>
-          <li class="set" style="--tint: #EFEEF0; --set-deep: #4A484E">
-            <a class="set__link" href="/sets/etoile">
-              <figure class="set__figure">
-                <img src="/media/uploads/nails/chip-etoile.webp" alt="A macro photograph of the Étoile set — mirror chrome" loading="lazy" decoding="async" />
-              </figure>
-              <p class="set__status">Made to order · about two weeks</p>
-              <div class="set__head">
-                <h3 class="set__name">Étoile</h3>
-                <p class="set__price">kr 520</p>
-              </div>
-              <p class="set__finish">Mirror chrome</p>
-              <p class="set__note">A mirror chrome that borrows the colour of whatever room you walk into, with crystals set by hand into small four-point stars.</p>
-              <span class="set__more">View the set</span>
-            </a>
-          </li>
-          <li class="set" style="--tint: #F8F0EA; --set-deep: #7A5748">
-            <a class="set__link" href="/sets/bunny-cream">
-              <figure class="set__figure">
-                <img src="/media/uploads/nails/chip-bunny-cream.webp" alt="A macro photograph of the Bunny Cream set — glazed pearl" loading="lazy" decoding="async" />
-              </figure>
-              <p class="set__status">Run 01 · twelve made · opens October</p>
-              <div class="set__head">
-                <h3 class="set__name">Bunny Cream</h3>
-                <p class="set__price">kr 460</p>
-              </div>
-              <p class="set__finish">Glazed pearl</p>
-              <p class="set__note">A milky nude with a glazed-doughnut sheen, and on two nails a rabbit the size of a grain of rice wearing a blush bow.</p>
-              <span class="set__more">View the set</span>
-            </a>
-          </li>
-          <li class="set" style="--tint: #F8E0E1; --set-deep: #521016">
-            <a class="set__link" href="/sets/amour">
-              <figure class="set__figure">
-                <img src="/media/uploads/nails/chip-amour.webp" alt="A macro photograph of the Amour set — jelly crimson" loading="lazy" decoding="async" />
-              </figure>
-              <p class="set__status">Run 01 · six made · four left</p>
-              <div class="set__head">
-                <h3 class="set__name">Amour</h3>
-                <p class="set__price">kr 540</p>
-              </div>
-              <p class="set__finish">Jelly crimson</p>
-              <p class="set__note">Ten nails on one theme — hearts poured in jelly red, a soda bottle and a love letter built up in relief, and a gingham bow sculpted by hand.</p>
-              <span class="set__more">View the set</span>
-            </a>
-          </li>
-        </ul>
+        </div>
       </section>
 
       <section class="assurances" data-symbol="assurances">
@@ -268,7 +411,7 @@
         </ul>
       </section>
 
-      <section id="waitlist" class="waitlist">
+      <section id="waitlist" class="waitlist" style="--wash: #F8E0E1; --shade: #B3202F; --deep: #521016">
         <div class="waitlist__inner">
           <div>
             <p class="eyebrow">The studio is not open yet</p>
@@ -395,7 +538,7 @@
       </div>
     </footer>
 
-    <script src="/assets/js/render.js?v=19"></script>
-    <script src="/assets/js/main.js?v=19"></script>
+    <script src="/assets/js/render.js?v=20"></script>
+    <script src="/assets/js/main.js?v=20"></script>
   </body>
 </html>

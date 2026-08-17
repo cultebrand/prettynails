@@ -17,6 +17,8 @@
       "image_alt": "A macro photograph of the Lily Blanc set — glazed milk",
       "hand": "/media/uploads/nails/hand-lily-blanc.webp",
       "hand_alt": "The same hand wearing the Lily Blanc press-on set",
+      "lay": "/media/uploads/nails/lay-lily-blanc.webp",
+      "lay_alt": "Ten milk-white almond nails laid out in two rows of five, each drawn with a single white lily in white on white",
       "gallery": [
         {
           "image": "/media/uploads/nails/isolated/lily-blanc-01.webp",
@@ -32,7 +34,7 @@
         }
       ],
       "status": "next-run",
-      "run_note": "Run 01 · eighteen made · opens October",
+      "run_note": "Eighteen in the first run",
       "lume": "#EEDCCB",
       "glow": "#8D7766",
       "ground": "#261B14"
@@ -54,6 +56,8 @@
       "image_alt": "A macro photograph of the Orchid Veil set — aurora pearl",
       "hand": "/media/uploads/nails/hand-orchid-veil.webp",
       "hand_alt": "The same hand wearing the Orchid Veil press-on set",
+      "lay": "/media/uploads/nails/lay-orchid-veil.webp",
+      "lay_alt": "Ten blush-pink almond nails in two rows of five, pearl shifting lilac to peach, two of them painted with an orchid",
       "gallery": [
         {
           "image": "/media/uploads/nails/isolated/orchid-veil-01.webp",
@@ -69,7 +73,7 @@
         }
       ],
       "status": "next-run",
-      "run_note": "Run 01 · eighteen made · opens October",
+      "run_note": "Eighteen in the first run",
       "lume": "#F5A3B4",
       "glow": "#C35259",
       "ground": "#2E1618"
@@ -91,6 +95,8 @@
       "image_alt": "A macro photograph of the Matcha Latte set — satin marble",
       "hand": "/media/uploads/nails/hand-matcha-latte.webp",
       "hand_alt": "The same hand wearing the Matcha Latte press-on set",
+      "lay": "/media/uploads/nails/lay-matcha-latte.webp",
+      "lay_alt": "Ten almond nails in two rows of five, sage green marbled through warm cream, no two of them alike",
       "gallery": [
         {
           "image": "/media/uploads/nails/isolated/matcha-latte-01.webp",
@@ -106,7 +112,7 @@
         }
       ],
       "status": "next-run",
-      "run_note": "Run 01 · twelve made · opens October",
+      "run_note": "Twelve in the first run",
       "lume": "#B1D599",
       "glow": "#698747",
       "ground": "#1A2114"
@@ -128,6 +134,8 @@
       "image_alt": "A macro photograph of the Cherry Gloss set — jelly gloss",
       "hand": "/media/uploads/nails/hand-cherry-gloss.webp",
       "hand_alt": "The same hand wearing the Cherry Gloss press-on set",
+      "lay": "/media/uploads/nails/lay-cherry-gloss.webp",
+      "lay_alt": "Ten almond nails in two rows of five in layered translucent red under a thick wet gloss, with no art on them at all",
       "gallery": [
         {
           "image": "/media/uploads/nails/isolated/cherry-gloss-01.webp",
@@ -143,7 +151,7 @@
         }
       ],
       "status": "few-left",
-      "run_note": "Run 01 · twelve made · nine left",
+      "run_note": "Twelve in the first run",
       "lume": "#E85A8B",
       "glow": "#D1414B",
       "ground": "#2E1616"
@@ -165,6 +173,8 @@
       "image_alt": "A macro photograph of the Étoile set — mirror chrome",
       "hand": "/media/uploads/nails/hand-etoile.webp",
       "hand_alt": "The same hand wearing the Étoile press-on set",
+      "lay": "/media/uploads/nails/lay-etoile.webp",
+      "lay_alt": "Ten mirror-chrome almond nails in two rows of five, reflecting the room, set with small four-point crystal stars",
       "gallery": [
         {
           "image": "/media/uploads/nails/isolated/etoile-01.webp",
@@ -180,7 +190,7 @@
         }
       ],
       "status": "made-to-order",
-      "run_note": "Made to order · about two weeks",
+      "run_note": "Made to order, about two weeks",
       "lume": "#C0BFD1",
       "glow": "#7E7985",
       "ground": "#1F1D21"
@@ -202,6 +212,8 @@
       "image_alt": "A macro photograph of the Bunny Cream set — glazed pearl",
       "hand": "/media/uploads/nails/hand-bunny-cream.webp",
       "hand_alt": "The same hand wearing the Bunny Cream press-on set",
+      "lay": "/media/uploads/nails/lay-bunny-cream.webp",
+      "lay_alt": "Ten milky nude almond nails in two rows of five, two of them carrying a sculpted white rabbit the size of a grain of rice",
       "gallery": [
         {
           "image": "/media/uploads/nails/isolated/bunny-cream-01.webp",
@@ -217,7 +229,7 @@
         }
       ],
       "status": "next-run",
-      "run_note": "Run 01 · twelve made · opens October",
+      "run_note": "Twelve in the first run",
       "lume": "#F9BCA3",
       "glow": "#A86A4A",
       "ground": "#2C180F"
@@ -239,6 +251,8 @@
       "image_alt": "A macro photograph of the Amour set — jelly crimson",
       "hand": "/media/uploads/nails/hand-amour.webp",
       "hand_alt": "The same hand wearing the Amour press-on set",
+      "lay": "/media/uploads/nails/lay-amour.webp",
+      "lay_alt": "Ten crimson almond nails scattered in two rows, with hearts, a gingham bow, a soda bottle and a love letter built up in relief",
       "gallery": [
         {
           "image": "/media/uploads/nails/isolated/amour-01.webp",
@@ -278,7 +292,7 @@
         }
       ],
       "status": "few-left",
-      "run_note": "Run 01 · six made · four left",
+      "run_note": "Six in the first run — the smallest",
       "lume": "#FE7D66",
       "glow": "#D14148",
       "ground": "#2E1616"

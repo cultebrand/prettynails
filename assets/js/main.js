@@ -1080,7 +1080,7 @@
     var TURN = 4.6;
     var PITCH = 3.4;
 
-    document.querySelectorAll(".set-grid, .pieces").forEach(function (list) {
+    document.querySelectorAll(".set-grid, .pieces, .case__trays").forEach(function (list) {
       var open = null;
 
       function clear() {
@@ -1093,7 +1093,7 @@
       list.addEventListener(
         "pointermove",
         function (event) {
-          var tile = event.target.closest && event.target.closest(".set, .piece");
+          var tile = event.target.closest && event.target.closest(".set, .piece, .tray");
           if (!tile) {
             clear();
             return;
@@ -1413,7 +1413,7 @@
          arrive. The stagger restarts at each list rather than running across
          both, so a row of three is a row of three: counting in document order
          is enough for that, because siblings are always contiguous in it. */
-      var risers = document.querySelectorAll(".set, .piece");
+      var risers = document.querySelectorAll(".set, .piece, .tray");
       var list = null;
       var seat = 0;
       risers.forEach(function (node) {
@@ -1431,7 +1431,7 @@
        cards are held at opacity 0 until something says to show them. If any of
        it throws, that something has to be this. */
     console.warn("[content]", error && error.message);
-    document.querySelectorAll(".set, .piece").forEach(function (node) {
+    document.querySelectorAll(".set, .piece, .tray").forEach(function (node) {
       node.classList.add("is-revealed");
     });
   });

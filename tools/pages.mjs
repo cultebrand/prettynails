@@ -35,6 +35,13 @@ const ORIGIN = "https://put-on.com";
 const OG_IMAGE = "/media/uploads/og-mynails.png";
 const YEAR = 2026;
 
+/* One cache-busting number for the whole site, because there were two.
+   head() stamped the stylesheets ?v=18 while footer() stamped the scripts ?v=19
+   and syncChrome() rewrote the hand-owned pages to ?v=19 — so the landing page
+   and the shop asked for two different builds of the same file. Bump this once
+   when either asset changes; nothing else in here carries a version. */
+const ASSET_V = 20;
+
 /* --- escaping --------------------------------------------------------------
    Every value below comes from content/*.json, which a non-technical editor
    fills in through the CMS. It is therefore untrusted input to this file and
@@ -178,8 +185,8 @@ function head({ title, description, path, jsonld = [], preload = [] }) {
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Italiana&amp;family=Jost:wght@300..600&amp;display=swap"
     />
-    <link rel="stylesheet" href="/assets/css/styles.css?v=18" />
-    <link rel="stylesheet" href="/assets/css/page.css?v=18" />
+    <link rel="stylesheet" href="/assets/css/styles.css?v=${ASSET_V}" />
+    <link rel="stylesheet" href="/assets/css/page.css?v=${ASSET_V}" />
 ${preloads}
     <!-- Where content/ and media/ live. These pages are not all at the same
          depth — a set's page is /sets/<slug> — so main.js is told the root
@@ -336,8 +343,8 @@ ${sets}
       </div>
     </footer>
 
-    <script src="/assets/js/render.js?v=19"></script>
-    <script src="/assets/js/main.js?v=19"></script>
+    <script src="/assets/js/render.js?v=${ASSET_V}"></script>
+    <script src="/assets/js/main.js?v=${ASSET_V}"></script>
   </body>
 </html>
 `;
@@ -385,6 +392,72 @@ const setCard = (item) => `          <li class="set" style="--tint: ${esc(item.w
               <span class="set__more">View the set</span>
             </a>
           </li>`;
+
+/* --- the shop's own two partials ------------------------------------------
+   Deliberately NOT setCard(). That one is rendered here for /shop and again at
+   the foot of all seven set pages, and index.html carries a third, hand-baked
+   copy of it in a different element order with the data-* hooks render.js
+   rebuilds on load. Editing it to improve one page silently rewrites nine, and
+   desynchronises the landing page from the shop the moment JavaScript runs.
+   These two are only ever called from OWNED["shop.html"], so the blast radius
+   of everything below is exactly one file.
+
+   It also buys something render.js structurally cannot do: an ordinal.
+   renderSymbolItems has no item index, so a CMS re-bind could never reproduce
+   "01"–"07" — which is why the case is not CMS-bound and says so in the markup. */
+
+/* One line of the printed key. The numeral is the set's place in the
+   catalogue, not its place in this list — the key is sorted by price, and the
+   set pages already call Amour "Set 07 of 07". */
+const keyRow = (item, index) => `            <li class="key__row">
+              <a href="#set-${esc(item.slug)}">
+                <span class="key__no">${String(index + 1).padStart(2, "0")}</span>
+                <span class="key__thumb" aria-hidden="true"><img src="${esc(
+                  item.gallery && item.gallery[0] ? item.gallery[0].image : item.image,
+                )}" alt="" loading="lazy" decoding="async" width="22" height="34" /></span>
+                <span class="key__name">${esc(item.title)}</span>
+                <span class="key__finish">${esc(item.finish)}</span>
+                <span class="key__shape">${esc(item.shape)}</span>
+                <span class="key__price">${esc(item.price)}</span>
+                <span class="key__run">${esc(item.run_note || "")}</span>
+              </a>
+            </li>`;
+
+/* One compartment of the case: the set's ten nails lying in its own tint, the
+   photograph of it worn tucked into the corner, and four short lines of label
+   printed beside the object rather than over it.
+
+   The blurb is not here. It is on the set's own page, and seven paragraphs of
+   it down a grid is what made this page a wall of prose nobody read. */
+const caseTray = (item, index) => {
+  const eager = index < 3;
+  return `            <li class="tray" id="set-${esc(item.slug)}" data-status="${esc(item.status || "")}" style="--tint: ${esc(
+    item.wash,
+  )}; --set-shade: ${esc(item.shade)}; --set-deep: ${esc(item.deep)}">
+              <figure class="tray__figure">
+                <img class="tray__lay" src="${esc(item.lay)}" alt="${esc(item.lay_alt)}" width="1350" height="900" ${
+                  eager
+                    ? 'loading="eager" fetchpriority="high"'
+                    : 'loading="lazy" fetchpriority="low"'
+                } decoding="async" />
+                <img class="tray__worn" src="${esc(item.hand)}" alt="" loading="lazy" decoding="async" />
+              </figure>
+              <div class="tray__label">
+                <div class="tray__head">
+                  <span class="tray__no">${String(index + 1).padStart(2, "0")}</span>
+                  <h3 class="tray__name"><a class="tray__link" href="/sets/${esc(
+                    item.slug,
+                  )}" aria-label="${esc(item.title)} — ${esc(item.finish.toLowerCase())}, ${esc(
+                    item.price,
+                  )}">${esc(item.title)}</a></h3>
+                  <p class="tray__price">${esc(item.price)}</p>
+                </div>
+                <p class="tray__spec">${esc(item.finish)} · ${esc(item.shape)}</p>
+                <p class="tray__line">${esc(item.tagline)}</p>
+                <p class="tray__run">${esc(item.run_note || "")}</p>
+              </div>
+            </li>`;
+};
 
 const waitlistBlock = ({ heading, note, item, level = 2 }) => `      <section id="waitlist" class="waitlist"${
     item ? ` style="--wash: ${esc(item.wash)}; --shade: ${esc(item.shade)}; --deep: ${esc(item.deep)}"` : ""
@@ -466,6 +539,8 @@ OWNED["shop.html"] = page(
       "Seven handmade press-on nail sets, each in twelve sizes and reusable. Glazed milk, aurora pearl, satin marble, jelly gloss, mirror chrome and more.",
     path: "/shop",
     current: "/shop",
+    // The first compartment is the page's largest image and its LCP element.
+    preload: [catalog.items[0].lay],
     jsonld: [
       {
         "@context": "https://schema.org",
@@ -484,24 +559,88 @@ OWNED["shop.html"] = page(
       ]),
     ],
   },
-  `      <section class="sets sets--page">
-        <header class="section-head">
-          <p class="eyebrow">Every set we make</p>
-          <h1 class="section-head__title">The seven</h1>
-          <p class="section-head__blurb">
-            Each set is ten nails on one idea, made in a small run and packed with twelve
-            sizes so it fits without a fitting. Nothing here is printed or bought in.
+  `      <nav class="crumbs" aria-label="Breadcrumb">
+        <ol>
+          <li><a href="/">Home</a></li>
+          <li><a href="/shop" aria-current="page">Shop</a></li>
+        </ol>
+      </nav>
+
+      <section class="case">
+        <div class="case__head">
+          <div class="case__lede">
+            <p class="eyebrow">Every set we make</p>
+            <h1 class="case__title">The seven</h1>
+            <p class="case__blurb">
+              Ten nails on one idea, sculpted and painted by hand — about four hours a
+              set, and fourteen for Amour. Twelve sizes in every box, plus two spares,
+              and the set goes back in the box to be worn again four or five times.
+            </p>
+            <p class="case__facts">
+              <a href="/guide#sizing">How to size</a>
+              <a href="/shipping">Shipping &amp; returns</a>
+              <a href="/faq">Questions</a>
+            </p>
+          </div>
+
+          <div class="key">
+            <h2 class="key__title">The index <span class="key__by">by price</span></h2>
+            <ol class="key__rows">
+              <li class="key__head" aria-hidden="true">
+                <span class="key__no">№</span>
+                <span class="key__thumb"></span>
+                <span class="key__name">Set</span>
+                <span class="key__finish">Finish</span>
+                <span class="key__shape">Shape</span>
+                <span class="key__price">Price</span>
+                <span class="key__run">Run</span>
+              </li>
+${catalog.items
+  .map((item, index) => ({ item, index }))
+  .sort((a, b) => Number(a.item.price.replace(/\D/g, "")) - Number(b.item.price.replace(/\D/g, "")))
+  .map(({ item, index }) => keyRow(item, index))
+  .join("\n")}
+            </ol>
+          </div>
+        </div>
+
+        <h2 class="visually-hidden">All seven sets</h2>
+        <!-- Not CMS-bound on purpose: no data-symbol, no data-list. The label
+             carries an ordinal, and render.js's renderSymbolItems has no item
+             index, so a re-bind could only ever produce these tiles without
+             their numbers. The seven live in content/catalog.json and this file
+             renders them; edit the catalogue and re-run tools/pages.mjs. -->
+        <ol class="case__trays">
+${catalog.items.map(caseTray).join("\n")}
+        </ol>
+      </section>
+
+      <section class="case__closer" aria-labelledby="whats-in-the-box">
+        <figure class="closer__figure">
+          <img src="/media/uploads/nails/box-open.webp" alt="An open box: ten almond nails seated in a die-cut card insert, with spares, a glue vial and adhesive tabs in the lid" width="1350" height="900" loading="lazy" decoding="async" />
+        </figure>
+        <div class="closer__body">
+          <h2 class="closer__title" id="whats-in-the-box">What arrives</h2>
+          <ul class="closer__list">
+            <li>Ten nails, plus two spares</li>
+            <li>Twelve sizes, so it fits without a fitting</li>
+            <li>Glue, adhesive tabs, a file and a cuticle stick</li>
+            <li>The box is the storage — the set goes back in it</li>
+            <li>Worn four or five times with care</li>
+          </ul>
+          <p class="closer__links">
+            <a href="/guide#sizing">Find your size</a> ·
+            <a href="/guide">Fit &amp; care</a> ·
+            <a href="/shipping">Shipping &amp; returns</a>
           </p>
-        </header>
-        <ul class="set-grid">
-${catalog.items.map(setCard).join("\n")}
-        </ul>
+        </div>
       </section>
 
 ${assurancesBlock()}
 ${waitlistBlock({
   heading: "Sets are made in small runs, and small runs go quickly.",
   note: "Leave an address and we’ll write once — when the first seven sets are ready to order. Nothing else, ever.",
+  item: catalog.items[catalog.items.length - 1],
 })}`,
 );
 
@@ -1329,8 +1468,11 @@ function syncChrome() {
     // JS off they drew an empty dark strip above the masthead.
     html = html.replace(/ *<aside aria-label="Announcement"[\s\S]*?<\/aside>/, "    " + bar);
 
-    // Both scripts are versioned together; the footer above bumped them.
-    html = html.replace(/\?v=1[0-9]"/g, '?v=19"');
+    // Every asset is versioned together off ASSET_V. The pattern has to match
+    // any number of digits: it used to be /\?v=1[0-9]"/, which would have
+    // silently stopped matching at 20 and pinned these five pages to the old
+    // build for ever, while the generated pages moved on.
+    html = html.replace(/\?v=\d+"/g, `?v=${ASSET_V}"`);
 
     if (html !== before) {
       writeFileSync(path, html);
