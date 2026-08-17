@@ -32,7 +32,10 @@
         }
       ],
       "status": "next-run",
-      "run_note": "Run 01 · eighteen made · opens October"
+      "run_note": "Run 01 · eighteen made · opens October",
+      "lume": "#EEDCCB",
+      "glow": "#8D7766",
+      "ground": "#261B14"
     },
     {
       "slug": "orchid-veil",
@@ -66,7 +69,10 @@
         }
       ],
       "status": "next-run",
-      "run_note": "Run 01 · eighteen made · opens October"
+      "run_note": "Run 01 · eighteen made · opens October",
+      "lume": "#F5A3B4",
+      "glow": "#C35259",
+      "ground": "#2E1618"
     },
     {
       "slug": "matcha-latte",
@@ -100,7 +106,10 @@
         }
       ],
       "status": "next-run",
-      "run_note": "Run 01 · twelve made · opens October"
+      "run_note": "Run 01 · twelve made · opens October",
+      "lume": "#B1D599",
+      "glow": "#698747",
+      "ground": "#1A2114"
     },
     {
       "slug": "cherry-gloss",
@@ -134,7 +143,10 @@
         }
       ],
       "status": "few-left",
-      "run_note": "Run 01 · twelve made · nine left"
+      "run_note": "Run 01 · twelve made · nine left",
+      "lume": "#E85A8B",
+      "glow": "#D1414B",
+      "ground": "#2E1616"
     },
     {
       "slug": "etoile",
@@ -168,7 +180,10 @@
         }
       ],
       "status": "made-to-order",
-      "run_note": "Made to order · about two weeks"
+      "run_note": "Made to order · about two weeks",
+      "lume": "#C0BFD1",
+      "glow": "#7E7985",
+      "ground": "#1F1D21"
     },
     {
       "slug": "bunny-cream",
@@ -202,7 +217,10 @@
         }
       ],
       "status": "next-run",
-      "run_note": "Run 01 · twelve made · opens October"
+      "run_note": "Run 01 · twelve made · opens October",
+      "lume": "#F9BCA3",
+      "glow": "#A86A4A",
+      "ground": "#2C180F"
     },
     {
       "slug": "amour",
@@ -260,7 +278,10 @@
         }
       ],
       "status": "few-left",
-      "run_note": "Run 01 · six made · four left"
+      "run_note": "Run 01 · six made · four left",
+      "lume": "#FE7D66",
+      "glow": "#D14148",
+      "ground": "#2E1616"
     }
   ]
 }

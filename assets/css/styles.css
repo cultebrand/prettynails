@@ -93,6 +93,174 @@
   }
 }
 
+/* ===========================================================================
+   THE LIT GROUND — the landing page only
+
+   Set with data-ground="lit" on <html>. Seven token declarations invert the
+   entire cascade, because every rule in this file is already written
+   `background: var(--wash); color: var(--ink)`. Remove the attribute and the
+   page is cream again; nothing else in the file knows which ground it is on.
+
+   Why the landing page earns its own ground. On cream the seven per-set washes
+   differ from each other by ΔE 0.8-1.8 and the seven inks by 2.2-10.1 — under
+   the threshold at which two fields read as different colours. So the page that
+   promises "seven sets, each with its own colour" was the one ground that could
+   not show it. Rotated onto a warm near-black the same values separate by
+   ΔE 7.5-24. And every photograph in this repo is an alpha cut-out: on cream a
+   pale hand on a pale field, on black a lit object.
+
+   The other twenty pages stay cream on purpose. They are read and filled in —
+   a fit guide, an FAQ, legal text, a sign-in form — and sustained reading
+   degrades on dark grounds. The ground follows the job.
+   =========================================================================== */
+
+:root[data-ground="lit"] .banner,
+:root[data-ground="lit"] .ribbon--top,
+:root[data-ground="lit"] .masthead,
+:root[data-ground="lit"] .hero {
+  --wash: var(--ground, #151110);
+  --ink: #f4eee6;
+  --ink-soft: #beb9b3;
+  --ink-faint: #9f9a95;
+  /* A light hairline on a dark ground loses apparent weight, so both go up. */
+  --line: color-mix(in srgb, var(--ink) 15%, transparent);
+  --line-soft: color-mix(in srgb, var(--ink) 9%, transparent);
+  --rose: #f5a3b4;
+  color: var(--ink);
+}
+
+/* The case: one continuous dark field behind the announcement, the strip of
+   nails, the masthead and the hero, cross-fading as a set is tried on. */
+:root[data-ground="lit"] .ribbon--top,
+:root[data-ground="lit"] .masthead,
+:root[data-ground="lit"] .hero {
+  background: var(--ground, #151110);
+  transition: background-color 1.1s ease-out;
+}
+
+:root[data-ground="lit"] .banner {
+  background: #0c0908;
+}
+
+/* The set's own ink on the dark. Falls back to --ink so a set added in the CMS
+   without a lume is legible rather than invisible. */
+:root[data-ground="lit"] .hero__title,
+:root[data-ground="lit"] .hero .eyebrow,
+:root[data-ground="lit"] .tryon__count {
+  /* Not by redefining --deep: the hero carries an inline style="--deep: …"
+     from the cream palette, and an inline custom property beats a stylesheet
+     one. These take the set's lit ink directly. */
+  color: var(--lume, var(--ink));
+}
+
+:root[data-ground="lit"] .hero__tagline {
+  color: var(--ink-soft);
+}
+
+:root[data-ground="lit"] .specs {
+  color: var(--ink-faint);
+}
+
+:root[data-ground="lit"] .specs dd {
+  color: var(--ink-soft);
+}
+
+/* Every cut-out nail is a lit object now: a specular top edge and a cast
+   shadow, never one soft blur. */
+:root[data-ground="lit"] .ribbon--top .ribbon__nail {
+  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.16))
+    drop-shadow(0 14px 18px rgba(0, 0, 0, 0.6));
+}
+
+/* The forearm passes behind the drifting strip and dissolves into it. */
+:root[data-ground="lit"] .ribbon--top::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(8, 5, 4, 0.8), rgba(8, 5, 4, 0.36) 58%, transparent);
+}
+
+:root[data-ground="lit"] .ribbon--top .ribbon__track {
+  position: relative;
+  z-index: 2;
+}
+
+/* The chip frame is the tile: the set's pale wash as a lit ground with the
+   macro cut-out on it. On cream these seven tints were within ΔE 1.8 of the
+   page and of each other; against the dark they separate. */
+:root[data-ground="lit"] .hero .chip__frame {
+  background: var(--tint, var(--wash));
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.07),
+    0 18px 26px -18px rgba(0, 0, 0, 0.9);
+}
+
+/* The one being worn turns its own light on. */
+:root[data-ground="lit"] .hero .chip[aria-current="true"] .chip__frame {
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--lume, var(--ink)) 70%, transparent),
+    0 0 36px -6px color-mix(in oklab, var(--glow, var(--shade)) 60%, transparent),
+    0 20px 30px -18px #000;
+}
+
+:root[data-ground="lit"] .hero .chip__name,
+:root[data-ground="lit"] .ribbon--top .ribbon__name {
+  color: var(--lume, var(--ink));
+}
+
+/* Two radials, mixed in oklab. In srgb a saturated red fading to transparent
+   goes muddy brown through the midtones — the difference between a red glow
+   and a dirt smear. */
+:root[data-ground="lit"] .hero__glow {
+  background:
+    radial-gradient(
+      46% 38% at 62% 26%,
+      color-mix(in oklab, var(--glow, var(--shade)) 34%, transparent),
+      transparent 72%
+    ),
+    radial-gradient(
+      76% 44% at 34% 102%,
+      color-mix(in oklab, var(--glow, var(--shade)) 16%, transparent),
+      transparent 76%
+    );
+}
+
+/* What turns the ground from a colour into a space: the corners fall off and
+   the light stays on the hand. */
+:root[data-ground="lit"] .hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  background: radial-gradient(122% 96% at 50% 42%, transparent 40%, rgba(0, 0, 0, 0.5) 100%);
+}
+
+:root[data-ground="lit"] .hero__hand,
+:root[data-ground="lit"] .hero__layer img {
+  filter: drop-shadow(-24px 40px 48px rgba(0, 0, 0, 0.72));
+  /* On cream the wrist fade read as a printing artefact; on the dark it reads
+     as light falling off, so it can be deeper. */
+  mask-image: linear-gradient(to bottom, transparent 0, #000 13%);
+}
+
+/* The cream pill is the brightest object on the page, which is right — it is
+   the only thing this page asks anyone to do. */
+:root[data-ground="lit"] .banner .btn--solid,
+:root[data-ground="lit"] .masthead .btn--solid,
+:root[data-ground="lit"] .hero .btn--solid {
+  background: var(--ink);
+  color: #171210;
+}
+
+:root[data-ground="lit"] .masthead .btn--ghost,
+:root[data-ground="lit"] .hero .btn--ghost {
+  color: var(--ink);
+  border-color: color-mix(in srgb, var(--ink) 32%, transparent);
+}
+
 /* --- resets --------------------------------------------------------------- */
 
 *,
@@ -309,7 +477,16 @@ a {
   pointer-events: none;
   opacity: 0.5;
   mix-blend-mode: multiply;
+  /* Inverted below for the lit ground — see the note there. */
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.32'/%3E%3C/svg%3E");
+}
+
+/* Multiply over a near-black ground does nothing at all, so on the lit ground
+   the same turbulence has to screen instead: fine light dust in the shadows,
+   which is what a photographed dark ground actually has. */
+:root[data-ground="lit"] .hero .grain {
+  opacity: 0.06;
+  mix-blend-mode: screen;
 }
 
 /* --- the announcement bar ------------------------------------------------- */
@@ -540,11 +717,17 @@ a.ribbon__item:focus-visible .ribbon__name {
    pushing it down, so the set's colour runs to the very top of the panel.
    Everywhere else it stays in the flow. */
 .masthead--float {
-  position: absolute;
-  inset-inline: 0;
-  top: var(--ribbon-h);
+  position: static;
   z-index: 20;
-  pointer-events: none;
+}
+
+@media (min-width: 62rem) {
+  .masthead--float {
+    position: absolute;
+    inset-inline: 0;
+    top: var(--ribbon-h);
+    pointer-events: none;
+  }
 }
 
 .masthead--float > * {
@@ -663,8 +846,10 @@ a.ribbon__item:focus-visible .ribbon__name {
   position: relative;
   isolation: isolate;
   overflow: hidden;
+  /* The ribbon and the masthead are inside the measured chrome above, so the
+     hero takes what is left of the first screen rather than a fixed slab. */
   min-height: calc(100svh - var(--ribbon-h));
-  padding: clamp(6.5rem, 14vh, 9.5rem) 0 clamp(3rem, 6vw, 4.5rem);
+  padding: clamp(3rem, 9vh, 6.5rem) 0 0;
   background: var(--wash);
   transition: background-color 1.1s ease-out;
 }
@@ -684,17 +869,13 @@ a.ribbon__item:focus-visible .ribbon__name {
 
 .hero__inner {
   display: grid;
-  /* The words come first on a narrow screen. The hand used to, and the effect
-     was that a phone opened on a photograph with no name, no price and nothing
-     to press — the h1 sat below the fold and the buttons below that. In this
-     order the set's name, its price and both buttons land above the fold on a
-     390x844 phone, and the hand still lands with them. */
+  /* The words first on a narrow screen: the hand used to come first and a phone
+     opened on a photograph with no name, no price and nothing to press. */
   grid-template-areas:
     "lede"
     "stage"
     "tryon";
-  gap: clamp(2rem, 5vw, 3rem);
-  align-items: center;
+  gap: clamp(1.5rem, 4vw, 2.5rem);
   max-width: var(--frame);
   margin-inline: auto;
   padding-inline: var(--gutter);
@@ -702,17 +883,39 @@ a.ribbon__item:focus-visible .ribbon__name {
 
 @media (min-width: 64rem) {
   .hero__inner {
-    grid-template-areas:
-      "lede stage"
-      "tryon stage";
-    /* Five columns of twelve for the words, the rest for the hand. */
-    grid-template-columns: calc((100% - 11 * 1.5rem) / 12 * 5 + 4 * 1.5rem) minmax(0, 1fr);
-    align-items: end;
-    gap: 1rem 1.5rem;
+    /* One column and one row. The label and the name stack at the left, the
+       hand is taken out of flow and hung from the right, and the seven chips
+       run along the bottom as a plinth. The old two-column grid is what kept
+       the hand at 383px in a 1440px window with 250px of dead edge beside it. */
+    position: relative;
+    display: block;
+    min-height: calc(100svh - var(--ribbon-h) - 6rem);
+    padding-bottom: 2.5rem;
   }
 
+  .hero__lede {
+    max-width: 34rem;
+  }
+
+  /* The name runs under the hand's silhouette. Three of the seven are long
+     enough to reach into it; that variation is the composition. */
+  .hero__title {
+    position: relative;
+    z-index: 1;
+    white-space: nowrap;
+  }
+
+  /* The seven run along the bottom edge of the hero as a plinth, full frame
+     width, rather than tucked under the words in a 32rem column. */
   .hero__tryon {
-    max-width: 32.5rem;
+    position: absolute;
+    /* Above the hand: the seven are objects on the near edge of the case and
+       the hand is behind them. Without this the last two chips sat under the
+       fingers. */
+    z-index: 3;
+    inset-block-end: 0;
+    inset-inline: var(--gutter);
+    max-width: none;
   }
 }
 
@@ -743,14 +946,16 @@ a.ribbon__item:focus-visible .ribbon__name {
 }
 
 .hero__title {
-  margin: 1rem 0 0;
+  margin: 0.5rem 0 0;
   font-family: var(--face-display);
-  font-size: var(--step-4);
+  /* 181px at 1440. The old ceiling was 84px inside a 546px column — a
+     headline. This is the object the page is about. */
+  font-size: clamp(3.25rem, 12.6vw, 11.25rem);
   font-weight: 400;
-  line-height: 0.92;
-  letter-spacing: -0.01em;
+  line-height: 0.88;
+  letter-spacing: -0.015em;
   color: var(--deep);
-  animation: hero-rise 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation: hero-rise 1s cubic-bezier(0.19, 1, 0.22, 1) 0.12s both;
 }
 
 .hero__tagline {
@@ -806,14 +1011,22 @@ a.ribbon__item:focus-visible .ribbon__name {
   grid-area: stage;
   justify-self: center;
   position: relative;
-  width: min(80vw, 25.84svh);
+  width: min(74vw, 34svh);
   aspect-ratio: 1200 / 1579;
 }
 
 @media (min-width: 64rem) {
+  /* Out of flow and hung from the right, cropped by the frame rather than
+     floating inside it — 36% wider than the 383px it used to be, and starting
+     above the masthead so the forearm passes behind the drifting nails. */
   .hero__stage {
-    align-self: center;
-    width: min(46vw, 42.56svh);
+    position: absolute;
+    z-index: 2;
+    inset-block-start: -9svh;
+    inset-inline-end: clamp(1.5rem, 6vw, 6rem);
+    width: auto;
+    height: 72svh;
+    justify-self: auto;
   }
 }
 
@@ -857,6 +1070,49 @@ html:not(.js) .hero__layers > .hero__layer:first-of-type {
   transform: none;
 }
 
+/* The shelf. One hairline from gutter to gutter, drawn under the name, out
+   through the hand and off the far side — the only horizontal in the
+   composition, and what the fingertips come to rest on. */
+.hero__shelf {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: clamp(1.25rem, 3vw, 2rem);
+  min-height: 44px;
+}
+
+.hero__shelf::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: 50%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--ink) 34%, transparent),
+    color-mix(in srgb, var(--ink) 10%, transparent)
+  );
+  transform: scaleX(0);
+  transform-origin: left;
+  animation: shelf-draw 1.1s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+}
+
+/* Threaded on the line: the rule passes behind it and it interrupts it. The
+   highest-contrast object in the composition, which is right — it is the only
+   thing this page is asking anyone to do. */
+.hero__shelf .btn {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes shelf-draw {
+  to {
+    transform: scaleX(1);
+  }
+}
+
 /* --- try it on ------------------------------------------------------------ */
 
 .hero__tryon {
@@ -893,6 +1149,8 @@ html:not(.js) .hero__layers > .hero__layer:first-of-type {
   /* Held here because each chip shadows --deep with its own swatch colour;
      the captions all speak in the ink of the set currently on the hand. */
   --rail-deep: var(--deep);
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: var(--gutter);
   display: flex;
   gap: 0.75rem;
   padding: 0.5rem 0;

@@ -973,9 +973,23 @@
       if (!set || index === current) return;
       current = index;
 
-      if (isFilled(set.wash)) panel.style.setProperty("--wash", set.wash);
-      if (isFilled(set.shade)) panel.style.setProperty("--shade", set.shade);
-      if (isFilled(set.deep)) panel.style.setProperty("--deep", set.deep);
+      ["wash", "shade", "deep", "ground", "glow", "lume"].forEach(function (key) {
+        if (!isFilled(set[key])) return;
+        panel.style.setProperty("--" + key, set[key]);
+      });
+
+      /* Only the three lit values go on the root, so the ribbon and the
+         masthead — which sit above the hero rather than inside it — wear the
+         set too. Not --wash/--shade/--deep: those are the cream palette's
+         names, and writing a pale wash onto the root overwrote the lit
+         ground's own --wash, which is what the skip link's colour is taken
+         from. Painting a rectangle's tokens onto the document is how a theme
+         gets quietly undone. */
+      ["ground", "glow", "lume"].forEach(function (key) {
+        if (isFilled(set[key])) {
+          document.documentElement.style.setProperty("--" + key, set[key]);
+        }
+      });
 
       // Re-keying the headline restarts its entrance, so the name arrives
       // rather than swapping character for character.
@@ -1021,10 +1035,14 @@
     }
 
     chips.forEach(function (chip, index) {
-      var button = chip.querySelector("button");
+      var button = chip.querySelector(".chip__button");
       if (!button) return;
       button.setAttribute("aria-pressed", index === 0 ? "true" : "false");
-      button.addEventListener("click", function () {
+      button.addEventListener("click", function (event) {
+        // Let a middle-click, a ctrl/cmd-click or a shift-click through: the
+        // href is the set's own page and someone doing that means it.
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
+        event.preventDefault();
         wear(index, true);
       });
     });
@@ -1037,7 +1055,7 @@
         event.preventDefault();
         var next = (current + step + chips.length) % chips.length;
         wear(next, true);
-        var button = chips[next].querySelector("button");
+        var button = chips[next].querySelector(".chip__button");
         if (button) button.focus();
       });
     }
