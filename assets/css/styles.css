@@ -969,7 +969,12 @@ a.ribbon__item:focus-visible .ribbon__name {
   /* The ribbon and the masthead are inside the measured chrome above, so the
      hero takes what is left of the first screen rather than a fixed slab. */
   min-height: calc(100svh - var(--ribbon-h));
-  padding: clamp(3rem, 9vh, 6.5rem) 0 0;
+  /* Almost nothing while the masthead is still in the flow above. The old
+     clamp(3rem, 9vh, 6.5rem) was written to clear the masthead once it starts
+     floating, which it only does at 62rem — below that it was 50-100px of
+     empty ground pushing the hand off the first screen. The wide layout puts
+     it back. */
+  padding: clamp(0.75rem, 2.5vh, 1.5rem) 0 0;
   background: var(--wash);
   transition: background-color 1.1s ease-out;
 }
@@ -996,19 +1001,58 @@ a.ribbon__item:focus-visible .ribbon__name {
 
 .hero__inner {
   display: grid;
-  /* The words first on a narrow screen: the hand used to come first and a phone
-     opened on a photograph with no name, no price and nothing to press. */
+  /* The label and the name, then the hand, then everything that describes it.
+     The hand is what the page is about, so it arrives after two lines of type
+     rather than after a tagline, a spec table and a headline — that stack ran
+     240px deep and put the hand three quarters of the way down a phone.
+
+     A name and a price still land above it, which is the thing the old order
+     was protecting: a phone must not open on a photograph with nothing to
+     press. It opens on the set's name now, and the price is a scroll of the
+     thumb below the hand rather than above it.
+
+     No `gap`: seven rows of it would give back everything the reorder saves.
+     Each row carries its own top margin instead. */
   grid-template-areas:
-    "lede"
+    "eyebrow"
+    "title"
     "stage"
+    "tagline"
+    "specs"
+    "shelf"
     "tryon";
-  gap: clamp(1.5rem, 4vw, 2.5rem);
+  gap: 0;
   max-width: var(--frame);
   margin-inline: auto;
   padding-inline: var(--gutter);
 }
 
-@media (min-width: 64rem) {
+/* Not a box on a narrow screen — its four children are placed individually so
+   the hand can come between the name and the description. It is a column again
+   at 62rem, where the hand leaves the flow entirely. */
+.hero__lede {
+  display: contents;
+}
+
+.hero__lede > .eyebrow {
+  grid-area: eyebrow;
+}
+
+.hero__lede > .specs {
+  grid-area: specs;
+}
+
+/* 62rem, not 64: the masthead starts floating over the hero at 62rem, and for
+   the 32px between the two breakpoints a 1000px-wide window got the phone
+   stack — a column of type down the left, dead air down the right, and the
+   hand more than half a screen down. Both switch together now. */
+@media (min-width: 62rem) {
+  /* The floating masthead is out of the flow, so the hero has to hold its own
+     clearance. 5.25rem is its 72px plus a little air. */
+  .hero {
+    padding-top: clamp(5.25rem, 9vh, 6.5rem);
+  }
+
   .hero__inner {
     /* One column and one row. The label and the name stack at the left, the
        hand is taken out of flow and hung from the right, and the seven chips
@@ -1021,6 +1065,8 @@ a.ribbon__item:focus-visible .ribbon__name {
   }
 
   .hero__lede {
+    display: block;
+    align-self: end;
     max-width: 34rem;
   }
 
@@ -1042,18 +1088,8 @@ a.ribbon__item:focus-visible .ribbon__name {
     z-index: 3;
     inset-block-end: 0;
     inset-inline: var(--gutter);
+    margin-top: 0;
     max-width: none;
-  }
-}
-
-.hero__lede {
-  grid-area: lede;
-  align-self: center;
-}
-
-@media (min-width: 64rem) {
-  .hero__lede {
-    align-self: end;
   }
 }
 
@@ -1073,6 +1109,7 @@ a.ribbon__item:focus-visible .ribbon__name {
 }
 
 .hero__title {
+  grid-area: title;
   margin: 0.5rem 0 0;
   font-family: var(--face-display);
   /* 181px at 1440. The old ceiling was 84px inside a 546px column — a
@@ -1086,6 +1123,7 @@ a.ribbon__item:focus-visible .ribbon__name {
 }
 
 .hero__tagline {
+  grid-area: tagline;
   margin: 1.25rem 0 0;
   max-width: 24rem;
   font-size: var(--step-0);
@@ -1139,8 +1177,16 @@ a.ribbon__item:focus-visible .ribbon__name {
   justify-self: center;
   position: relative;
   isolation: isolate;
-  width: min(74vw, 34svh);
+  /* 34svh was a thumbnail: 287px across on a 390px phone, and nothing at all
+     on a 320. The frame leads now and the viewport only caps it on a short
+     screen — the centrepiece is allowed to be the biggest thing in the frame.
+
+     100%, not 92vw: a fixed width wider than the column stretches the column,
+     and the try-on rail and the spec table are in it — they were running 9px
+     past the gutter and being clipped by the panel's own overflow. */
+  width: min(100%, 48svh);
   aspect-ratio: 1200 / 1579;
+  margin-block: clamp(1rem, 3.5vw, 1.75rem) clamp(0.75rem, 2.5vw, 1.25rem);
   /* The hand is looked at through a perspective rather than pasted flat, so
      when it turns it foreshortens instead of skewing. The vanishing point sits
      high and right, where the wrist enters the frame and where the lamp is:
@@ -1179,7 +1225,7 @@ a.ribbon__item:focus-visible .ribbon__name {
   );
 }
 
-@media (min-width: 64rem) {
+@media (min-width: 62rem) {
   /* Out of flow and hung from the right, cropped by the frame rather than
      floating inside it — 36% wider than the 383px it used to be, and starting
      above the masthead so the forearm passes behind the drifting nails. */
@@ -1190,6 +1236,7 @@ a.ribbon__item:focus-visible .ribbon__name {
     inset-inline-end: clamp(1.5rem, 6vw, 6rem);
     width: auto;
     height: 72svh;
+    margin-block: 0;
     justify-self: auto;
     /* Standing further back from a taller object: the same turn reads as a
        gentler foreshortening, which is what stops a 72svh hand from looking
@@ -1271,6 +1318,7 @@ html:not(.js) .hero__layers > .hero__layer:first-of-type {
    through the hand and off the far side — the only horizontal in the
    composition, and what the fingertips come to rest on. */
 .hero__shelf {
+  grid-area: shelf;
   position: relative;
   z-index: 3;
   display: flex;
@@ -1314,6 +1362,7 @@ html:not(.js) .hero__layers > .hero__layer:first-of-type {
 
 .hero__tryon {
   grid-area: tryon;
+  margin-top: clamp(1.5rem, 4vw, 2.5rem);
   min-width: 0;
 }
 
