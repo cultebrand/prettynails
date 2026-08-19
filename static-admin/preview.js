@@ -24,7 +24,7 @@
 
   var SITE_BASE = new URL("..", location.href);
   var FONTS_URL =
-    "https://fonts.googleapis.com/css2?family=Italiana&family=Jost:wght@300..600&display=swap";
+    "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,500&family=Italiana&family=Jost:wght@300..600&display=swap";
 
   if (!window.CMS || !window.PureRender) {
     console.warn("[preview] CMS or PureRender missing — live preview disabled.");

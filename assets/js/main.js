@@ -1130,10 +1130,20 @@
     var rail = panel.querySelector(".tryon__rail");
     if (!Array.isArray(sets) || !chips.length) return;
 
-    var slot = {};
+    /* A key may be bound more than once — the set's index is printed in the
+       try-on counter and again as the engraving behind the hand — so each key
+       maps to a list, not to whichever node happened to come last. */
+    var slots = {};
     panel.querySelectorAll("[data-hero]").forEach(function (node) {
-      slot[node.getAttribute("data-hero")] = node;
+      var key = node.getAttribute("data-hero");
+      (slots[key] = slots[key] || []).push(node);
     });
+
+    function put(key, value) {
+      (slots[key] || []).forEach(function (node) {
+        node.textContent = value;
+      });
+    }
 
     var total = String(sets.length).padStart(2, "0");
     var current = -1;
@@ -1167,24 +1177,21 @@
 
       // Re-keying the headline restarts its entrance, so the name arrives
       // rather than swapping character for character.
-      if (slot.title) {
-        slot.title.textContent = set.title || "";
-        slot.title.style.animation = "none";
-        void slot.title.offsetWidth;
-        slot.title.style.animation = "";
-      }
-      if (slot.eyebrow) {
-        slot.eyebrow.textContent =
-          "Handmade press-on · Set " + pad(index + 1) + " of " + total;
-      }
-      if (slot.tagline) slot.tagline.textContent = set.tagline || "";
-      if (slot.finish) slot.finish.textContent = set.finish || "";
-      if (slot.shape) slot.shape.textContent = set.shape || "";
-      if (slot.price) slot.price.textContent = set.price || "";
-      if (slot.index) slot.index.textContent = pad(index + 1);
+      (slots.title || []).forEach(function (node) {
+        node.textContent = set.title || "";
+        node.style.animation = "none";
+        void node.offsetWidth;
+        node.style.animation = "";
+      });
+      put("eyebrow", "Handmade press-on · Set " + pad(index + 1) + " of " + total);
+      put("tagline", set.tagline || "");
+      put("finish", set.finish || "");
+      put("shape", set.shape || "");
+      put("price", set.price || "");
+      put("index", pad(index + 1));
       // `total` rather than the raw count: the eyebrow beside it already reads
       // "Set 05 of 07", and the counter was rendering "05 / 7" against it.
-      if (slot.total) slot.total.textContent = total;
+      put("total", total);
 
       layers.forEach(function (layer, i) {
         layer.classList.toggle("is-on", i === index);
@@ -1208,6 +1215,53 @@
       }
     }
 
+    /* --- the parade -------------------------------------------------------
+       Left alone, the hero tries the seven on by itself — the one thing a
+       static page could never do, and the fastest way to say "each of these
+       is a different set" without asking for a single click. It is a
+       courtesy, not a carousel: it waits while the visitor is anywhere near
+       the rail or holding the hand, it stops for good the moment they choose
+       a set themselves, it does not run off-screen or in a hidden tab, and it
+       never starts at all for anyone who asked for less motion. */
+    var HOLD = 5200;
+    var paradeTimer = 0;
+    var paradeDone = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var heroSeen = true;
+    // True while a cursor or the keyboard focus is on the rail. Held as its
+    // own flag because the tab-hidden and off-screen pauses also end in
+    // scheduleParade(), and coming back to the tab must not restart the
+    // parade under a cursor that never moved.
+    var engaged = false;
+
+    panel.style.setProperty("--hold", HOLD + "ms");
+
+    function pauseParade() {
+      if (paradeTimer) {
+        clearTimeout(paradeTimer);
+        paradeTimer = 0;
+      }
+      // The fill under the worn tile goes with the timer it was tracking;
+      // a bar that keeps filling while nothing is scheduled is a lie.
+      panel.classList.remove("is-parading");
+    }
+
+    function stopParade() {
+      paradeDone = true;
+      pauseParade();
+      panel.classList.remove("is-parading");
+    }
+
+    function scheduleParade() {
+      if (paradeDone || engaged || document.hidden || !heroSeen) return;
+      pauseParade();
+      panel.classList.add("is-parading");
+      paradeTimer = window.setTimeout(function () {
+        paradeTimer = 0;
+        wear((current + 1) % chips.length, true);
+        scheduleParade();
+      }, HOLD);
+    }
+
     chips.forEach(function (chip, index) {
       var button = chip.querySelector(".chip__button");
       if (!button) return;
@@ -1217,6 +1271,7 @@
         // href is the set's own page and someone doing that means it.
         if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
         event.preventDefault();
+        stopParade();
         wear(index, true);
       });
     });
@@ -1227,10 +1282,41 @@
         var step = event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
         if (!step) return;
         event.preventDefault();
+        stopParade();
         var next = (current + step + chips.length) % chips.length;
         wear(next, true);
         var button = chips[next].querySelector(".chip__button");
         if (button) button.focus();
+      });
+
+      // Reaching for the rail — with a cursor, a finger or the tab key — is
+      // the visitor taking over. The parade waits, and comes back only after
+      // they have left it alone again.
+      rail.addEventListener(
+        "pointerenter",
+        function () {
+          engaged = true;
+          pauseParade();
+        },
+        { passive: true }
+      );
+      rail.addEventListener(
+        "pointerleave",
+        function () {
+          engaged = false;
+          scheduleParade();
+        },
+        { passive: true }
+      );
+      rail.addEventListener("pointerdown", stopParade, { passive: true });
+      rail.addEventListener("focusin", function () {
+        engaged = true;
+        pauseParade();
+      });
+      rail.addEventListener("focusout", function (event) {
+        if (rail.contains(event.relatedTarget)) return;
+        engaged = false;
+        scheduleParade();
       });
     }
 
@@ -1241,21 +1327,65 @@
       var from = null;
       stage.addEventListener("pointerdown", function (event) {
         from = event.clientX;
+        // Holding the hand pauses the parade; it resumes on release unless
+        // the hold turned out to be a swipe, which stops it for good below.
+        pauseParade();
       });
-      stage.addEventListener("pointerup", function (event) {
-        if (from === null) return;
-        var moved = event.clientX - from;
-        from = null;
-        if (Math.abs(moved) < 44) return;
-        wear(
-          (current + (moved < 0 ? 1 : -1) + chips.length) % chips.length,
-          true
+      // Ended on the window, not the stage, exactly like the tilt above: a
+      // press that ends off the stage never fires pointerup here, and a
+      // vertical scroll that starts on the hand ends in pointercancel with no
+      // pointerup at all. Either way the gesture is over — `from` must clear
+      // (or a later unrelated release reads as a swipe) and the parade must
+      // come back rather than staying paused for good.
+      ["pointerup", "pointercancel"].forEach(function (name) {
+        window.addEventListener(
+          name,
+          function (event) {
+            if (from === null) return;
+            var moved = name === "pointerup" ? event.clientX - from : 0;
+            from = null;
+            if (Math.abs(moved) < 44) {
+              scheduleParade();
+              return;
+            }
+            stopParade();
+            wear(
+              (current + (moved < 0 ? 1 : -1) + chips.length) % chips.length,
+              true
+            );
+          },
+          { passive: true }
         );
       });
     }
 
+    // Off-screen or in a background tab the parade holds still: sets should
+    // not have come and gone while nobody was looking.
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(
+        function (entries) {
+          heroSeen = Boolean(entries[0] && entries[0].isIntersecting);
+          if (heroSeen) {
+            scheduleParade();
+          } else {
+            pauseParade();
+          }
+        },
+        { threshold: 0.25 }
+      ).observe(panel);
+    }
+
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden) {
+        pauseParade();
+      } else {
+        scheduleParade();
+      }
+    });
+
     current = -1;
     wear(0, false);
+    scheduleParade();
   }
 
   /* --- the mobile dock ------------------------------------------------------

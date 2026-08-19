@@ -40,7 +40,7 @@ const YEAR = 2026;
    and syncChrome() rewrote the hand-owned pages to ?v=19 — so the landing page
    and the shop asked for two different builds of the same file. Bump this once
    when either asset changes; nothing else in here carries a version. */
-const ASSET_V = 21;
+const ASSET_V = 22;
 
 /* --- escaping --------------------------------------------------------------
    Every value below comes from content/*.json, which a non-technical editor
@@ -183,7 +183,7 @@ function head({ title, description, path, jsonld = [], preload = [] }) {
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Italiana&amp;family=Jost:wght@300..600&amp;display=swap"
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,500&amp;family=Italiana&amp;family=Jost:wght@300..600&amp;display=swap"
     />
     <link rel="stylesheet" href="/assets/css/styles.css?v=${ASSET_V}" />
     <link rel="stylesheet" href="/assets/css/page.css?v=${ASSET_V}" />

@@ -54,7 +54,7 @@
   var TOKEN_KEY = "pure-builder.github-token";
   var SVELTIA_USER_KEY = "sveltia-cms.user";
   var FONTS_URL =
-    "https://fonts.googleapis.com/css2?family=Italiana&family=Jost:wght@300..600&display=swap";
+    "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,500&family=Italiana&family=Jost:wght@300..600&display=swap";
   var PAGE_CSS_HEADER =
     "/* Written by the visual builder (static-admin/builder.html).\n" +
     "   Hand edits here are overwritten on the next builder save — put\n" +

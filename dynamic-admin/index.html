@@ -70,6 +70,35 @@
             return;
           }
 
+          const kind = response.headers.get('content-type') || '';
+          if (!response.ok || !kind.includes('json')) {
+            /* A static host answered — GitHub Pages serving this hostname
+               directly, its 404 page where /api/cms/token should be. That is
+               not an error, it is the design: the bare domain stays on GitHub
+               Pages, and the node — with everything under /api/cms/ — lives
+               at cms.put-on.com. This dashboard only works where the node
+               answers, so on the public hostnames the kind thing is to just
+               go there; anywhere else (localhost, a preview), say what
+               happened and stop, because guessing a redirect would loop. */
+            const NODE_HOST = 'cms.put-on.com';
+            if (/^(www\.)?put-on\.com$/.test(location.hostname)) {
+              location.replace(
+                'https://' + NODE_HOST + location.pathname + location.search
+              );
+              return;
+            }
+            document.title = 'MyNails \u2014 the node is not here';
+            document.body.innerHTML =
+              '<div style="font:16px/1.6 system-ui;max-width:36rem;margin:18vh auto;padding:0 1.5rem;color:#333">' +
+              '<h1 style="font-size:1.4rem">No node on this hostname</h1>' +
+              '<p><strong>' + location.hostname + '</strong> is served by a static host, ' +
+              'so <code>/api/cms/\u2026</code> does not exist here and this dashboard cannot sign anyone in. ' +
+              'The CMS configuration is fine. The dashboard lives at ' +
+              '<a href="https://' + NODE_HOST + '/dynamic-admin/">' + NODE_HOST + '/dynamic-admin/</a>.</p>' +
+              '</div>';
+            return;
+          }
+
           const body = await response.json();
           if (body && body.account) {
             // Always overwritten rather than filled in only when empty: a token
