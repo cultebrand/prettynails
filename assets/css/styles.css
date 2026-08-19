@@ -278,41 +278,8 @@
   color: var(--lume, var(--ink));
 }
 
-/* Two radials, mixed in oklab. In srgb a saturated red fading to transparent
-   goes muddy brown through the midtones — the difference between a red glow
-   and a dirt smear. */
-:root[data-ground="lit"] .hero__glow {
-  background:
-    radial-gradient(
-      46% 38% at 62% 26%,
-      color-mix(in oklab, var(--glow, var(--shade)) 34%, transparent),
-      transparent 72%
-    ),
-    radial-gradient(
-      76% 44% at 34% 102%,
-      color-mix(in oklab, var(--glow, var(--shade)) 16%, transparent),
-      transparent 76%
-    );
-}
-
-/* What turns the ground from a colour into a space: the corners fall off and
-   the light stays on the hand. */
-:root[data-ground="lit"] .hero::after {
-  content: "";
-  position: absolute;
-  /* Bled past the edges so the pool of light can move without ever dragging
-     an uncovered corner into the frame. */
-  inset: -6%;
-  z-index: 4;
-  pointer-events: none;
-  background: radial-gradient(122% 96% at 50% 42%, transparent 40%, rgba(0, 0, 0, 0.5) 100%);
-  /* Fixed to the wall, with the wall. */
-  transform: translate3d(calc(var(--hand-turn, 0) * -2px), calc(var(--hand-pitch, 0) * -1.4px), 0);
-}
-
 :root[data-ground="lit"] .hero__hand,
 :root[data-ground="lit"] .hero__layer img {
-  filter: drop-shadow(-24px 40px 48px rgba(0, 0, 0, 0.72));
   /* On cream the wrist fade read as a printing artefact; on the dark it reads
      as light falling off, so it can be deeper. */
   mask-image: linear-gradient(to bottom, transparent 0, #000 13%);
@@ -1102,19 +1069,6 @@ a.ribbon__item:focus-visible .ribbon__name {
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background: radial-gradient(
-    58% 46% at 72% 18%,
-    color-mix(in srgb, var(--shade) 46%, transparent),
-    transparent 70%
-  );
-  /* The case turns around the hand rather than sliding past it: the hand goes
-     one way and the wall behind it goes the other. Two things moving in
-     opposite directions is the strongest depth cue there is, and it is the
-     difference between orbiting an object and panning past a picture of one.
-     The type does not join in — it is printed on the page, not standing in the
-     room, and moving it is where this sort of thing starts to feel cheap. */
-  transform: translate3d(calc(var(--hand-turn, 0) * -3.4px), calc(var(--hand-pitch, 0) * -2.4px), 0);
-  transition: background 1.1s ease-out;
 }
 
 .hero__inner {
@@ -1375,36 +1329,6 @@ a.ribbon__item:focus-visible .ribbon__name {
   perspective-origin: 60% 30%;
 }
 
-/* The hand's shadow on the back of the case. The drop-shadow on the image
-   hugs its outline, which is what a cut-out pasted to a page has; what a hand
-   held up in a room also has is this — a soft mass thrown behind and below it,
-   far enough off the wall to have gone shapeless. It slides opposite the turn,
-   so the light stays where it is while the hand moves in it.
-
-   A gradient under a transform rather than a second drop-shadow on the image:
-   there are eight stacked photographs in this frame and re-filtering them all
-   sixty times a second is not a thing to spend a phone's battery on. */
-.hero__stage::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  inset: 14% -12% -6% -16%;
-  pointer-events: none;
-  background: radial-gradient(
-    52% 44% at 44% 52%,
-    color-mix(in srgb, var(--cast) 46%, transparent),
-    transparent 74%
-  );
-  /* Further than the hand travels, and the same way: turning the right face
-     into a light that is on the right sweeps the shadow away to the left. The
-     gap opening between an object and its shadow is the whole of depth. */
-  transform: translate3d(
-    calc(var(--hand-turn, 0) * 2.6px),
-    calc(var(--hand-pitch, 0) * 1.8px),
-    0
-  );
-}
-
 @media (min-width: 62rem) {
   /* Out of flow and hung from the right, cropped by the frame rather than
      floating inside it — 36% wider than the 383px it used to be, and starting
@@ -1432,7 +1356,6 @@ a.ribbon__item:focus-visible .ribbon__name {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  filter: drop-shadow(-18px 26px 34px color-mix(in srgb, #3c2820 16%, transparent));
   /* The hand enters the frame from the top, so the photograph ends the wrist
      on a straight cut. Fading the top of the frame lets the arm leave the
      picture instead of being sliced off by it — the one thing on the page that
