@@ -1311,14 +1311,18 @@ a.ribbon__item:focus-visible .ribbon__name {
   justify-self: center;
   position: relative;
   isolation: isolate;
-  /* 34svh was a thumbnail: 287px across on a 390px phone, and nothing at all
-     on a 320. The frame leads now and the viewport only caps it on a short
-     screen — the centrepiece is allowed to be the biggest thing in the frame.
+  /* Sized against what the first screen actually has left: 100svh minus the
+     chrome stacked above the hand (banner, ribbon, masthead, eyebrow, title —
+     ~30rem on a phone), converted to a width through the image's own aspect
+     ratio. A bare svh cap ignored that chrome, and the fingertips crossed the
+     fold on anything shorter than ~1100px. The 9rem floor keeps the hand
+     legible on very short landscape screens, where fitting the fold entirely
+     is not worth a thumbnail.
 
      100%, not 92vw: a fixed width wider than the column stretches the column,
      and the try-on rail and the spec table are in it — they were running 9px
      past the gutter and being clipped by the panel's own overflow. */
-  width: min(100%, 48svh);
+  width: min(100%, max(9rem, calc((100svh - 30rem) * (1200 / 1579))));
   aspect-ratio: 1200 / 1579;
   margin-block: clamp(1rem, 3.5vw, 1.75rem) clamp(0.75rem, 2.5vw, 1.25rem);
   /* The hand is looked at through a perspective rather than pasted flat, so
